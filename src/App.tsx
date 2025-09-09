@@ -3,6 +3,7 @@ import './App.css'
 import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
 import VotacionesActivasPage from './pages/aprendiz/VotacionesActivasPage'
+import Login from './pages/Login'
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
         <Route path='/' element={<Home/>}/>
         <Route path='/dashboard' element={<Dashboard/>}/>
         <Route path='/votaciones' element={<VotacionesActivasPage/>}/>
+        <Route path='/login' element={<Login/>}/>
       </Routes>
     </BrowserRouter>
   )
