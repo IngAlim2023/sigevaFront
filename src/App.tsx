@@ -4,6 +4,8 @@ import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
 import VotacionesActivasPage from './pages/aprendiz/VotacionesActivasPage'
 import Login from './pages/Login'
+import CandidateSelectionPage from './pages/aprendiz/SeleccionarCandidatoPage'
+import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
 import Navbar from './pages/Navbar'
 import GestionCandidatos from './pages/funcionario/GestionCandidatos'
 
@@ -27,7 +29,13 @@ function App() {
 
   return (
     <BrowserRouter>
-     <Routes>
+      <Routes>
+        <Route path='/' element={<Home/>}/>
+        <Route path='/dashboard' element={<Dashboard/>}/>
+        <Route path='/votaciones' element={<VotacionesActivasPage/>}/>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/seleccion' element={<CandidateSelectionPage/>}/>
+     
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Login />} />
@@ -38,7 +46,7 @@ function App() {
           <Route path="/home" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
-          <Route path="/gestion-candidatos" element={<GestionCandidatos />} />
+          <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
         </Route>
 
         {/* Redirección en caso de ruta no encontrada */}
