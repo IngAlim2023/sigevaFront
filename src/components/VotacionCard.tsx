@@ -9,9 +9,9 @@ interface Props {
 
 export const VotacionCard = ({ regional, titulo, centro, jornada }: Props) => {
   return (
-    <Card className="h-100 border-success border-1">
+    <Card className="h-100 border-success border-1 ">
+      <Card.Header className="text-muted">{regional}</Card.Header>
       <Card.Body className="d-grid gap-2">
-        <Card.Subtitle className="text-muted mb-2">{regional}</Card.Subtitle>
         <Card.Title className="fw-bold">{titulo}</Card.Title>
         <Card.Text>{centro}</Card.Text>
         <Card.Text>
