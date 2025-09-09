@@ -11,17 +11,13 @@ export const VotacionCard = ({ regional, titulo, centro, jornada }: Props) => {
   return (
     <Card className="h-100 border-success border-1 ">
       <Card.Header className="text-muted">{regional}</Card.Header>
-      <Card.Body className="d-grid gap-2">
+      <Card.Body>
         <Card.Title className="fw-bold">{titulo}</Card.Title>
         <Card.Text>{centro}</Card.Text>
         <Card.Text>
           <span className="fw-semibold">Jornada:</span> {jornada}
         </Card.Text>
-        <Button
-          className="btn-gradient"
-        >
-          Participar
-        </Button>
+        <Button className="btn-gradient">Participar</Button>
       </Card.Body>
     </Card>
   );
