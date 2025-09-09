@@ -18,9 +18,7 @@ export const VotacionCard = ({ regional, titulo, centro, jornada }: Props) => {
           <span className="fw-semibold">Jornada:</span> {jornada}
         </Card.Text>
         <Button
-          style={{
-            backgroundColor: "#5E2ABF",
-          }}
+          className="btn-gradient"
         >
           Participar
         </Button>
