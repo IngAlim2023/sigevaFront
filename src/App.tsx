@@ -8,6 +8,7 @@ import CandidateSelectionPage from './pages/aprendiz/SeleccionarCandidatoPage'
 import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
 import Navbar from './pages/Navbar'
 import GestionCandidatos from './pages/funcionario/GestionCandidatos'
+import CargarAprendices from './pages/funcionario/CargarAprendices'
 
 function PublicLayout() {
   return <Outlet />;
@@ -41,6 +42,7 @@ function App() {
           <Route path="/seleccion" element={<CandidateSelectionPage />} />
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
           <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
+          <Route path='/cargar-aprendices'  element={<CargarAprendices/>} />
         </Route>
 
         {/* Redirección en caso de ruta no encontrada */}
