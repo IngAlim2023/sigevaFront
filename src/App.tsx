@@ -8,6 +8,7 @@ import CandidateSelectionPage from './pages/aprendiz/SeleccionarCandidatoPage'
 import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
 import Navbar from './pages/Navbar'
 import GestionCandidatos from './pages/funcionario/GestionCandidatos'
+import  EleccionesActivasPage  from './pages/funcionario/EleccionesActivasPage'
 
 function PublicLayout() {
   return <Outlet />;
@@ -40,6 +41,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/seleccion" element={<CandidateSelectionPage />} />
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
+          <Route path="/elecciones" element={<EleccionesActivasPage />} />
           <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
         </Route>
 
