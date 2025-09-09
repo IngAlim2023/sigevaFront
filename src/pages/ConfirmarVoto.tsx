@@ -21,7 +21,6 @@ export default function ConfirmarVoto(){
                 <Form.Group className="mb-4">
                     <Form.Control type="text" placeholder=" - - - - - - " className="text-center border-success" />
                 </Form.Group>
-
                 <Form.Group>
                     <Button type="submit" className="w-100">Confirmar Voto</Button>
                 </Form.Group>
