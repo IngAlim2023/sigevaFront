@@ -14,6 +14,7 @@ export default function ConfirmarVoto(){
     }
     return(
         <div className="d-flex justify-content-center align-items-center vh-100 ">
+            
             <Container style={{ maxWidth: "450px" }} className="bg-white p-5 rounded shadow">
                 <h1 className="fw-bold text-center" >Confirmar Voto</h1>
                 <p className=" text-center">Ingresa el código de 6 dígitos enviado a tu correo.</p>

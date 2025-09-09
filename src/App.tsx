@@ -4,7 +4,7 @@ import Home from './pages/Home'
 import Dashboard from './pages/Dashboard'
 import VotacionesActivasPage from './pages/aprendiz/VotacionesActivasPage'
 import Login from './pages/Login'
-import ConfirmarVoto from './pages/ConfirmarVoto'
+import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
 
 function App() {
 
