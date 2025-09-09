@@ -7,6 +7,7 @@ import Login from './pages/Login'
 import CandidateSelectionPage from './pages/aprendiz/SeleccionarCandidatoPage'
 import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
 import Navbar from './pages/Navbar'
+import GestionCandidatos from './pages/funcionario/GestionCandidatos'
 
 function PublicLayout() {
   return <Outlet />;
