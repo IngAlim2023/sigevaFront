@@ -1,17 +1,13 @@
-import {
-  BrowserRouter,
-  Route,
-  Routes,
-  Navigate,
-  Outlet,
-} from "react-router-dom";
-import "./App.css";
-import Home from "./pages/Home";
-import Dashboard from "./pages/Dashboard";
-import VotacionesActivasPage from "./pages/aprendiz/VotacionesActivasPage";
-import Login from "./pages/Login";
-import CandidateSelectionPage from "./pages/aprendiz/SeleccionarCandidatoPage";
-import Navbar from "./pages/Navbar";
+import { BrowserRouter, Route, Routes, Navigate, Outlet} from 'react-router-dom'
+import './App.css'
+import Home from './pages/Home'
+import Dashboard from './pages/Dashboard'
+import VotacionesActivasPage from './pages/aprendiz/VotacionesActivasPage'
+import Login from './pages/Login'
+import CandidateSelectionPage from './pages/aprendiz/SeleccionarCandidatoPage'
+import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
+import Navbar from './pages/Navbar'
+import GestionCandidatos from './pages/funcionario/GestionCandidatos'
 
 function PublicLayout() {
   return <Outlet />;
@@ -44,6 +40,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/seleccion" element={<CandidateSelectionPage />} />
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
+          <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
         </Route>
 
         {/* Redirección en caso de ruta no encontrada */}
