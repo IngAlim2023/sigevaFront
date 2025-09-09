@@ -13,7 +13,7 @@ const Navbar = () => {
           <img
             src={"../public/Sigeva.svg"}
             alt="Logo"
-            style={{ height: "40px" }} // puedes ajustar tamaño
+            style={{ height: "30px" }} // puedes ajustar tamaño
           />
         </Link>
 
