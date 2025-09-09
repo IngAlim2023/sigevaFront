@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import CandidatoCard from "../../components/CandidatoCard";
+import Navbar from "../Navbar";
 
 const candidatos = [
   {
@@ -40,13 +41,14 @@ export default function CandidateSelectionPage() {
 
   return (
     <>
+      <Navbar />
       <Container className="my-4 text-center">
         <h3 className="fw-bold">Selección de Candidato</h3>
         <p className="text-muted">
           Seleccione un candidato para ver sus propuestas y emitir su voto.
         </p>
 
-        <Row className="g-2 my-2">
+        <Row className="g-4 my-4">
           {candidatos.map((c, index) => (
             <Col key={index} xs={12} md={6} lg={3}>
               <CandidatoCard
@@ -60,9 +62,7 @@ export default function CandidateSelectionPage() {
 
         {candidatoSeleccionado && (
           <div className="d-flex justify-content-center mt-4">
-            <Button
-              className="btn-gradient"
-            >
+            <Button className="btn-gradient">
               Votar por {candidatoSeleccionado}
             </Button>
           </div>

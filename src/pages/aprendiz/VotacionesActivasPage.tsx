@@ -1,5 +1,6 @@
 import { Col, Container, Row } from "react-bootstrap";
 import { VotacionCard } from "../../components/VotacionCard";
+import Navbar from "../Navbar";
 const votaciones = [
   {
     regional: "Regional Bogotá D.C.",
@@ -24,12 +25,13 @@ const votaciones = [
 const VotacionesActivasPage = () => {
   return (
     <>
-      <Container className="my-4">
+      <Navbar />
+      <Container className="my-4 text-center">
         <h3 className="fw-bold">Votaciones Activas</h3>
-        <p className="text-muted mb-5">
+        <p className="text-muted">
           Participe en los procesos de elección de aprendices.
         </p>
-        <Row className="g-4">
+        <Row className="g-4 my-4">
           {votaciones.map((vote, index) => (
             <Col key={index} xs={12} md={6} lg={4}>
               <VotacionCard {...vote} />
