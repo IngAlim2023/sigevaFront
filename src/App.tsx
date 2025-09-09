@@ -15,7 +15,7 @@ function PublicLayout() {
 
 // Layout con navbar + guard
 function PrivateLayout() {
-  // const isAuth = !!localStorage.getItem("token"); 
+  // const isAuth = !!localStorage.getItem("token");
   // if (!isAuth) return <Navigate to="/" replace />;
   return (
     <>
@@ -26,16 +26,9 @@ function PrivateLayout() {
 }
 
 function App() {
-
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<Home/>}/>
-        <Route path='/dashboard' element={<Dashboard/>}/>
-        <Route path='/votaciones' element={<VotacionesActivasPage/>}/>
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/seleccion' element={<CandidateSelectionPage/>}/>
-     
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Login />} />
@@ -45,6 +38,7 @@ function App() {
         <Route element={<PrivateLayout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/seleccion" element={<CandidateSelectionPage />} />
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
           <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
         </Route>
@@ -53,7 +47,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
