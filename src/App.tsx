@@ -8,6 +8,7 @@ import CandidateSelectionPage from './pages/aprendiz/SeleccionarCandidatoPage'
 import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
 import Navbar from './pages/Navbar'
 import GestionCandidatos from './pages/funcionario/GestionCandidatos'
+import  EleccionesActivasPage  from './pages/funcionario/EleccionesActivasPage'
 import AgregarCandidato from './pages/funcionario/AgregarCandidato'
 
 function PublicLayout() {
@@ -16,7 +17,7 @@ function PublicLayout() {
 
 // Layout con navbar + guard
 function PrivateLayout() {
-  // const isAuth = !!localStorage.getItem("token"); 
+  // const isAuth = !!localStorage.getItem("token");
   // if (!isAuth) return <Navigate to="/" replace />;
   return (
     <>
@@ -27,7 +28,6 @@ function PrivateLayout() {
 }
 
 function App() {
-
   return (
     <BrowserRouter>
       <Routes>
@@ -44,7 +44,9 @@ function App() {
         <Route element={<PrivateLayout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/seleccion" element={<CandidateSelectionPage />} />
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
+          <Route path="/elecciones" element={<EleccionesActivasPage />} />
           <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
           <Route path='/gestion-candidatos' element={<GestionCandidatos/>} />
           <Route path='/agregar-candidato' element={<AgregarCandidato/>} />
@@ -54,7 +56,7 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;
