@@ -1,0 +1,69 @@
+/* Sidebar fija (desktop) */
+:root {
+  --sidebar-width: 192px;
+}
+
+.sidebar-fixed {
+  width: var(--sidebar-width);
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  background-color: #5027BC;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
+  z-index: 1030; /* por debajo del Offcanvas */
+}
+.logo-sena{
+    width: 150px;
+  height: 10vh;
+
+  
+
+}
+
+/* Offcanvas (mobile) */
+.sidebar-offcanvas .offcanvas-body {
+  background-color: #5027BC;
+  color: white;
+  height: 100%;
+  padding: 1rem;
+}
+.sidebar-offcanvas .offcanvas-header,
+.sidebar-offcanvas .offcanvas-title {
+  color: rgb(0, 0, 0);
+}
+
+/* Links */
+.sidebar-link {
+  color: white !important;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 6px;
+  text-decoration: none;
+}
+.sidebar-link:hover {
+  background-color: rgba(255,255,255,0.08);
+}
+
+/* Logo y footer */
+.sidebar-logo { font-weight: 700; margin-bottom: 1rem; }
+.sidebar-footer { margin-top: auto; }
+
+/* MAIN CONTENT: aplica offset solo en pantallas grandes */
+.main-content {
+  transition: margin-left .15s ease;
+  margin-left: 0; /* por defecto en móvil */
+  padding: 2rem 1.5rem;
+}
+@media (min-width: 992px) {
+  .main-content {
+    margin-left: var(--sidebar-width);
+  }
+}
