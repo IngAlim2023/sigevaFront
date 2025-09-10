@@ -6,11 +6,15 @@ import VotacionesActivasPage from './pages/aprendiz/VotacionesActivasPage'
 import Login from './pages/Login'
 import CandidateSelectionPage from './pages/aprendiz/SeleccionarCandidatoPage'
 import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
-import Navbar from './pages/Navbar'
+// import Navbar from './pages/Navbar'
+import Sidebar from './sidebar/Sidebar'
 import GestionCandidatos from './pages/funcionario/GestionCandidatos'
+import CargarAprendices from './pages/funcionario/CargarAprendices'
+import PanelMetricas from './pages/funcionario/PanelMetricas'
 import  EleccionesActivasPage  from './pages/funcionario/EleccionesActivasPage'
 import AgregarCandidato from './pages/funcionario/AgregarCandidato'
 import FormEleccion from './pages/funcionario/FormEleccion'
+
 
 function PublicLayout() {
   return <Outlet />;
@@ -22,7 +26,10 @@ function PrivateLayout() {
   // if (!isAuth) return <Navigate to="/" replace />;
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
+      <Sidebar/>
+
+      
       <Outlet />
     </>
   );
@@ -50,6 +57,8 @@ function App() {
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
           <Route path="/elecciones" element={<EleccionesActivasPage />} />
           <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
+          <Route path='/cargar-aprendices'  element={<CargarAprendices/>} />
+          <Route path='/panel-metricas' element={<PanelMetricas/>} />
           <Route path='/gestion-candidatos' element={<GestionCandidatos/>} />
           <Route path='/agregar-candidato' element={<AgregarCandidato/>} />
         </Route>
