@@ -1,0 +1,21 @@
+/* Estado normal (borde morado, texto morado) */
+.btn-morado {
+  border: 1px solid #5031C9;
+  color: #5031C9;
+  background-color: transparent;
+}
+
+/* Hover (fondo un poco más claro) */
+.btn-morado:hover {
+  background-color: rgba(80, 49, 201, 0.1);
+  color: #5031C9;
+}
+
+/* Estado seleccionado (activo) */
+.btn-morado.active,
+.btn-morado:focus,
+.btn-morado:checked {
+  background-color: #5031C9 !important;
+  color: white !important;
+  border-color: #5031C9 !important;
+}

@@ -10,6 +10,7 @@ import Navbar from './pages/Navbar'
 import GestionCandidatos from './pages/funcionario/GestionCandidatos'
 import  EleccionesActivasPage  from './pages/funcionario/EleccionesActivasPage'
 import AgregarCandidato from './pages/funcionario/AgregarCandidato'
+import FormEleccion from './pages/funcionario/FormEleccion'
 
 function PublicLayout() {
   return <Outlet />;
@@ -50,6 +51,7 @@ function App() {
           <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
           <Route path='/gestion-candidatos' element={<GestionCandidatos/>} />
           <Route path='/agregar-candidato' element={<AgregarCandidato/>} />
+          <Route path='/form-eleccion' element={<FormEleccion/>} />
         </Route>
 
         {/* Redirección en caso de ruta no encontrada */}
