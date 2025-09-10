@@ -3,6 +3,7 @@
   border: 1px solid #5031C9;
   color: #5031C9;
   background-color: transparent;
+  transition: all 0.2s ease-in-out;
 }
 
 /* Hover (fondo un poco más claro) */
@@ -11,11 +12,12 @@
   color: #5031C9;
 }
 
-/* Estado seleccionado (activo) */
+/* Estado seleccionado (activo en grupo) */
 .btn-morado.active,
 .btn-morado:focus,
-.btn-morado:checked {
+.btn-morado:checked,
+.btn-morado:active {
   background-color: #5031C9 !important;
-  color: white !important;
+  color: #fff !important;
   border-color: #5031C9 !important;
 }

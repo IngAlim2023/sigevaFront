@@ -39,6 +39,7 @@ function App() {
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Login />} />
+          <Route path='/form-eleccion' element={<FormEleccion/>} />
         </Route>
 
         {/* Rutas privadas */}
@@ -51,7 +52,6 @@ function App() {
           <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
           <Route path='/gestion-candidatos' element={<GestionCandidatos/>} />
           <Route path='/agregar-candidato' element={<AgregarCandidato/>} />
-          <Route path='/form-eleccion' element={<FormEleccion/>} />
         </Route>
 
         {/* Redirección en caso de ruta no encontrada */}
