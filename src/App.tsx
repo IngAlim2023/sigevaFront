@@ -9,6 +9,7 @@ import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
 import Navbar from './pages/Navbar'
 import GestionCandidatos from './pages/funcionario/GestionCandidatos'
 import CargarAprendices from './pages/funcionario/CargarAprendices'
+import PanelMetricas from './pages/funcionario/PanelMetricas'
 
 function PublicLayout() {
   return <Outlet />;
@@ -43,6 +44,7 @@ function App() {
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
           <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
           <Route path='/cargar-aprendices'  element={<CargarAprendices/>} />
+          <Route path='/panel-metricas' element={<PanelMetricas/>} />
         </Route>
 
         {/* Redirección en caso de ruta no encontrada */}
