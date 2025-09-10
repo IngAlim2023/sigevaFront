@@ -10,6 +10,7 @@ import Navbar from './pages/Navbar'
 import GestionCandidatos from './pages/funcionario/GestionCandidatos'
 import  EleccionesActivasPage  from './pages/funcionario/EleccionesActivasPage'
 import AgregarCandidato from './pages/funcionario/AgregarCandidato'
+import FormEleccion from './pages/funcionario/FormEleccion'
 
 function PublicLayout() {
   return <Outlet />;
@@ -38,6 +39,7 @@ function App() {
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Login />} />
+          <Route path='/form-eleccion' element={<FormEleccion/>} />
         </Route>
 
         {/* Rutas privadas */}
