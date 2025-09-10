@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Navbar from "../Navbar";
+
 import "../funcionario/form.css";
 import { Form, Button, Container, Row, Col, ToggleButtonGroup, ToggleButton } from "react-bootstrap";
 import axios from "axios";
@@ -35,7 +35,7 @@ function FormEleccion() {
 
   return (
     <>
-      <Navbar />
+      
       <Container className="mt-5">
         <Row className="justify-content-center">
           <Col md={6}>
