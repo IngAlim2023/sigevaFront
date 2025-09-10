@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import CandidatoCard from "../../components/CandidatoCard";
-import Navbar from "../Navbar";
 
 const candidatos = [
   {
@@ -41,7 +40,6 @@ export default function CandidateSelectionPage() {
 
   return (
     <>
-      <Navbar />
       <Container className="my-4 text-center">
         <h3 className="fw-bold">Selección de Candidato</h3>
         <p className="text-muted">

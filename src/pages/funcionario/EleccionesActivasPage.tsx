@@ -1,6 +1,16 @@
 import { Row, Col, Container, Button } from "react-bootstrap";
 import EleccionCard from "../../components/EleccionCard";
 import { FaPlusCircle } from "react-icons/fa";
+import { useState } from "react";
+import EleccionDetalleModal from "../../components/EleccionDetalleModal";
+
+interface Eleccion {
+  regional: string;
+  titulo: string;
+  fechaInicio: string;
+  fechaTerminacion: string;
+  jornada: string;
+}
 
 const elecciones = [
   {
@@ -27,6 +37,15 @@ const elecciones = [
 ];
 
 export default function EleccionesActivasPage() {
+  const [showModal, setShowModal] = useState(false);
+  const [selectedEleccion, setSelectedEleccion] = useState<Eleccion | null>(null)
+
+  const handleDetalles = (eleccion: Eleccion) => {
+    setSelectedEleccion(eleccion);
+    setShowModal(true);
+  };
+
+
   return (
     <Container className="my-4">
       {/* Título de bienvenida */}
@@ -42,7 +61,7 @@ export default function EleccionesActivasPage() {
       <Row className="g-2 my-2">
         {elecciones.map((vote, index) => (
           <Col key={index} xs={12} md={6} lg={4}>
-            <EleccionCard {...vote} />
+            <EleccionCard {...vote} onDetalles={() => handleDetalles(vote)} />
           </Col>
         ))}
       </Row>
@@ -57,6 +76,12 @@ export default function EleccionesActivasPage() {
           <FaPlusCircle /> Crear elección
         </Button>
       </div>
+
+      <EleccionDetalleModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        eleccion={selectedEleccion}
+      />
     </Container>
   );
 }

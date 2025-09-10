@@ -7,6 +7,7 @@ interface EleccionCardProps {
   fechaTerminacion: string;
   jornada: string;
   regional: string;
+  onDetalles?: () => void;
 }
 
 export default function EleccionCard({
@@ -15,6 +16,7 @@ export default function EleccionCard({
   fechaTerminacion,
   jornada,
   regional,
+  onDetalles,
 }: EleccionCardProps) {
   return (
     <Card className="h-100 border-success border-1">
@@ -31,7 +33,9 @@ export default function EleccionCard({
           <span className="fw-semibold">Jornada:</span>
           {jornada}
         </Card.Text>
-        <Button className="btn-gradient">Detalles</Button>
+        <Button className="btn-gradient" onClick={onDetalles}>
+          Detalles
+        </Button>
       </Card.Body>
     </Card>
   );
