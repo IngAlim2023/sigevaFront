@@ -1,6 +1,6 @@
 import { Col, Container, Row } from "react-bootstrap";
 import { VotacionCard } from "../../components/VotacionCard";
-import Navbar from "../Navbar";
+
 const votaciones = [
   {
     regional: "Regional Bogotá D.C.",
@@ -25,8 +25,7 @@ const votaciones = [
 const VotacionesActivasPage = () => {
   return (
     <>
-      <Navbar />
-      <Container className="my-4 text-center">
+      <Container className="my-4">
         <h3 className="fw-bold">Votaciones Activas</h3>
         <p className="text-muted">
           Participe en los procesos de elección de aprendices.
