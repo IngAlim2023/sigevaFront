@@ -1,26 +1,26 @@
 import { createContext, useContext } from "react";
-import type { ResponseType, User } from "./types/authTypes";
+import type { ResponseType } from "./types/authTypes";
 
-interface AuthContextType {
+interface AuthContextType<T> {
   isAuthenticated: boolean;
-  user: User | null;
-  login: (response: ResponseType) => void;
+  user: T | null;
+  login: (response: ResponseType<T>) => void;
   logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType<any>>({
   user: null,
   isAuthenticated: false,
   login: () => {},
   logout: () => {},
 });
 
-export const useAuth = () => {
+export const useAuth = <T>() => {
   const context = useContext(AuthContext);
 
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
 
-  return context;
+  return context as AuthContextType<T>;
 };
