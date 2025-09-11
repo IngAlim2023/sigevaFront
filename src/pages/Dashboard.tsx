@@ -1,117 +1,169 @@
-import React from "react";
-import { Container, Row, Col, Card, Button, Badge, ListGroup } from "react-bootstrap";
-import { BsCalendar3, BsPeople, BsGraphUp, BsCheck2Circle } from "react-icons/bs";
+import React, { useState } from "react";
+import { Container, Row, Col, Card, Button, Badge, ListGroup, ProgressBar } from "react-bootstrap";
+import { 
+  BsCalendar3, 
+  BsPeople, 
+  BsGraphUp, 
+  BsCheck2Circle,
+  BsArrowRight
+} from "react-icons/bs";
 import imgAprendices from "../assets/img-aprendices.svg";
-import Footer from "../components/Footer";
 import "../Dashboard.css";
-import "../Footer.css";
+
+interface Election {
+  id: number;
+  title: string;
+  location: string;
+  date: string;
+  status: 'upcoming' | 'ongoing' | 'completed';
+  progress: number;
+}
 
 const Dashboard: React.FC = () => {
+  const [elections] = useState<Election[]>([
+    {
+      id: 1,
+      title: 'Representante Centro Agropecuario',
+      location: 'La Dorada, Caldas',
+      date: '22-24 Mar',
+      status: 'upcoming',
+      progress: 0
+    },
+    {
+      id: 2,
+      title: 'Representante Centro de Gestión',
+      location: 'Manizales, Caldas',
+      date: '25-27 Mar',
+      status: 'upcoming',
+      progress: 0
+    },
+    {
+      id: 3,
+      title: 'Representante Bienestar',
+      location: 'La Dorada, Caldas',
+      date: 'En curso',
+      status: 'ongoing',
+      progress: 68
+    }
+  ]);
+
   return (
-    <div className="d-flex flex-column min-vh-100">
-      <div className="main-content flex-grow-1">
-      <Container fluid>
-        {/* Bienvenida */}
-        <Row className="mb-4">
-          <Col>
-          <h2 className="fw-bold">¡Bienvenido al Sistema de Gestión Electoral!</h2>
-          <p className="text-muted">
-            Administra las elecciones estudiantiles del SENA de manera digital, transparente y eficiente.
-          </p>
-            <div className="d-flex gap-3 flex-wrap">
-              <Button className="btn-morado">Nueva Elección</Button>
-              <Button className="btn-morado-outline">Ver Reportes</Button>
-            </div>
-        </Col>
-      </Row>
+    <div className="dashboard-container">
+      <Container fluid className="py-4">
+        {/* Encabezado */}
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <h1 className="h3 mb-2">Panel de Control</h1>
+            <p className="text-muted mb-0">
+              Bienvenido al sistema de gestión electoral del SENA
+            </p>
+          </div>
+          <div className="d-flex gap-2">
+            <Button variant="outline-primary" className="d-flex align-items-center gap-2">
+              Reportes
+            </Button>
+            <Button variant="primary" className="d-flex align-items-center gap-2">
+              <BsCalendar3 /> Nueva Elección
+            </Button>
+          </div>
+        </div>
 
-      <Row>
-        {/* Columna izquierda */}
-        <Col lg={8}>
-          <Card className="mb-4">
-            <Card.Body>
-              <h5 className="text-success mb-3">Próximas Elecciones</h5>
-              <ListGroup variant="flush">
-                <ListGroup.Item>
-                  <strong>Representante Centro Agropecuario</strong>
-                  <div>La Dorada, Caldas</div>
-                  <Badge bg="light" text="success" className="mt-2">
-                    22-24 Mar
-                  </Badge>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <strong>Representante Centro Agropecuario</strong>
-                  <div>La Dorada, Caldas</div>
-                  <Badge bg="light" text="success" className="mt-2">
-                    22-24 Mar
-                  </Badge>
-                </ListGroup.Item>
-                <ListGroup.Item>
-                  <strong>Representante Centro Agropecuario</strong>
-                  <div>La Dorada, Caldas</div>
-                  <Badge bg="light" text="success" className="mt-2">
-                    22-24 Mar
-                  </Badge>
-                </ListGroup.Item>
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        </Col>
+        <Row className="g-4">
+          {/* Próximas Elecciones */}
+          <Col lg={8}>
+            <Card className="h-100 shadow-sm border-0">
+              <Card.Body>
+                <h5 className="mb-3 fw-bold">Próximas Elecciones</h5>
+                
+                <ListGroup variant="flush" className="election-list">
+                  {elections.map((election) => (
+                    <ListGroup.Item key={election.id} className="px-0 py-3 border-0">
+                      <div className="d-flex justify-content-between align-items-start">
+                        <div>
+                          <h6 className="mb-1 fw-bold">{election.title}</h6>
+                          <p className="text-muted small mb-2">
+                            {election.location} • {election.date}
+                          </p>
+                          {election.status === 'ongoing' && (
+                            <div className="mt-2">
+                              <div className="d-flex justify-content-between small mb-1">
+                                <span>Progreso</span>
+                                <span>{election.progress}%</span>
+                              </div>
+                              <ProgressBar now={election.progress} variant="success" className="rounded" style={{ height: '6px' }} />
+                            </div>
+                          )}
+                        </div>
+                        <Badge 
+                          bg={
+                            election.status === 'ongoing' ? 'success' : 
+                            election.status === 'upcoming' ? 'primary' : 'secondary'
+                          }
+                          className="px-3 py-2"
+                        >
+                          {election.status === 'ongoing' ? 'En Curso' : 'Próxima'}
+                        </Badge>
+                      </div>
+                    </ListGroup.Item>
+                  ))}
+                </ListGroup>
+              </Card.Body>
+            </Card>
+          </Col>
 
-        {/* Columna derecha */}
-        <Col lg={4}>
-            <div className="position-relative mb-4" style={{ width: '100%', maxWidth: '900px' }}>
-              <div style={{ 
-                width: '100%', 
-                paddingBottom: '66.67%', /* 408/612 = 0.6667 */
-                position: 'relative',
-                overflow: 'hidden',
-                borderRadius: '0.5rem',
-                margin: '0 auto'
-              }}>
-                <img 
-                  src={imgAprendices} 
-                  alt="Aprendices" 
-                  className="position-absolute top-0 start-0 w-100 h-100" 
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-              <div className="position-absolute" style={{ bottom: '-20px', right: '20px' }}>
-                <Badge bg="success" className="p-3 d-flex align-items-center gap-2" style={{ fontSize: '1.1rem' }}>
-                  <BsCheck2Circle size={20} />
-                  <div>
-                    74% Participación
-                    <br />
-                    <small style={{ fontSize: '0.9rem' }}>Promedio Nacional</small>
+          {/* Panel derecho */}
+          <Col lg={4}>
+            {/* Imagen destacada */}
+            <div className="position-relative mb-4 rounded-3 overflow-hidden shadow-sm">
+              <img 
+                src={imgAprendices} 
+                alt="Aprendices participando" 
+                className="img-fluid w-100"
+                style={{ height: '200px', objectFit: 'cover' }}
+              />
+              <div className="position-absolute bottom-0 end-0 m-3">
+                <Badge bg="success" className="p-3 d-flex align-items-center gap-2">
+                  <BsCheck2Circle size={18} />
+                  <div className="text-start">
+                    <div className="fw-bold">74% Participación</div>
+                    <small className="opacity-75">Promedio Nacional</small>
                   </div>
                 </Badge>
               </div>
             </div>
 
-          <Card>
-            <Card.Body>
-              <h5 className="text-success mb-3">Acciones Rápidas</h5>
-              <ListGroup variant="flush">
-                <ListGroup.Item action className="d-flex align-items-center gap-2">
-                  <BsCalendar3 className="text-primary" />
-                  <span>Programar Elección</span>
-                </ListGroup.Item>
-                <ListGroup.Item action className="d-flex align-items-center gap-2">
-                  <BsPeople className="text-primary" />
-                  <span>Importar Votantes</span>
-                </ListGroup.Item>
-                <ListGroup.Item action className="d-flex align-items-center gap-2">
-                  <BsGraphUp className="text-primary" />
-                  <span>Generar Reporte</span>
-                </ListGroup.Item>
-              </ListGroup>
-            </Card.Body>
-          </Card>
-        </Col>
+            {/* Acciones rápidas */}
+            <Card className="shadow-sm border-0">
+              <Card.Body>
+                <h5 className="mb-3 fw-bold">Acciones Rápidas</h5>
+                <ListGroup variant="flush">
+                  <ListGroup.Item action className="d-flex align-items-center gap-3 px-0 py-3 border-0">
+                    <div className="bg-light rounded p-2">
+                      <BsCalendar3 className="text-primary" />
+                    </div>
+                    <span>Programar Elección</span>
+                    <BsArrowRight className="ms-auto text-muted" />
+                  </ListGroup.Item>
+                  <ListGroup.Item action className="d-flex align-items-center gap-3 px-0 py-3 border-0">
+                    <div className="bg-light rounded p-2">
+                      <BsPeople className="text-primary" />
+                    </div>
+                    <span>Gestionar Candidatos</span>
+                    <BsArrowRight className="ms-auto text-muted" />
+                  </ListGroup.Item>
+                  <ListGroup.Item action className="d-flex align-items-center gap-3 px-0 py-3 border-0">
+                    <div className="bg-light rounded p-2">
+                      <BsGraphUp className="text-primary" />
+                    </div>
+                    <span>Ver Estadísticas</span>
+                    <BsArrowRight className="ms-auto text-muted" />
+                  </ListGroup.Item>
+                </ListGroup>
+              </Card.Body>
+            </Card>
+          </Col>
         </Row>
       </Container>
-      </div>
-      <Footer />
     </div>
   );
 };
