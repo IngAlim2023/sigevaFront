@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import Sidebar from "../../sidebar/Sidebar";
 import "../funcionario/form.css";
 import { Form, Button, Container, Row, Col, ToggleButtonGroup, ToggleButton } from "react-bootstrap";
 import axios from "axios";
@@ -35,6 +35,7 @@ function FormEleccion() {
 
   return (
     <>
+    <Sidebar/>
       
       <Container className="mt-5">
         <Row className="justify-content-center">
@@ -88,7 +89,7 @@ function FormEleccion() {
                   </Form.Group>
                 </Col>
                 <Col>
-                  <Form.Group className="mb-3">
+        <Form.Group className="mb-3">
                     <Form.Label>Fecha de cierre</Form.Label>
                     <Form.Control type="date" required value={fechaCierre} onChange={(e) => setFechaCierre(e.target.value)} />
                   </Form.Group>
