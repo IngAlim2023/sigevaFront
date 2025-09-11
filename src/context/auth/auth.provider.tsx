@@ -1,16 +1,16 @@
-import { type ReactNode, useState } from "react";
+import { useState, type ReactNode } from "react";
 import { AuthContext } from "./auth.context";
-import type { ResponseType, User } from "./types/authTypes";
+import type { ResponseType } from "./types/authTypes";
 
-interface Props {
+interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider = ({ children }: Props) => {
+export function AuthProvider<T>({ children }: AuthProviderProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<T | null>(null);
 
-  const login = (response: ResponseType) => {
+  const login = (response: ResponseType<T>) => {
     if (!response.success) {
       setIsAuthenticated(false);
       setUser(null);
@@ -38,4 +38,4 @@ export const AuthProvider = ({ children }: Props) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
