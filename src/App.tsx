@@ -1,38 +1,46 @@
-import { BrowserRouter, Route, Routes, Navigate, Outlet} from 'react-router-dom'
-import './App.css'
-import Home from './pages/Home'
-import Dashboard from './pages/Dashboard'
-import VotacionesActivasPage from './pages/aprendiz/VotacionesActivasPage'
-import Login from './pages/Login'
-import CandidateSelectionPage from './pages/aprendiz/SeleccionarCandidatoPage'
-import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
-// import Navbar from './pages/Navbar'
-import Sidebar from './sidebar/Sidebar'
-import GestionCandidatos from './pages/funcionario/GestionCandidatos'
-import CargarAprendices from './pages/funcionario/CargarAprendices'
-import PanelMetricas from './pages/funcionario/PanelMetricas'
-import  EleccionesActivasPage  from './pages/funcionario/EleccionesActivasPage'
-import AgregarCandidato from './pages/funcionario/AgregarCandidato'
-import FormEleccion from './pages/funcionario/FormEleccion'
-
-
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
+import "./App.css";
+import Dashboard from "./pages/Dashboard";
+import VotacionesActivasPage from "./pages/aprendiz/VotacionesActivasPage";
+import Login from "./pages/Login";
+import CandidateSelectionPage from "./pages/aprendiz/SeleccionarCandidatoPage";
+import ConfirmarVoto from "./pages/aprendiz/ConfirmarVoto";
+import GestionCandidatos from "./pages/funcionario/GestionCandidatos";
+import CargarAprendices from "./pages/funcionario/CargarAprendices";
+import PanelMetricas from "./pages/funcionario/PanelMetricas";
+import EleccionesActivasPage from "./pages/funcionario/EleccionesActivasPage";
+import AgregarCandidato from "./pages/funcionario/AgregarCandidato";
+import FormEleccion from "./pages/funcionario/FormEleccion";
+import MainLayout from "./layouts/MainLayout";
+import { useAuth } from "./context/auth/auth.context";
 
 function PublicLayout() {
   return <Outlet />;
 }
 
-// Layout con navbar + guard
 function PrivateLayout() {
+  const { isAuthenticated } = useAuth();
   // const isAuth = !!localStorage.getItem("token");
   // if (!isAuth) return <Navigate to="/" replace />;
-  return (
-    <>
-      {/* <Navbar /> */}
-      <Sidebar/>
 
-      
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
+}
+
+function FuncionarioLayout() {
+  return (
+    <MainLayout showSidebar={true}>
       <Outlet />
-    </>
+    </MainLayout>
   );
 }
 
@@ -40,31 +48,29 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-
-        <Route path='/' element={<Login/>}/>
-        <Route path='/seleccion' element={<CandidateSelectionPage/>}/>
-     
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Login />} />
-          <Route path='/form-eleccion' element={<FormEleccion/>} />
         </Route>
 
-        {/* Rutas privadas */}
+        {/* Rutas de Aprendiz */}
         <Route element={<PrivateLayout />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/seleccion" element={<CandidateSelectionPage />} />
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
-          <Route path="/elecciones" element={<EleccionesActivasPage />} />
-          <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
-          <Route path='/cargar-aprendices'  element={<CargarAprendices/>} />
-          <Route path='/panel-metricas' element={<PanelMetricas/>} />
-          <Route path='/gestion-candidatos' element={<GestionCandidatos/>} />
-          <Route path='/agregar-candidato' element={<AgregarCandidato/>} />
+          <Route path="/seleccion" element={<CandidateSelectionPage />} />
+          <Route path="/confirmar-voto" element={<ConfirmarVoto />} />
+
+          {/* Rutas de Funcionario */}
+          <Route element={<FuncionarioLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/gestion-candidatos" element={<GestionCandidatos />} />
+            <Route path="/cargar-aprendices" element={<CargarAprendices />} />
+            <Route path="/panel-metricas" element={<PanelMetricas />} />
+            <Route path="/elecciones" element={<EleccionesActivasPage />} />
+            <Route path="/agregar-candidato" element={<AgregarCandidato />} />
+            <Route path="/nueva-eleccion" element={<FormEleccion />} />
+          </Route>
         </Route>
 
-        {/* Redirección en caso de ruta no encontrada */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
