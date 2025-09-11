@@ -16,6 +16,7 @@ import AgregarCandidato from './pages/funcionario/AgregarCandidato'
 import FormEleccion from './pages/funcionario/FormEleccion'
 
 
+
 function PublicLayout() {
   return <Outlet />;
 }
