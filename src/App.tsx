@@ -50,7 +50,11 @@ function App() {
       <Routes>
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<Login />} />
+          <Route
+            path="/login-funcionario"
+            element={<Login perfil="funcionario" />}
+          />
+          <Route path="/login-aprendiz" element={<Login perfil="aprendiz" />} />
         </Route>
 
         {/* Rutas de Aprendiz */}
@@ -58,17 +62,16 @@ function App() {
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
           <Route path="/seleccion" element={<CandidateSelectionPage />} />
           <Route path="/confirmar-voto" element={<ConfirmarVoto />} />
-        </Route>
-
-        {/* Rutas de Funcionario */}
-        <Route element={<FuncionarioLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/gestion-candidatos" element={<GestionCandidatos />} />
-          <Route path="/cargar-aprendices" element={<CargarAprendices />} />
-          <Route path="/panel-metricas" element={<PanelMetricas />} />
-          <Route path="/elecciones" element={<EleccionesActivasPage />} />
-          <Route path="/agregar-candidato" element={<AgregarCandidato />} />
-          <Route path="/nueva-eleccion" element={<FormEleccion />} />
+          {/* Rutas de Funcionario */}
+          <Route element={<FuncionarioLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/gestion-candidatos" element={<GestionCandidatos />} />
+            <Route path="/cargar-aprendices" element={<CargarAprendices />} />
+            <Route path="/panel-metricas" element={<PanelMetricas />} />
+            <Route path="/elecciones" element={<EleccionesActivasPage />} />
+            <Route path="/agregar-candidato" element={<AgregarCandidato />} />
+            <Route path="/nueva-eleccion" element={<FormEleccion />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
