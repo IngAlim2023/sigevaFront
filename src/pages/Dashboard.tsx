@@ -9,6 +9,7 @@ import {
 } from "react-icons/bs";
 import imgAprendices from "../assets/img-aprendices.svg";
 import "../Dashboard.css";
+import { useNavigate } from "react-router-dom";
 
 interface Election {
   id: number;
@@ -20,6 +21,7 @@ interface Election {
 }
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [elections] = useState<Election[]>([
     {
       id: 1,
@@ -59,7 +61,11 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
           <div className="d-flex gap-2">
-            <Button variant="primary" className="d-flex align-items-center gap-2">
+            <Button 
+              variant="primary" 
+              className="d-flex align-items-center gap-2"
+              onClick={() => navigate('/nueva-eleccion')}
+            >
               <BsCalendar3 /> Nueva Elección
             </Button>
           </div>
