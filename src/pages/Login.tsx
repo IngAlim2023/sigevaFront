@@ -6,6 +6,15 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import Logo from "../assets/Sigeva logo.svg";
 import { useAuth } from "../context/auth/auth.context";
+import type { ResponseType } from "../context/auth/types/authTypes";
+
+export interface User {
+  id: number;
+  email: string;
+  estado: string;
+  perfil: "Aprendiz" | "Funcionario";
+  centroFormacion: number;
+}
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -16,20 +25,20 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await api.post("/login", {
+      const res = await api.post<ResponseType<User>>("/login", {
         email,
         password,
       });
 
       login(res.data);
-      console.log(res.data.data.perfil);
+      console.log(res.data.data?.perfil);
 
-      if (res.data.success && res.data.data.perfil === "Aprendiz") {
-        navigate("/votaciones");
-      }
-
-      if (res.data.success && res.data.data.perfil === "Funcionario") {
-        navigate("/elecciones");
+       if (res.data.success) {
+        if (res.data.data?.perfil === "Aprendiz") {
+          navigate("/votaciones");
+        } else if (res.data.data?.perfil === "Funcionario") {
+          navigate("/nueva-eleccion");
+        }
       }
     } catch (error) {
       throw new Error("Error en login:", error as Error);

@@ -47,10 +47,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
     { to: '/dashboard', icon: <FaHome />, text: 'Inicio' },
     { to: '/gestion-candidatos', icon: <FaUserTie />, text: 'Gestión de Candidatos' },
     { to: '/cargar-aprendices', icon: <FaUsers />, text: 'Cargar Aprendices' },
-    { to: '/metricas', icon: <FaChartBar />, text: 'Métricas' },
+    { to: '/panel-metricas', icon: <FaChartBar />, text: 'Métricas' },
     { to: '/elecciones', icon: <FaClipboardList />, text: 'Elecciones' },
-    { to: '/configuracion', icon: <FaCog />, text: 'Configuración' },
-    {}
+    
   ];
 
   const renderNavItem = (item: typeof navItems[0]) => (

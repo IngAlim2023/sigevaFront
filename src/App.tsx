@@ -62,15 +62,17 @@ function App() {
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
           <Route path="/seleccion" element={<CandidateSelectionPage />} />
           <Route path="/confirmar-voto" element={<ConfirmarVoto />} />
+        </Route>
 
-          {/* Rutas de Funcionario */}
-          <Route element={<FuncionarioLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/cargar-aprendices" element={<CargarAprendices />} />
-            <Route path="/panel-metricas" element={<PanelMetricas />} />
-            <Route path="/agregar-candidato" element={<AgregarCandidato />} />
-            <Route path="/nueva-eleccion" element={<FormEleccion />} />
-          </Route>
+        {/* Rutas de Funcionario */}
+        <Route element={<FuncionarioLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/gestion-candidatos" element={<GestionCandidatos />} />
+          <Route path="/cargar-aprendices" element={<CargarAprendices />} />
+          <Route path="/panel-metricas" element={<PanelMetricas />} />
+          <Route path="/elecciones" element={<EleccionesActivasPage />} />
+          <Route path="/agregar-candidato" element={<AgregarCandidato />} />
+          <Route path="/nueva-eleccion" element={<FormEleccion />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
