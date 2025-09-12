@@ -50,6 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
     { to: '/metricas', icon: <FaChartBar />, text: 'Métricas' },
     { to: '/elecciones', icon: <FaClipboardList />, text: 'Elecciones' },
     { to: '/configuracion', icon: <FaCog />, text: 'Configuración' },
+    {}
   ];
 
   const renderNavItem = (item: typeof navItems[0]) => (
