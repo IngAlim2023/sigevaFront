@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Card, Button, Badge, ListGroup, ProgressBar } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Badge, ListGroup } from "react-bootstrap";
 import { 
   BsCalendar3, 
   BsPeople, 
@@ -23,27 +23,27 @@ const Dashboard: React.FC = () => {
   const [elections] = useState<Election[]>([
     {
       id: 1,
-      title: 'Representante Centro Agropecuario',
-      location: 'La Dorada, Caldas',
-      date: '22-24 Mar',
-      status: 'upcoming',
+      title: 'Representante de Aprendices',
+      location: 'Popayán',
+      date: '15-17 Oct 2025',
+      status: 'ongoing',
       progress: 0
     },
     {
       id: 2,
-      title: 'Representante Centro de Gestión',
-      location: 'Manizales, Caldas',
-      date: '25-27 Mar',
+      title: 'Delegado Curricular',
+      location: 'Medellín',
+      date: '20-22 Mar 2026',
       status: 'upcoming',
       progress: 0
     },
     {
       id: 3,
-      title: 'Representante Bienestar',
-      location: 'La Dorada, Caldas',
-      date: 'En curso',
-      status: 'ongoing',
-      progress: 68
+      title: 'Representante de Bienestar',
+      location: 'Bogotá',
+      date: '10-12 Jun 2027',
+      status: 'upcoming',
+      progress: 0
     }
   ]);
 
@@ -59,9 +59,6 @@ const Dashboard: React.FC = () => {
             </p>
           </div>
           <div className="d-flex gap-2">
-            <Button variant="outline-primary" className="d-flex align-items-center gap-2">
-              Reportes
-            </Button>
             <Button variant="primary" className="d-flex align-items-center gap-2">
               <BsCalendar3 /> Nueva Elección
             </Button>
@@ -84,15 +81,6 @@ const Dashboard: React.FC = () => {
                           <p className="text-muted small mb-2">
                             {election.location} • {election.date}
                           </p>
-                          {election.status === 'ongoing' && (
-                            <div className="mt-2">
-                              <div className="d-flex justify-content-between small mb-1">
-                                <span>Progreso</span>
-                                <span>{election.progress}%</span>
-                              </div>
-                              <ProgressBar now={election.progress} variant="success" className="rounded" style={{ height: '6px' }} />
-                            </div>
-                          )}
                         </div>
                         <Badge 
                           bg={
