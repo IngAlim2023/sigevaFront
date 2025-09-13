@@ -16,6 +16,14 @@ export interface Funcionario {
   centroFormacion: number;
 }
 
+export interface Administrador {
+  id: number;
+  email: string;
+  estado: string;
+  perfil: "Administrador";
+  centroFormacion: number;
+}
+
 export interface Aprendiz {
   id: number;
   nombre: string;
@@ -26,10 +34,10 @@ export interface Aprendiz {
   centroFormacionIdcentroFormacion: number;
 }
 
-export type User = Funcionario | Aprendiz;
+export type User = Funcionario | Aprendiz | Administrador;
 
 interface Props {
-  perfil: "funcionario" | "aprendiz";
+  perfil: "funcionario" | "aprendiz" | "administrador";
 }
 
 export default function Login({ perfil }: Props) {
@@ -42,9 +50,7 @@ export default function Login({ perfil }: Props) {
     e.preventDefault();
     try {
       const endpoint =
-        perfil === "funcionario"
-          ? "/api/usuarios/login"
-          : "/api/aprendiz/login";
+        perfil === "aprendiz" ? "/api/aprendiz/login" : "/api/usuarios/login";
       const res = await api.post<ResponseType<Funcionario>>(endpoint, {
         email,
         password,
@@ -57,6 +63,8 @@ export default function Login({ perfil }: Props) {
         if (perfil === "Aprendiz") {
           navigate("/votaciones");
         } else if (res.data.data.perfil === "Funcionario") {
+          navigate("/dashboard");
+        } else if (res.data.data.perfil === "Administrador") {
           navigate("/dashboard");
         }
       }
