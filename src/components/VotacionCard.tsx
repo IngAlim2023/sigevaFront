@@ -1,4 +1,5 @@
 import { Card, Button } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
   regional: string;
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export const VotacionCard = ({ regional, titulo, centro, jornada }: Props) => {
+  const navigate = useNavigate();
   return (
     <Card className="h-100 border-success border-1 ">
       <Card.Header className="text-muted">{regional}</Card.Header>
@@ -17,7 +19,7 @@ export const VotacionCard = ({ regional, titulo, centro, jornada }: Props) => {
         <Card.Text>
           <span className="fw-semibold">Jornada:</span> {jornada}
         </Card.Text>
-        <Button className="btn-gradient">Participar</Button>
+        <Button className="btn-gradient" onClick={()=>{navigate("/seleccion")}}>Participar</Button>
       </Card.Body>
     </Card>
   );

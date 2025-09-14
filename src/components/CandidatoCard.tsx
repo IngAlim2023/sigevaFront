@@ -1,4 +1,5 @@
 import { Card } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 
 interface Props {
   nombre: string;
@@ -7,6 +8,7 @@ interface Props {
   foto: string;
   seleccionado: boolean;
   onSelect: () => void;
+  onMoreInfo:()=> void;
 }
 
 export default function CandidateCard({
@@ -16,6 +18,7 @@ export default function CandidateCard({
   foto,
   seleccionado,
   onSelect,
+  onMoreInfo
 }: Props) {
   return (
     <Card
@@ -35,6 +38,7 @@ export default function CandidateCard({
         {/* <Card.Text className="text-success fw-semibold">
           Ver descripción ampliada <span>▼</span>
         </Card.Text> */}
+        <Button variant="success" onClick={(e)=>{e.stopPropagation(); onMoreInfo();}}>Quiero Saber Más</Button>
       </Card.Body>
     </Card>
   );

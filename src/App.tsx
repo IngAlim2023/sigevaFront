@@ -20,6 +20,8 @@ import FormEleccion from "./pages/funcionario/FormEleccion";
 import MainLayout from "./layouts/MainLayout";
 import { useAuth } from "./context/auth/auth.context";
 
+import ModalCandidato from "./components/ModalCandidato";
+
 function PublicLayout() {
   return <Outlet />;
 }
@@ -51,13 +53,16 @@ function App() {
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Login />} />
+          <Route path="/votaciones" element={<VotacionesActivasPage />} />
+          <Route path="/seleccion" element={<CandidateSelectionPage />} />
+          <Route path="/confirmar-voto" element={<ConfirmarVoto />} />
+          <Route path="/modal" element={<ModalCandidato />} />
+
+          
         </Route>
 
         {/* Rutas de Aprendiz */}
         <Route element={<PrivateLayout />}>
-          <Route path="/votaciones" element={<VotacionesActivasPage />} />
-          <Route path="/seleccion" element={<CandidateSelectionPage />} />
-          <Route path="/confirmar-voto" element={<ConfirmarVoto />} />
         </Route>
 
         {/* Rutas de Funcionario */}

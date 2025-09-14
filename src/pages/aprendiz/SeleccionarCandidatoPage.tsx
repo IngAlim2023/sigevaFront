@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import CandidatoCard from "../../components/CandidatoCard";
+import SelecionarCandidato from "../../components/ModalCandidato";
 
 const candidatos = [
   {
@@ -34,9 +35,8 @@ const candidatos = [
 ];
 
 export default function CandidateSelectionPage() {
-  const [candidatoSeleccionado, setCandidatoSeleccionado] = useState<
-    string | null
-  >(null);
+  const [candidatoSeleccionado, setCandidatoSeleccionado] =useState<typeof candidatos[0] | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <>
@@ -51,21 +51,31 @@ export default function CandidateSelectionPage() {
             <Col key={index} xs={12} md={6} lg={3}>
               <CandidatoCard
                 {...c}
-                seleccionado={candidatoSeleccionado === c.nombre}
-                onSelect={() => setCandidatoSeleccionado(c.nombre)}
+                seleccionado={candidatoSeleccionado?.nombre === c.nombre}
+                onSelect={() => setCandidatoSeleccionado(c)}
+                onMoreInfo={()=>{setShowModal(true), setCandidatoSeleccionado(c)} }
+                  
               />
             </Col>
           ))}
         </Row>
 
-        {candidatoSeleccionado && (
+        {/* {candidatoSeleccionado && (
           <div className="d-flex justify-content-center mt-4">
             <Button className="btn-gradient">
               Votar por {candidatoSeleccionado}
             </Button>
           </div>
-        )}
+        )} */}
+
+        <SelecionarCandidato
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          candidato={candidatoSeleccionado}
+        />
+
       </Container>
+
     </>
   );
 }
