@@ -8,36 +8,64 @@ import Logo from "../assets/Sigeva logo.svg";
 import { useAuth } from "../context/auth/auth.context";
 import type { ResponseType } from "../context/auth/types/authTypes";
 
-export interface User {
+export interface Funcionario {
   id: number;
   email: string;
   estado: string;
-  perfil: "Aprendiz" | "Funcionario";
+  perfil: "Funcionario";
   centroFormacion: number;
 }
 
-export default function Login() {
+export interface Administrador {
+  id: number;
+  email: string;
+  estado: string;
+  perfil: "Administrador";
+  centroFormacion: number;
+}
+
+export interface Aprendiz {
+  id: number;
+  nombre: string;
+  apellidos: string;
+  estado: string;
+  perfil: "Aprendiz";
+  jornada: string;
+  centroFormacionIdcentroFormacion: number;
+}
+
+export type User = Funcionario | Aprendiz | Administrador;
+
+interface Props {
+  perfil: "funcionario" | "aprendiz" | "administrador";
+}
+
+export default function Login({ perfil }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth();
+  const { login } = useAuth<User>();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await api.post<ResponseType<User>>("/login", {
+      const endpoint =
+        perfil === "aprendiz" ? "/api/aprendiz/login" : "/api/usuarios/login";
+      const res = await api.post<ResponseType<Funcionario>>(endpoint, {
         email,
         password,
       });
 
       login(res.data);
-      console.log(res.data.data?.perfil);
 
-       if (res.data.success) {
-        if (res.data.data?.perfil === "Aprendiz") {
+      if (res.data.success && res.data.data) {
+        const perfil = res.data.data?.perfil as User["perfil"];
+        if (perfil === "Aprendiz") {
           navigate("/votaciones");
-        } else if (res.data.data?.perfil === "Funcionario") {
-          navigate("/nueva-eleccion");
+        } else if (res.data.data.perfil === "Funcionario") {
+          navigate("/dashboard");
+        } else if (res.data.data.perfil === "Administrador") {
+          navigate("/dashboard");
         }
       }
     } catch (error) {

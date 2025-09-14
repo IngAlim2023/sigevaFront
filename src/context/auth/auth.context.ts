@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, use } from "react";
 import type { ResponseType } from "./types/authTypes";
 
 interface AuthContextType<T> {
@@ -8,15 +8,10 @@ interface AuthContextType<T> {
   logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType<any>>({
-  user: null,
-  isAuthenticated: false,
-  login: () => {},
-  logout: () => {},
-});
+export const AuthContext = createContext({} as AuthContextType<any>);
 
 export const useAuth = <T>() => {
-  const context = useContext(AuthContext);
+  const context = use(AuthContext);
 
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
