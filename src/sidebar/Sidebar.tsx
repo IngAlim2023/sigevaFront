@@ -6,6 +6,7 @@ import { BsList } from 'react-icons/bs';
 // import logo2 from '../assets/icon-sena-2.svg';
 import logo1 from '../assets/icon-sena-sigeva.svg'
 import "./sidebar.css";
+import { useAuth } from '../context/auth/auth.context';
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -16,6 +17,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+  const {logout} = useAuth();
 
   const handleClose = useCallback(() => {
     setShow(false);
@@ -83,9 +85,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         </nav>
         <div className="sidebar-footer">
           <Link
-            to="/logout"
+            to="/"
             className="sidebar-link"
-            onClick={(e) => handleNavigation(e, '/logout')}
+            onClick={logout}
           >
             <FaSignOutAlt className="sidebar-icon" />
             <span className="sidebar-text">Cerrar Sesión</span>
