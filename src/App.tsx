@@ -24,6 +24,7 @@ import Aprendices from "./pages/administrador/Aprendices";
 import AprendizForm from "./pages/administrador/AprendizForm";
 import { Funcionarios } from "./pages/administrador/Funcionarios";
 import { DashboardAdmin } from "./pages/administrador/DashboardAdmin";
+import { Toaster } from "react-hot-toast";
 
 import ModalCandidato from "./components/ModalCandidato";
 
@@ -98,6 +99,7 @@ function App() {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Toaster position="top-right" reverseOrder={false} />
     </BrowserRouter>
   );
 }

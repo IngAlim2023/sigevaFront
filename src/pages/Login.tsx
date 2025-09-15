@@ -1,32 +1,45 @@
 import Container from "react-bootstrap/Container";
+import toast from "react-hot-toast";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import Logo from "../assets/Sigeva white.svg";
 import { useAuth } from "../context/auth/auth.context";
 import type { ResponseType, User } from "../context/auth/types/authTypes";
+import { Controller, useForm, type SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  loginSchema,
+  type FormValues,
+} from "../components/LoginForm/models/login.schema";
 
 interface Props {
   perfil: "gestor" | "aprendiz";
 }
 
 export default function Login({ perfil }: Props) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur",
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const onSubmit: SubmitHandler<FormValues> = async (data) => {
     try {
       const endpoint =
         perfil === "aprendiz" ? "/api/aprendiz/login" : "/api/usuarios/login";
-      const res = await api.post<ResponseType<User>>(endpoint, {
-        email,
-        password,
-      });
+      const res = await api.post<ResponseType<User>>(endpoint, data);
 
       login(res.data);
 
@@ -44,7 +57,8 @@ export default function Login({ perfil }: Props) {
         }
       }
     } catch (error) {
-      throw new Error("Error en login:", error as Error);
+      toast.error("Correo o contraseña incorrectos")
+      throw new Error("Error en el servidor", error as Error)
     }
   };
   return (
@@ -106,8 +120,7 @@ export default function Login({ perfil }: Props) {
                     : "text-dark fw-semibold"
                 }`}
                 style={{
-                  backgroundColor:
-                    perfil === "gestor" ? "#5031C9" : "#fff",
+                  backgroundColor: perfil === "gestor" ? "#5031C9" : "#fff",
                   transition: "background 0.3s",
                   fontSize: "0.9rem",
                   minWidth: "130px",
@@ -118,29 +131,51 @@ export default function Login({ perfil }: Props) {
             </div>
           </div>
 
-          <Form onSubmit={handleSubmit}>
+          <Form onSubmit={handleSubmit(onSubmit)}>
             <Form.Group className="mb-3">
               <Form.Label>
                 <strong>Correo electrónico</strong>{" "}
               </Form.Label>
-              <Form.Control
-                type="text"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Ingrese su correo electrónico "
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <Form.Control
+                    id="email"
+                    type="email"
+                    placeholder="Ingrese su correo electrónico"
+                    {...field}
+                    className={`form-control ${
+                      errors.email ? "is-invalid" : ""
+                    }`}
+                  />
+                )}
               />
+              {errors.email && <p className="error">{errors.email.message}</p>}
             </Form.Group>
 
             <Form.Group className="mb-4">
               <Form.Label>
                 <strong>Contraseña</strong>{" "}
               </Form.Label>
-              <Form.Control
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Ingrese su contraseña"
+              <Controller
+                name="password"
+                control={control}
+                render={({ field }) => (
+                  <Form.Control
+                    id="password"
+                    type="password"
+                    placeholder="Ingrese su contraseña"
+                    {...field}
+                    className={`form-control ${
+                      errors.password ? "is-invalid" : ""
+                    }`}
+                  />
+                )}
               />
+              {errors.password && (
+                <p className="error">{errors.password.message}</p>
+              )}
             </Form.Group>
 
             <Form.Group>
@@ -149,8 +184,9 @@ export default function Login({ perfil }: Props) {
                 type="submit"
                 className="w-100 rounded"
                 style={{ backgroundColor: "#5031C9", border: "none" }}
+                disabled={isSubmitting}
               >
-                Ingresar
+                {isSubmitting ? "Ingresando..." : "Ingresar"}
               </Button>
             </Form.Group>
           </Form>
