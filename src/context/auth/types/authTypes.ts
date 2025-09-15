@@ -1,16 +1,8 @@
-export interface Funcionario {
+export interface Gestor {
   id: number;
   email: string;
   estado: string;
-  perfil: "Funcionario";
-  centroFormacion: number;
-}
-
-export interface Administrador {
-  id: number;
-  email: string;
-  estado: string;
-  perfil: "Administrador";
+  perfil: "Funcionario" | "Administrador";
   centroFormacion: number;
 }
 
@@ -24,7 +16,7 @@ export interface Aprendiz {
   centroFormacionIdcentroFormacion: number;
 }
 
-export type User = Funcionario | Aprendiz | Administrador;
+export type User = Gestor | Aprendiz;
 
 export interface ResponseType<T> {
   success: boolean;

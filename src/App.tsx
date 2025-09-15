@@ -60,12 +60,8 @@ function App() {
             element={<Inicio/>}
           />
           <Route
-            path="/login-funcionario"
-            element={<Login perfil="funcionario" />}
-          />
-          <Route
-            path="/login-admin"
-            element={<Login perfil="administrador" />}
+            path="/login"
+            element={<Login perfil="gestor" />}
           />
           <Route path="/login-aprendiz" element={<Login perfil="aprendiz" />} />
         </Route>

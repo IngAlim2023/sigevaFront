@@ -8,12 +8,7 @@ interface AuthContextType<T> {
   logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType<User>>({
-  isAuthenticated: false,
-  user: null,
-  login: () => {},
-  logout: () => {},
-});
+export const AuthContext = createContext({} as AuthContextType<User>);
 
 export const useAuth = () => {
   const context = use(AuthContext);

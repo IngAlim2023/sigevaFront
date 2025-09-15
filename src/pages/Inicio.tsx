@@ -27,7 +27,7 @@ const Inicio: React.FC = () => {
                 </Col>
                 <Col xs={12} md={5} className="rounded-2 mb-2" style={{ background: "linear-gradient(135deg, #2575fc, #6a11cb)" }}>
                   <a
-                    href="/login-funcionario"
+                    href="/login"
                     className="btn btn-lg w-100 text-white btn-funcionario"
                   >
                     <FaUserTie className="me-2" />

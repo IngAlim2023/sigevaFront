@@ -9,7 +9,7 @@ import { useAuth } from "../context/auth/auth.context";
 import type { ResponseType, User } from "../context/auth/types/authTypes";
 
 interface Props {
-  perfil: "funcionario" | "aprendiz" | "administrador";
+  perfil: "gestor" | "aprendiz";
 }
 
 export default function Login({ perfil }: Props) {
@@ -31,13 +31,16 @@ export default function Login({ perfil }: Props) {
       login(res.data);
 
       if (res.data.success && res.data.data) {
-        const perfil = res.data.data?.perfil as User["perfil"];
-        if (perfil === "Aprendiz") {
-          navigate("/votaciones");
-        } else if (res.data.data.perfil === "Funcionario") {
-          navigate("/dashboard");
-        } else if (res.data.data.perfil === "Administrador") {
-          navigate("/aprendices");
+        switch (res.data.data.perfil) {
+          case "Aprendiz":
+            navigate("/votaciones");
+            break;
+          case "Funcionario":
+            navigate("/dashboard");
+            break;
+          case "Administrador":
+            navigate("/aprendices");
+            break;
         }
       }
     } catch (error) {
