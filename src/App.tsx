@@ -49,20 +49,22 @@ function FuncionarioLayout() {
   );
 }
 
+function AdminLayout() {
+  return (
+    <MainLayout showSidebar={true}>
+      <Outlet />
+    </MainLayout>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
-          <Route
-            path="/"
-            element={<Inicio/>}
-          />
-          <Route
-            path="/login"
-            element={<Login perfil="gestor" />}
-          />
+          <Route path="/" element={<Inicio />} />
+          <Route path="/login" element={<Login perfil="gestor" />} />
           <Route path="/login-aprendiz" element={<Login perfil="aprendiz" />} />
         </Route>
 
@@ -71,6 +73,7 @@ function App() {
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
           <Route path="/seleccion" element={<CandidateSelectionPage />} />
           <Route path="/confirmar-voto" element={<ConfirmarVoto />} />
+
           {/* Rutas de Funcionario */}
           <Route element={<FuncionarioLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -80,8 +83,11 @@ function App() {
             <Route path="/elecciones" element={<EleccionesActivasPage />} />
             <Route path="/agregar-candidato" element={<AgregarCandidato />} />
             <Route path="/nueva-eleccion" element={<FormEleccion />} />
-            {/* Rutas de administrador */}
-            <Route path="/dashboard-admin" element={<DashboardAdmin/>} />
+          </Route>
+
+          {/* Rutas de Administrador */}
+          <Route element={<AdminLayout />}>
+            <Route path="/dashboard-admin" element={<DashboardAdmin />} />
             <Route path="/aprendices" element={<Aprendices />} />
             <Route path="/funcionarios" element={<Funcionarios />} />
             <Route path="/aprendiz-form" element={<AprendizForm />} />

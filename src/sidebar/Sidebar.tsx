@@ -1,10 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaHome, FaUserTie, FaUsers, FaChartBar, FaCog, FaSignOutAlt, FaClipboardList } from 'react-icons/fa';
-import { Button } from 'react-bootstrap';
+import { FaHome, FaUserTie, FaUsers, FaChartBar, FaSignOutAlt, FaClipboardList, FaUserGraduate, FaUserPlus, FaChevronDown } from 'react-icons/fa';
+import { Button, Dropdown } from 'react-bootstrap';
 import { BsList } from 'react-icons/bs';
-// import logo2 from '../assets/icon-sena-2.svg';
-import logo1 from '../assets/icon-sena-sigeva.svg'
 import "./sidebar.css";
 import { useAuth } from '../context/auth/auth.context';
 
@@ -13,104 +11,180 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
-  const [show, setShow] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+  const [showSidebar, setShowSidebar] = useState(!isMobile);
   const location = useLocation();
   const navigate = useNavigate();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
-  const {logout} = useAuth();
+
+  const { user, logout } = useAuth();
+  const isAdmin = user?.perfil?.toLowerCase() === 'administrador';
+  const sidebarClass = isAdmin ? 'admin-sidebar' : '';
 
   const handleClose = useCallback(() => {
-    setShow(false);
+    setShowSidebar(false);
     onNavigate?.();
   }, [onNavigate]);
 
   const handleShow = useCallback(() => {
-    setShow(true);
+    setShowSidebar(true);
   }, []);
 
+  // Manejar redimensionamiento de pantalla
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth < 992;
       setIsMobile(mobile);
-      if (!mobile) handleClose();
+      setShowSidebar(!mobile);
     };
 
     window.addEventListener('resize', handleResize);
+    handleResize();
+    
     return () => window.removeEventListener('resize', handleResize);
-  }, [handleClose]);
+  }, []);
 
-  const handleNavigation = useCallback((e: React.MouseEvent, to: string) => {
+  // Obtener los enlaces según el rol del usuario
+  const getNavItems = useCallback(() => {
+    if (!user) return [];
+
+    const commonItems = [];
+
+    if (user.perfil?.toLowerCase() === 'funcionario') {
+      return [
+        { to: '/dashboard', icon: <FaHome />, text: 'Inicio', type: 'link' },
+        { 
+          type: 'dropdown', 
+          text: 'Gestión de Usuarios', 
+          icon: <FaUsers />,
+          items: [
+            { to: '/aprendices', icon: <FaUserGraduate />, text: 'Aprendices' },
+          ] 
+        },
+        { to: '/gestion-candidatos', icon: <FaUserTie />, text: 'Gestión de Candidatos', type: 'link' },
+        { to: '/cargar-aprendices', icon: <FaUserPlus />, text: 'Cargar Aprendices', type: 'link' },
+        { to: '/panel-metricas', icon: <FaChartBar />, text: 'Métricas', type: 'link' },
+        { to: '/elecciones', icon: <FaClipboardList />, text: 'Elecciones', type: 'link' },
+      ];
+    }
+
+    if (user.perfil?.toLowerCase() === 'administrador') {
+      return [
+        { to: '/dashboard-admin', icon: <FaHome />, text: 'Dashboard', type: 'link' },
+        { 
+          type: 'dropdown', 
+          text: 'Gestión de Usuarios', 
+          icon: <FaUsers />,
+          items: [
+            { to: '/aprendices', icon: <FaUserGraduate />, text: 'Aprendices' },
+            { to: '/funcionarios', icon: <FaUserTie />, text: 'Funcionarios' },
+          ] 
+        },
+        { to: '/aprendiz-form', icon: <FaUserPlus />, text: 'Añadir Aprendiz', type: 'link' },
+      ];
+    }
+
+    return commonItems;
+  }, [user]);
+
+  const handleNavigation = (e: React.MouseEvent, to: string) => {
     e.preventDefault();
     navigate(to);
-    handleClose();
-  }, [navigate, handleClose]);
+    if (isMobile) {
+      setShowSidebar(false);
+      onNavigate?.();
+    }
+  };
 
-  const navItems = [
-    { to: '/dashboard', icon: <FaHome />, text: 'Inicio' },
-    { to: '/gestion-candidatos', icon: <FaUserTie />, text: 'Gestión de Candidatos' },
-    { to: '/cargar-aprendices', icon: <FaUsers />, text: 'Cargar Aprendices' },
-    { to: '/panel-metricas', icon: <FaChartBar />, text: 'Métricas' },
-    { to: '/elecciones', icon: <FaClipboardList />, text: 'Elecciones' },
-    
-  ];
-
-  const renderNavItem = (item: typeof navItems[0]) => (
-    <Link
-      key={item.to}
-      to={item.to}
-      className={`sidebar-link ${location.pathname === item.to ? 'active' : ''}`}
-      onClick={(e) => handleNavigation(e, item.to)}
-    >
-      <span className="sidebar-icon">{item.icon}</span>
-      <span className="sidebar-text">{item.text}</span>
-    </Link>
-  );
+  const navItems = getNavItems();
+  const isActive = (to: string) => location.pathname === to;
 
   return (
     <>
       {/* Botón de menú en móvil */}
       {isMobile && (
-        <Button variant="light" className="sidebar-toggle" onClick={handleShow}>
+        <Button 
+          variant="light" 
+          className="sidebar-toggle" 
+          onClick={() => setShowSidebar(true)}
+        >
           <BsList size={24} />
         </Button>
       )}
 
+      {/* Overlay para móvil */}
+      {isMobile && showSidebar && (
+        <div 
+          className="sidebar-overlay" 
+          onClick={() => setShowSidebar(false)}
+        />
+      )}
+
       {/* Contenido del Sidebar */}
-      <div className="sidebar-content">
+      <div className={`sidebar-container ${sidebarClass} ${showSidebar ? 'open' : ''}`}>
         <div className="sidebar-logo">
-          <img src={logo1} alt="SENA" className="logo-sena" />
+          <img 
+            src="/src/assets/icon-sena-sigeva.svg" 
+            alt="SENA" 
+            className="logo-sena" 
+          />
         </div>
+        
         <nav className="sidebar-nav">
-          {navItems.map(renderNavItem)}
+          {navItems.map((item, index) => {
+            if (item.type === 'dropdown') {
+              return (
+                <Dropdown key={index} className="sidebar-dropdown">
+                  <Dropdown.Toggle as="div" className={`sidebar-link ${item.items.some(i => isActive(i.to)) ? 'active' : ''}`}>
+                    <span className="sidebar-icon">{item.icon}</span>
+                    <span className="sidebar-text">{item.text}</span>
+                    <FaChevronDown className="ms-auto" />
+                  </Dropdown.Toggle>
+                  <Dropdown.Menu className="sidebar-submenu">
+                    {item.items.map((subItem, subIndex) => (
+                      <Dropdown.Item 
+                        key={subIndex}
+                        as={Link}
+                        to={subItem.to}
+                        className={`dropdown-item ${isActive(subItem.to) ? 'active' : ''}`}
+                        onClick={(e: React.MouseEvent) => handleNavigation(e, subItem.to)}
+                      >
+                        <span className="sidebar-icon">{subItem.icon}</span>
+                        <span className="sidebar-text">{subItem.text}</span>
+                      </Dropdown.Item>
+                    ))}
+                  </Dropdown.Menu>
+                </Dropdown>
+              );
+            }
+            
+            return (
+              <Link
+                key={index}
+                to={item.to}
+                className={`sidebar-link ${isActive(item.to) ? 'active' : ''}`}
+                onClick={(e) => handleNavigation(e, item.to)}
+              >
+                <span className="sidebar-icon">{item.icon}</span>
+                <span className="sidebar-text">{item.text}</span>
+              </Link>
+            );
+          })}
         </nav>
+        
         <div className="sidebar-footer">
-          <Link
-            to="/"
+          <button
             className="sidebar-link"
-            onClick={logout}
+            onClick={(e) => {
+              e.preventDefault();
+              logout();
+              navigate('/');
+            }}
           >
             <FaSignOutAlt className="sidebar-icon" />
             <span className="sidebar-text">Cerrar Sesión</span>
-          </Link>
+          </button>
         </div>
       </div>
-
-      {/* Overlay para móvil */}
-      {show && isMobile && (
-        <div
-          className="sidebar-overlay"
-          onClick={handleClose}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            zIndex: 999
-          }}
-        />
-      )}
     </>
   );
 };
