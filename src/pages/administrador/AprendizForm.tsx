@@ -179,13 +179,14 @@ const getProgramas = async () => {
                     <Form.Control
                       {...register("grupo")}
                       placeholder="Grupo - ficha"
+                      required
                     />
                   </Form.Group>
                 </Col>
                 <Col md={6}>
                   <Form.Group>
                     <Form.Label>Jornada</Form.Label>
-                    <Form.Select {...register("jornada")}>
+                    <Form.Select {...register("jornada")} required>
                       <option value="">Seleccione...</option>
                       <option value="Diurna">Diurna</option>
                       <option value="Noche">Noche</option>
@@ -198,7 +199,7 @@ const getProgramas = async () => {
                 <Col md={6}>
                   <Form.Group>
                     <Form.Label>Programa de Formación</Form.Label>
-                    <Form.Select {...register("programa")}>
+                    <Form.Select {...register("programa")} required>
                       <option value="">Seleccione...</option>
                       {programas.map((p) => (
                         <option
@@ -215,7 +216,7 @@ const getProgramas = async () => {
                   <Form.Group>
                     <Form.Label>Centro Formación</Form.Label>
                     <Form.Select
-                      {...register("centro_formacion_idcentro_formacion")}
+                      {...register("centro_formacion_idcentro_formacion")} required
                     >
                       <option value={0}>Seleccione...</option>
                       {centros.map((c) => (
@@ -239,7 +240,7 @@ const getProgramas = async () => {
             <Col md={6}>
               <Form.Group>
                 <Form.Label>Nombres</Form.Label>
-                <Form.Control {...register("nombres")} placeholder="Nombres" />
+                <Form.Control {...register("nombres")} required placeholder="Nombres" />
               </Form.Group>
             </Col>
             <Col md={6}>
@@ -248,6 +249,7 @@ const getProgramas = async () => {
                 <Form.Control
                   {...register("apellidos")}
                   placeholder="Apellidos"
+                  required
                 />
               </Form.Group>
             </Col>
@@ -257,7 +259,7 @@ const getProgramas = async () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Tipo Documento</Form.Label>
-                <Form.Select {...register("tipo_documento")}>
+                <Form.Select {...register("tipo_documento")} required>
                   <option value="">Seleccione...</option>
                   <option value="CC">Cédula de Ciudadanía</option>
                   <option value="TI">Tarjeta Identidad</option>
@@ -271,13 +273,14 @@ const getProgramas = async () => {
                 <Form.Control
                   {...register("numero_documento")}
                   placeholder="Documento"
+                  required
                 />
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Celular</Form.Label>
-                <Form.Control {...register("celular")} placeholder="Celular" />
+                <Form.Control {...register("celular")} placeholder="Celular"/>
               </Form.Group>
             </Col>
           </Row>
@@ -290,6 +293,7 @@ const getProgramas = async () => {
                   type="email"
                   {...register("email")}
                   placeholder="Correo electronico"
+                  required
                 />
               </Form.Group>
             </Col>
@@ -298,8 +302,9 @@ const getProgramas = async () => {
                 <Form.Label>Contraseña</Form.Label>
                 <Form.Control
                   type="password"
-                  {...register("password")}
+                  {...register("password", {required: !aprendiz})}
                   placeholder="Contraseña"
+                  required={!aprendiz}
                 />
               </Form.Group>
             </Col>
