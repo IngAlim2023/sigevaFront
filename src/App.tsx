@@ -22,6 +22,8 @@ import { useAuth } from "./context/auth/auth.context";
 import Inicio from "./pages/Inicio";
 import Aprendices from "./pages/administrador/Aprendices";
 import AprendizForm from "./pages/administrador/AprendizForm";
+import { Funcionarios } from "./pages/administrador/Funcionarios";
+import { DashboardAdmin } from "./pages/administrador/DashboardAdmin";
 
 function PublicLayout() {
   return <Outlet />;
@@ -83,7 +85,9 @@ function App() {
             <Route path="/agregar-candidato" element={<AgregarCandidato />} />
             <Route path="/nueva-eleccion" element={<FormEleccion />} />
             {/* Rutas de administrador */}
+            <Route path="/dashboard-admin" element={<DashboardAdmin/>} />
             <Route path="/aprendices" element={<Aprendices />} />
+            <Route path="/funcionarios" element={<Funcionarios />} />
             <Route path="/aprendiz-form" element={<AprendizForm />} />
           </Route>
         </Route>
