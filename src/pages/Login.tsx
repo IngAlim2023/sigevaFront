@@ -72,6 +72,7 @@ export default function Login({ perfil }: Props) {
       throw new Error("Error en login:", error as Error);
     }
   };
+  
   return (
     <div
       className="d-flex justify-content-center align-items-center vh-100 bg-primary "

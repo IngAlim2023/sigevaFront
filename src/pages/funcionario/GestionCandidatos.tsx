@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../../context/auth/auth.context";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AgregarCandidatoModal from "../../components/candidatos/AgregarCandidatoModal";
+
 
 interface Candidato {
   id: number;
@@ -23,6 +25,19 @@ const MOCK: Candidato[] = [
 const GestionCandidatos = () => {
   const [candidatos, setCandidatos] = useState<Candidato[]>(MOCK);
   const [showModal, setShowModal] = useState(false);
+  const { user, isAuthenticated } = useAuth<any>();
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      console.log("Usuario logueado:", user);
+      console.log("Id centro de formación:", user.centroFormacion);
+      // aquí puedes llamar a tu endpoint para traer candidatos por ese id
+    }
+  }, [isAuthenticated, user]);
+
+  if (!isAuthenticated) {
+    return <p>Debes iniciar sesión para gestionar candidatos</p>;
+  }
 
   const handleAgregarCandidato = (nuevoCandidato: Candidato) => {
     setCandidatos(prev => [...prev, nuevoCandidato]);
@@ -48,7 +63,7 @@ const GestionCandidatos = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-5">
         <h2 className="fw-bold m-0">Gestión de Candidatos</h2>
-        <button 
+        <button
           className="btn btn-gradient d-flex align-items-center gap-2"
           onClick={() => setShowModal(true)}
         >
