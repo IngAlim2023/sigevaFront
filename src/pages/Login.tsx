@@ -6,35 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import Logo from "../assets/Sigeva logo.svg";
 import { useAuth } from "../context/auth/auth.context";
-import type { ResponseType } from "../context/auth/types/authTypes";
-
-export interface Funcionario {
-  id: number;
-  email: string;
-  estado: string;
-  perfil: "Funcionario";
-  centroFormacion: number;
-}
-
-export interface Administrador {
-  id: number;
-  email: string;
-  estado: string;
-  perfil: "Administrador";
-  centroFormacion: number;
-}
-
-export interface Aprendiz {
-  id: number;
-  nombre: string;
-  apellidos: string;
-  estado: string;
-  perfil: "Aprendiz";
-  jornada: string;
-  centroFormacionIdcentroFormacion: number;
-}
-
-export type User = Funcionario | Aprendiz | Administrador;
+import type { ResponseType, User } from "../context/auth/types/authTypes";
 
 interface Props {
   perfil: "funcionario" | "aprendiz" | "administrador";
@@ -43,7 +15,7 @@ interface Props {
 export default function Login({ perfil }: Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth<User>();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,7 +23,7 @@ export default function Login({ perfil }: Props) {
     try {
       const endpoint =
         perfil === "aprendiz" ? "/api/aprendiz/login" : "/api/usuarios/login";
-      const res = await api.post<ResponseType<Funcionario>>(endpoint, {
+      const res = await api.post<ResponseType<User>>(endpoint, {
         email,
         password,
       });
