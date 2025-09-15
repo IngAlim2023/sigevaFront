@@ -37,6 +37,7 @@ const candidatos = [
 export default function CandidateSelectionPage() {
   const [candidatoSeleccionado, setCandidatoSeleccionado] =useState<typeof candidatos[0] | null>(null);
   const [showModal, setShowModal] = useState(false);
+  
 
   return (
     <>

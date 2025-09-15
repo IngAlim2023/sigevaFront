@@ -8,11 +8,11 @@ interface Props {
   jornada: string;
 }
 
-export const VotacionCard = ({ regional, titulo, centro, jornada }: Props) => {
+export const VotacionCard = ({ titulo, centro, jornada }: Props) => {
   const navigate = useNavigate();
   return (
     <Card className="h-100 border-success border-1 ">
-      <Card.Header className="text-muted">{regional}</Card.Header>
+      <Card.Header className="text-muted"></Card.Header>
       <Card.Body>
         <Card.Title className="fw-bold">{titulo}</Card.Title>
         <Card.Text>{centro}</Card.Text>
