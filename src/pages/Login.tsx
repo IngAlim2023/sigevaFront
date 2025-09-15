@@ -4,7 +4,7 @@ import Button from "react-bootstrap/Button";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
-import Logo from "../assets/Sigeva logo.svg";
+import Logo from "../assets/Sigeva white.svg";
 import { useAuth } from "../context/auth/auth.context";
 import type { ResponseType, User } from "../context/auth/types/authTypes";
 
@@ -47,52 +47,107 @@ export default function Login({ perfil }: Props) {
   return (
     <div
       className="d-flex justify-content-center align-items-center vh-100 bg-primary "
-      style={{ background: "linear-gradient(135deg, #6a11cb, #2575fc)" }}
+      style={{
+        background:
+          "linear-gradient(95deg, #6136BF 2.31%, #542EA6 20.84%, #4B68BF 48.18%, #049DBF 72.74%, #04BFBF 98.69%)",
+      }}
     >
-      <Container
-        style={{ maxWidth: "450px", minHeight: "480px" }}
-        className="bg-white p-5 rounded shadow"
-      >
-        <Form onSubmit={handleSubmit}>
-          <h3 className="text-center mb-3 fw-bold">Bienvenido a</h3>
-          <div className="text-center mb-4">
-            <img src={`${Logo}`} alt="Logo" height="50px" />
+      <Container style={{ maxWidth: "600px", maxHeight: "480px" }}>
+        <div className="text-center mb-4">
+          <img src={`${Logo}`} alt="Logo" height="50px" />
+        </div>
+
+        <p className="text-center text-white">
+          Sistema de Gestión de Votos para Aprendices
+        </p>
+        <Container
+          style={{ maxWidth: "450px", minHeight: "40px", borderRadius: "1.5rem" }}
+          className="bg-white p-5 shadow"
+        >
+          {/* Cambio de login */}
+          <div className="d-flex justify-content-center mb-4">
+            <div
+              className="rounded-pill d-flex"
+              style={{
+                backgroundColor: "#fff",
+                border: "2px solid #5031C9",
+                padding: "3px",
+                gap: "2px",
+              }}
+            >
+              <a
+                href="/login-aprendiz"
+                className={`text-decoration-none text-center px-4 py-2 rounded-pill ${
+                  perfil === "aprendiz"
+                    ? "text-white fw-bold"
+                    : "text-dark fw-semibold"
+                }`}
+                style={{
+                  backgroundColor: perfil === "aprendiz" ? "#5031C9" : "#fff",
+                  transition: "background 0.3s",
+                  fontSize: "0.9rem",
+                  minWidth: "130px",
+                }}
+              >
+                Aprendiz
+              </a>
+              <a
+                href="/login-funcionario"
+                className={`text-decoration-none text-center px-4 py-2 rounded-pill ${
+                  perfil === "funcionario"
+                    ? "text-white fw-bold"
+                    : "text-dark fw-semibold"
+                }`}
+                style={{
+                  backgroundColor:
+                    perfil === "funcionario" ? "#5031C9" : "#fff",
+                  transition: "background 0.3s",
+                  fontSize: "0.9rem",
+                  minWidth: "130px",
+                }}
+              >
+                Funcionario
+              </a>
+            </div>
           </div>
 
-          <p className="text-center">
-            Sistema de Gestión de Votos para Aprendices
-          </p>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>
+                <strong>Correo electrónico</strong>{" "}
+              </Form.Label>
+              <Form.Control
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Ingrese su correo electrónico "
+              />
+            </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>
-              <strong>Correo electrónico</strong>{" "}
-            </Form.Label>
-            <Form.Control
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Ingrese su correo electrónico "
-            />
-          </Form.Group>
+            <Form.Group className="mb-4">
+              <Form.Label>
+                <strong>Contraseña</strong>{" "}
+              </Form.Label>
+              <Form.Control
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Ingrese su contraseña"
+              />
+            </Form.Group>
 
-          <Form.Group className="mb-4">
-            <Form.Label>
-              <strong>Contraseña</strong>{" "}
-            </Form.Label>
-            <Form.Control
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Ingrese su número de documento"
-            />
-          </Form.Group>
-
-          <Form.Group>
-            <Button variant="primary" type="submit" className="w-100">
-              Ingresar
-            </Button>
-          </Form.Group>
-        </Form>
+            <Form.Group>
+              <Button
+                variant="primary"
+                type="submit"
+                className="w-100 rounded"
+                style={{ backgroundColor: "#5031C9", border: "none"}}
+              >
+                Ingresar
+              </Button>
+            </Form.Group>
+          </Form>
+        </Container>
       </Container>
     </div>
   );
