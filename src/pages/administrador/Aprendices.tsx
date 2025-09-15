@@ -103,7 +103,7 @@ const Aprendices: React.FC = () => {
       name: "Editar",
       cell: (row) => (
         <>
-        <Button variant="light" size="lg" onClick={()=>navigate('form-aprendiz', {state:{aprendiz:row}})}>
+        <Button variant="light" size="lg" onClick={()=>navigate('/aprendiz-form', {state:{aprendiz:row}})}>
           <FaEdit />
         </Button>
         </>
@@ -173,7 +173,7 @@ const Aprendices: React.FC = () => {
           />
         </Col>
         <Col xs='auto'>
-          <Button style={{backgroundColor:'#5027BC'}} onClick={()=>navigate('/form-aprendiz')}>
+          <Button style={{backgroundColor:'#5027BC'}} onClick={()=>navigate('/aprendiz-form')}>
             <AiOutlinePlusCircle className="me-2 fs-3" />
             Nuevo Aprendiz
           </Button>
