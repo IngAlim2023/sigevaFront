@@ -19,6 +19,9 @@ import AgregarCandidato from "./pages/funcionario/AgregarCandidato";
 import FormEleccion from "./pages/funcionario/FormEleccion";
 import MainLayout from "./layouts/MainLayout";
 import { useAuth } from "./context/auth/auth.context";
+import Inicio from "./pages/Inicio";
+import Aprendices from "./pages/administrador/Aprendices";
+import AprendizForm from "./pages/administrador/AprendizForm";
 
 function PublicLayout() {
   return <Outlet />;
@@ -51,8 +54,16 @@ function App() {
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
           <Route
+            path="/"
+            element={<Inicio/>}
+          />
+          <Route
             path="/login-funcionario"
             element={<Login perfil="funcionario" />}
+          />
+          <Route
+            path="/login-admin"
+            element={<Login perfil="administrador" />}
           />
           <Route path="/login-aprendiz" element={<Login perfil="aprendiz" />} />
         </Route>
@@ -71,6 +82,9 @@ function App() {
             <Route path="/elecciones" element={<EleccionesActivasPage />} />
             <Route path="/agregar-candidato" element={<AgregarCandidato />} />
             <Route path="/nueva-eleccion" element={<FormEleccion />} />
+            {/* Rutas de administrador */}
+            <Route path="/aprendices" element={<Aprendices />} />
+            <Route path="/aprendiz-form" element={<AprendizForm />} />
           </Route>
         </Route>
 
