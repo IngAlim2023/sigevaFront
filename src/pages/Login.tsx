@@ -65,7 +65,7 @@ export default function Login({ perfil }: Props) {
         } else if (res.data.data.perfil === "Funcionario") {
           navigate("/dashboard");
         } else if (res.data.data.perfil === "Administrador") {
-          navigate("/dashboard");
+          navigate("/aprendices");
         }
       }
     } catch (error) {
