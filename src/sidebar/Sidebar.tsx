@@ -1,11 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaHome, FaUserTie, FaUsers, FaChartBar, FaCog, FaSignOutAlt, FaClipboardList } from 'react-icons/fa';
+import { FaHome, FaUserTie, FaUsers, FaChartBar, FaSignOutAlt, FaClipboardList, FaUserGraduate, FaUserCheck, FaBuilding, FaGraduationCap, FaCog, FaHistory, FaUserPlus } from 'react-icons/fa';
 import { Button } from 'react-bootstrap';
 import { BsList } from 'react-icons/bs';
-// import logo2 from '../assets/icon-sena-2.svg';
 import logo1 from '../assets/icon-sena-sigeva.svg'
 import "./sidebar.css";
+import { useAuth } from '../context/auth/auth.context';
 
 interface SidebarProps {
   onNavigate?: () => void;
@@ -16,6 +16,41 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+  const { user } = useAuth();
+
+  // Función para obtener los enlaces según el rol
+  const getNavItems = () => {
+    // Si no hay usuario, no mostramos nada
+    if (!user) return [];
+
+    // Enlaces comunes para todos los roles
+    const commonItems = [
+      { to: '/dashboard', icon: <FaHome />, text: 'Inicio' },
+    ];
+
+    // Si es funcionario
+    if ((user.perfil as any).toLowerCase() === 'funcionario') {
+      return [
+        ...commonItems,
+        { to: '/gestion-candidatos', icon: <FaUserTie />, text: 'Gestión de Candidatos' },
+        { to: '/cargar-aprendices', icon: <FaUsers />, text: 'Cargar Aprendices' },
+        { to: '/panel-metricas', icon: <FaChartBar />, text: 'Métricas' },
+        { to: '/elecciones', icon: <FaClipboardList />, text: 'Elecciones' },
+      ];
+    }
+
+    // Si es administrador
+    if ((user.perfil as any).toLowerCase() === 'administrador') {
+      return [
+        { to: '/dashboard-admin', icon: <FaHome />, text: 'Dashboard' },
+        { to: '/aprendices', icon: <FaUserGraduate />, text: 'Aprendices' },
+        { to: '/funcionarios', icon: <FaUserTie />, text: 'Funcionarios' },
+        { to: '/aprendiz-form', icon: <FaUserPlus />, text: 'Aprendiz Form' },
+      ];
+    }
+
+    return commonItems;
+  };
 
   const handleClose = useCallback(() => {
     setShow(false);
@@ -43,26 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
     handleClose();
   }, [navigate, handleClose]);
 
-  const navItems = [
-    { to: '/dashboard', icon: <FaHome />, text: 'Inicio' },
-    { to: '/gestion-candidatos', icon: <FaUserTie />, text: 'Gestión de Candidatos' },
-    { to: '/cargar-aprendices', icon: <FaUsers />, text: 'Cargar Aprendices' },
-    { to: '/panel-metricas', icon: <FaChartBar />, text: 'Métricas' },
-    { to: '/elecciones', icon: <FaClipboardList />, text: 'Elecciones' },
-    
-  ];
-
-  const renderNavItem = (item: typeof navItems[0]) => (
-    <Link
-      key={item.to}
-      to={item.to}
-      className={`sidebar-link ${location.pathname === item.to ? 'active' : ''}`}
-      onClick={(e) => handleNavigation(e, item.to)}
-    >
-      <span className="sidebar-icon">{item.icon}</span>
-      <span className="sidebar-text">{item.text}</span>
-    </Link>
-  );
+  const navItems = getNavItems();
 
   return (
     <>
@@ -79,7 +95,17 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
           <img src={logo1} alt="SENA" className="logo-sena" />
         </div>
         <nav className="sidebar-nav">
-          {navItems.map(renderNavItem)}
+          {navItems.map((item) => (
+            <Link
+              key={item.to}
+              to={item.to}
+              className={`sidebar-link ${location.pathname === item.to ? 'active' : ''}`}
+              onClick={(e) => handleNavigation(e, item.to)}
+            >
+              <span className="sidebar-icon">{item.icon}</span>
+              <span className="sidebar-text">{item.text}</span>
+            </Link>
+          ))}
         </nav>
         <div className="sidebar-footer">
           <Link
