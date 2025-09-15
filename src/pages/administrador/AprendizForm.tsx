@@ -1,40 +1,103 @@
 import { Form, Row, Col, Button, Card } from "react-bootstrap";
-import { FaRegSave, FaRegUser } from "react-icons/fa";
+import { FaBookOpen, FaRegSave, FaRegUser } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router-dom";
 import { api } from "../../api";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
+import { useEffect, useState } from "react";
+
+export interface ProgramaFormacion {
+  idprogramaFormacion: number;
+  idnivelFormacion: number;
+  idareaTematica: number;
+  programa: string;
+  codigoPrograma: string;
+  version: string;
+  duracion: number;
+}
+
+export interface CentroFormacion {
+  idcentroFormacion: number;
+  idregional: number;
+  centroFormacioncol: string;
+  idmunicipios: number;
+  direccion: string;
+  telefono: string;
+  correo: string;
+  subdirector: string;
+  correosubdirector: string;
+}
 
 const AprendizForm = () => {
   const location = useLocation();
   const aprendiz = location.state?.aprendiz;
   const navigate = useNavigate();
+  const [centros, setCentros] = useState<CentroFormacion[]>([]);
+  const [programas, setProgramas] = useState<ProgramaFormacion[]>([]);
+
+
+const getCentros = async () => {
+  try {
+    const res = await api.get("api/centrosFormacion/obtiene");
+    console.log(res.data)
+    setCentros(res.data.data || []);
+  } catch (err) {
+    toast.error("Error cargando centros");
+    setCentros([]);
+  }
+};
+
+const getProgramas = async () => {
+  try {
+    const res = await api.get("api/programasFormacion/listar");
+    console.log(res.data)
+    setProgramas(res.data || []);
+  } catch (err) {
+    toast.error("Error cargando programas");
+    setProgramas([]);
+  }
+};
+
+  useEffect(() => {
+    getCentros();
+    getProgramas();
+  }, []);
 
   const { register, handleSubmit } = useForm({
     defaultValues: aprendiz
       ? {
-          //EDITAR
+          // EDITAR
+          idaprendiz: aprendiz.idaprendiz ?? 0,
           idgrupo: aprendiz.idgrupo ?? 0,
           idprograma_formacion: aprendiz.idprogramaFormacion ?? 0,
           perfil_idperfil: aprendiz.perfilIdPerfil ?? 3,
           nombres: aprendiz.nombres ?? "",
           apellidos: aprendiz.apellidos ?? "",
           celular: aprendiz.celular ?? "",
+          estado: aprendiz.estado ?? "activo",
           tipo_documento: aprendiz.tipoDocumento ?? "",
           centro_formacion_idcentro_formacion:
             aprendiz.centroFormacionIdcentroFormacion ?? 0,
           numero_documento: aprendiz.numeroDocumento ?? "",
           email: aprendiz.email ?? "",
-          password: aprendiz.password ?? "",
+          password: "",
         }
       : {
-          //CREAR
-          idgrupo: "",
-          idprograma_formacion: "",
+          // CREAR
+          grupo: "",
+          jornada: "",
+          programa: "",
+          codigo_programa: "", //
+          version: "", //
+          duracion: "", //
+          idnivel_formacion: 0, //
+          nivel_formacion: "", //
+          idarea_tematica: 0, //
           perfil_idperfil: 3,
           nombres: "",
           apellidos: "",
           celular: "",
+          estado: "activo",
           tipo_documento: "",
           centro_formacion_idcentro_formacion: 0,
           numero_documento: "",
@@ -44,31 +107,48 @@ const AprendizForm = () => {
   });
 
   const agregarAprendiz = async (data: any) => {
+    if (!data.password) delete data.password;
     try {
       const res = await api.post("/api/aprendiz/crear", data);
-      navigate("/");
-      return res.data.message;
+      toast.success(res.data.message, { id: "toast" });
+      navigate("/aprendices");
     } catch (error: any) {
-      toast.error("Error al Agregar el Aprendiz", { id: "toast" });
-      console.error("Error en agregarAprendiz", error);
+      toast.error(error.response?.data?.message || "Error al crear aprendiz", {
+        id: "toast",
+      });
     }
   };
 
   const actualizarAprendiz = async (data: any) => {
+    if (!data.password) delete data.password;
     try {
       const res = await api.put(
         `/api/aprendiz/actualizar/${data.idaprendiz}`,
         data
       );
-      navigate("/");
-      return res.data.message;
+      toast.success(res.data.message, { id: "toast" });
+      navigate("/aprendices");
     } catch (error: any) {
-      toast.error("Error al Actualizar el Aprendiz", { id: "toast" });
-      console.error("Error en actualizarAprendiz", error);
+      toast.error(
+        error.response?.data?.message || "Error al actualizar el aprendiz",
+        {
+          id: "toast",
+        }
+      );
     }
   };
-
   const onSubmit = (data: any) => {
+    if (data.programa) {
+    const programaObj = JSON.parse(data.programa);
+
+    data.idprograma_formacion = programaObj.idprogramaFormacion;
+    data.codigo_programa = programaObj.codigoPrograma;
+    data.version = programaObj.version;
+    data.duracion = programaObj.duracion;
+    data.idnivel_formacion = programaObj.idnivelFormacion;
+    data.idarea_tematica = programaObj.idareaTematica;
+    data.programa =  programaObj.programa; 
+  }
     if (aprendiz) {
       actualizarAprendiz(data);
     } else {
@@ -86,7 +166,72 @@ const AprendizForm = () => {
       </Card.Header>
       <Card.Body className="p-4">
         <Form onSubmit={handleSubmit(onSubmit)}>
-          <h4 className="mb-3 text-primary">
+          {!aprendiz ? (
+            <>
+              <h4 className="mt-3 text-primary">
+                <FaBookOpen className="mx-2" />
+                Datos Estudiantiles
+              </h4>
+              <Row className="mb-3">
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Grupo</Form.Label>
+                    <Form.Control
+                      {...register("grupo")}
+                      placeholder="Grupo - ficha"
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Jornada</Form.Label>
+                    <Form.Select {...register("jornada")}>
+                      <option value="">Seleccione...</option>
+                      <option value="Diurna">Diurna</option>
+                      <option value="Noche">Noche</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+              </Row>
+
+              <Row>
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Programa de Formación</Form.Label>
+                    <Form.Select {...register("programa")}>
+                      <option value="">Seleccione...</option>
+                      {programas.map((p) => (
+                        <option
+                          key={p.idprogramaFormacion}
+                          value={JSON.stringify(p)}
+                        >
+                          {p.programa}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group>
+                    <Form.Label>Centro Formación</Form.Label>
+                    <Form.Select
+                      {...register("centro_formacion_idcentro_formacion")}
+                    >
+                      <option value={0}>Seleccione...</option>
+                      {centros.map((c) => (
+                        <option value={c.idcentroFormacion}>
+                          {c.centroFormacioncol}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+              </Row>
+            </>
+          ) : (
+            <></>
+          )}
+          <h4 className="mt-4 text-primary">
             <FaRegUser className="mx-2" />
             Datos Personales
           </h4>
@@ -146,37 +291,6 @@ const AprendizForm = () => {
                   {...register("email")}
                   placeholder="Correo electronico"
                 />
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label>Centro Formación</Form.Label>
-                <Form.Select
-                  {...register("centro_formacion_idcentro_formacion")}
-                >
-                  <option value={0}>Seleccione...</option>
-                  <option value={1}>
-                    Centro de teleinformatica y produccion industrial
-                  </option>
-                  <option value={2}>Centro de comercio y servicios</option>
-                  <option value={3}>Centro santander de quilichado</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
-
-          <Row className="mb-4">
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label>Programa de Formación</Form.Label>
-                <Form.Select
-                  {...register("idprograma_formacion")}
-                >
-                  <option value={0}>Seleccione...</option>
-                  <option value={1}>Diseño grafico</option>
-                  <option value={2}>Desarrollo de software</option>
-                  <option value={3}>Administracion de empresas</option>
-                </Form.Select>
               </Form.Group>
             </Col>
             <Col md={6}>
