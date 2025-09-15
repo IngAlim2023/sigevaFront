@@ -15,9 +15,23 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   const [showSidebar, setShowSidebar] = useState(!isMobile);
   const location = useLocation();
   const navigate = useNavigate();
+
   const { user, logout } = useAuth();
   const isAdmin = user?.perfil?.toLowerCase() === 'administrador';
   const sidebarClass = isAdmin ? 'admin-sidebar' : '';
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
+  const {logout} = useAuth();
+
+  const handleClose = useCallback(() => {
+    setShow(false);
+    onNavigate?.();
+  }, [onNavigate]);
+
+  const handleShow = useCallback(() => {
+    setShow(true);
+  }, []);
+
 
   // Manejar redimensionamiento de pantalla
   useEffect(() => {
@@ -168,9 +182,16 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         </nav>
         
         <div className="sidebar-footer">
+
           <button
             className="sidebar-link"
             onClick={handleLogout}
+
+          <Link
+            to="/"
+            className="sidebar-link"
+            onClick={logout}
+
           >
             <FaSignOutAlt className="sidebar-icon" />
             <span className="sidebar-text">Cerrar Sesión</span>
