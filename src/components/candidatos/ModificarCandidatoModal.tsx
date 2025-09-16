@@ -3,6 +3,8 @@ import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import Select from "react-select"
 import axios from "axios";
 
+
+
 interface Aprendiz {
   idaprendiz: number;
   nombres: string;
@@ -15,17 +17,19 @@ interface Eleccion {
   ideleccion: number;
   nombre: string;
 }
-interface AgregarCandidatoModalProps {
+interface ModificarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
   onSave: (candidato: any) => void;
+  // candidatos: Candidato[];
   elecciones: Eleccion[];
   aprendices: Aprendiz[];
 }
 
 const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
-const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }: AgregarCandidatoModalProps) => {
+
+const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }: ModificarCandidatoModalProps) => {
   const [formData, setFormData] = useState<{
     nombres: string;
     foto: File | string | null;
@@ -48,6 +52,9 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
     ? aprendices.map((a) => ({
       value: a.idaprendiz,
       label: `${a.nombres} ${a.apellidos}`.trim(),
+
+      // numeroDocumento: a.numeroDocumento,
+      // email: a.email,
     }))
     : [];
 
@@ -110,6 +117,22 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
     }
   };
 
+
+  // const handleSelectChange = (selected: any) => {
+  //   if (selected) {
+  //     setFormData({
+  //       ...formData,
+  //       nombres: selected.label,
+  //       idaprendiz: selected.value
+  //     });
+  //   } else {
+  //     setFormData({
+  //       ...formData,
+  //       nombres: "",
+  //       idaprendiz: null,
+  //     });
+  //   }
+  // };
   const handleSelectChange = (selected: any) => {
     if (selected) {
       const aprendiz = aprendices.find((a) => a.idaprendiz === selected.value);
@@ -126,6 +149,7 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
       });
     }
   };
+
 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
@@ -249,4 +273,4 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
   );
 };
 
-export default AgregarCandidatoModal;
+export default ModificarCandidatoModal;
