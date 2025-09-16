@@ -7,15 +7,19 @@ interface Props {
   foto: string;
   seleccionado: boolean;
   onSelect: () => void;
+  aprendiz:{
+    nombres:string;
+    apellidos:string;
+  };
 }
 
 export default function CandidateCard({
-  nombre,
   programa,
   propuesta,
   foto,
   seleccionado,
   onSelect,
+  aprendiz
 }: Props) {
   return (
     <Card
@@ -29,7 +33,7 @@ export default function CandidateCard({
         style={{ height: "250px", objectFit: "cover" }}
       />
       <Card.Body>
-        <Card.Title className="fw-bold">{nombre}</Card.Title>
+        <Card.Title className="fw-bold">{aprendiz.nombres} {aprendiz.apellidos}</Card.Title>
         <Card.Subtitle className="text-muted">{programa}</Card.Subtitle>
         <Card.Text className="mt-2">{propuesta}</Card.Text>
         {/* <Card.Text className="text-success fw-semibold">
