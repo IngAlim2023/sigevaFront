@@ -79,7 +79,7 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                         })
                     }else{
                         Swal.fire({
-                            title:"Tu Voto No Fue Registrado Con Éxito",
+                            title:"Tu Voto No Fue Registrado, ¿Ya votaste?, Intenta nuevamente",
                             icon: "error",
                             draggable: true,
                             showConfirmButton:true,
@@ -95,7 +95,7 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                     
                 } catch (error) {
                     Swal.fire({
-                        title:"Tu Voto No Fue Registrado Con Éxito",
+                        title:"Tu Voto No Fue Registrado, Intenta nuevamente",
                         icon: "error",
                         draggable: true,
                         showConfirmButton:true,
@@ -108,11 +108,31 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
 
                 }
             } else {
-                alert("Código OTP inválido");
+                Swal.fire({
+                        title:"Código OTP Incorrecto, Intenta nuevamente",
+                        icon: "error",
+                        draggable: true,
+                        showConfirmButton:true,
+                        confirmButtonText:"Intenta votar de nuevo"
+                    }).then((result)=>{
+                        if(result.isConfirmed){
+                            navigate("/votaciones")
+                        }
+                        })
             }
 
         } catch (error) {
-            alert("Error al validar el código OTP");
+                    Swal.fire({
+                        title:"Código OTP Incorrecto, Intenta nuevamente",
+                        icon: "error",
+                        draggable: true,
+                        showConfirmButton:true,
+                        confirmButtonText:"Intenta votar de nuevo"
+                    }).then((result)=>{
+                        if(result.isConfirmed){
+                            navigate("/votaciones")
+                        }
+                        })
         }
     }
 
