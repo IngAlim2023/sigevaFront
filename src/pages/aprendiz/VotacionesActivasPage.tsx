@@ -1,7 +1,7 @@
 import { Col, Container, Row } from "react-bootstrap";
 import { VotacionCard } from "../../components/VotacionCard";
 import { useEffect, useState } from "react";
-import {api} from "../../api";
+import { api } from "../../api";
 import { useAuth } from "../../context/auth/auth.context";
 
 // const votaciones = [
@@ -26,28 +26,21 @@ import { useAuth } from "../../context/auth/auth.context";
 // ];
 
 const VotacionesActivasPage = () => {
-    const [id, setId] = useState(1);
-    const [votaciones, setVotaciones] = useState<any[]>([]);
-    const {user }=useAuth<any>();
-    
-      const traerCandidatos=async()=>{
-      try{
-        //setId(user)
-        console.log("usuario", user)
-        const {data}=await api.get(`/api/eleccionPorCentro/${id} ` )
-        setVotaciones(data.eleccionesActivas);
-        
-      }
-      catch(error){
-        alert("error al cargar los candidatos" + error)
-      }
+  const [votaciones, setVotaciones] = useState<any[]>([]);
+  const { user } = useAuth<any>();
+
+  console.log("user", user)
+  useEffect(() => {
+    const loadVotaciones = async () => {
+      const { data } = await api.get(`api/eleccionPorCentro/${user.centroFormacion}`);
+      setVotaciones(data.eleccionesActivas);
     }
-  
-    useEffect(()=>{
-  
-      traerCandidatos();
-    },[])
-  
+    loadVotaciones();
+  }, []);
+
+  console.log("votaciones", votaciones)
+
+
   return (
     <>
       <Container className="my-4">
@@ -60,7 +53,7 @@ const VotacionesActivasPage = () => {
             <Col key={index} xs={12} md={6} lg={4}>
               <VotacionCard {...vote} />
             </Col>
-          ))} 
+          ))}
         </Row>
       </Container>
     </>
