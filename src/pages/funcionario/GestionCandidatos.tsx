@@ -16,8 +16,16 @@ interface Programa {
   version: string;
   duracion: number;
 }
-interface Aprendiz {
-  idaprendiz: number;
+// interface Aprendiz {
+//   idaprendiz: number;
+//   nombres: string;
+//   apellidos: string;
+//   programa: Programa;
+//   email: string;
+// }
+
+interface Candidato {
+  idcandidatos: number;
   nombres: string;
   apellidos: string;
   programa: Programa;
@@ -27,8 +35,8 @@ interface Aprendiz {
 const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
 const GestionCandidatos = () => {
-  const [aprendices, setAprendices] = useState<Aprendiz[]>([]);
-  // const [candidatos, setCandidatos] = useState<Candidato[]>(MOCK);
+  // const [aprendices, setAprendices] = useState<Aprendiz[]>([]);
+  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [showModal, setShowModal] = useState(false);
   const { user, isAuthenticated } = useAuth<any>();
   const [loading, setLoading] = useState(false);
@@ -42,7 +50,7 @@ const GestionCandidatos = () => {
         setLoading(true);
         const res = await fetch(
           //utlizar vite_url_back
-          `${VITE_URL_BACK}/api/aprendiz/centros/${user.centroFormacion}`
+          `${VITE_URL_BACK}/api/candidatos/listar/cformacion/${user?.centroFormacion}`
 
         );
         if (!res.ok) {
@@ -50,7 +58,7 @@ const GestionCandidatos = () => {
         }
         const data = await res.json();
         console.log(data);
-        setAprendices(data);
+        setCandidatos(data.data || []);
       } catch (error) {
         console.error(error);
       } finally {
@@ -81,22 +89,22 @@ const GestionCandidatos = () => {
     return <p>Debes iniciar sesión para gestionar candidatos</p>;
   }
 
-  const handleAgregarCandidato = (nuevo: Aprendiz) => {
-    setAprendices(prev => [...prev, nuevo]);
+  const handleAgregarCandidato = (nuevo: Candidato) => {
+    setCandidatos(prev => [...prev, nuevo]);
   };
 
   const onEditar = (id: number) => {
     // Implementar lógica de edición
-    const aprendiz = aprendices.find(c => c.idaprendiz === id);
-    if (aprendiz) {
-      // Aquí podrías abrir un modal de edición con los datos del aprendiz
-      alert(`Editar aprendiz: ${aprendiz.nombres} ${aprendiz.apellidos}`);
+    const candidato = candidatos.find(c => c.idcandidatos === id);
+    if (candidato) {
+      // Aquí podrías abrir un modal de edición con los datos del candidato
+      alert(`Editar candidato: ${candidato.nombres} ${candidato.apellidos}`);
     }
   };
 
   const onEliminar = (id: number) => {
-    if (confirm("¿Está seguro de eliminar este aprendiz?")) {
-      setAprendices(prev => prev.filter(c => c.idaprendiz !== id));
+    if (confirm("¿Está seguro de eliminar este candidato?")) {
+      setCandidatos(prev => prev.filter(c => c.idcandidatos !== id));
     }
   };
 
@@ -132,38 +140,38 @@ const GestionCandidatos = () => {
                 {loading ? (
                   <tr>
                     <td colSpan={4} className="text-center py-5 text-muted">
-                      Cargando aprendices...
+                      Cargando candidatos...
                     </td>
                   </tr>
-                ) : aprendices.length > 0 ? (
-                  aprendices.map((a) => (
-                    <tr key={a.idaprendiz}>
+                ) : candidatos.length > 0 ? (
+                  candidatos.map((c) => (
+                    <tr key={c.idcandidatos}>
                       <td className="ps-4">
                         <img
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(a.nombres + ' ' + a.apellidos)}&background=random&size=128&rounded=true&bold=true&format=png`}
-                          alt={`${a.nombres} ${a.apellidos}`}
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(c.nombres + ' ' + c.apellidos)}&background=random&size=128&rounded=true&bold=true&format=png`}
+                          alt={`${c.nombres} ${c.apellidos}`}
                           className="rounded-circle"
                           style={{ width: 48, height: 48, objectFit: "cover" }}
                         />
                       </td>
                       <td className="fw-semibold">
-                        {a.nombres} {a.apellidos}
+                        {c.nombres} 
                       </td>
-                      <td className="text-muted">{a.programa?.programa || "Sin programa"}</td>
-                      <td className="text-muted">{a.email}</td>
+                      <td className="text-muted">{c.programa?.programa || "Sin programa"}</td>
+                      <td className="text-muted">{c.email}</td>
                       <td>
                         <div className="d-flex justify-content-center gap-3">
                           <button
                             className="btn btn-sm p-0 border-0 text-primary"
                             title="Editar"
-                            onClick={() => onEditar(a.idaprendiz)}
+                            onClick={() => onEditar(c.idcandidatos)}
                           >
                             <FiEdit2 size={18} />
                           </button>
                           <button
                             className="btn btn-sm p-0 border-0 text-danger"
                             title="Eliminar"
-                            onClick={() => onEliminar(a.idaprendiz)}
+                            onClick={() => onEliminar(c.idcandidatos)}
                           >
                             <FiTrash2 size={18} />
                           </button>
@@ -174,7 +182,7 @@ const GestionCandidatos = () => {
                 ) : (
                   <tr>
                     <td colSpan={4} className="text-center py-5 text-muted">
-                      No hay aprendices en este centro de formación.
+                      No hay candidatos en este centro de formación.
                     </td>
                   </tr>
                 )}
@@ -190,7 +198,7 @@ const GestionCandidatos = () => {
         show={showModal}
         onHide={() => setShowModal(false)}
         onSave={handleAgregarCandidato}
-        aprendices={aprendices}
+        candidatos={candidatos}
         elecciones={elecciones || []}
       />
 

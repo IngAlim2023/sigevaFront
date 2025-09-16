@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
-import { FiUpload } from "react-icons/fi";
+// import { FiUpload } from "react-icons/fi";
 import Select from "react-select"
 import axios from "axios";
 
@@ -14,8 +14,8 @@ interface Programa {
   duracion: number;
 }
 
-interface Aprendiz {
-  idaprendiz: number;
+interface Candidato {
+  idcandidato: number;
   nombres: string;
   apellidos: string;
   programa: Programa;
@@ -29,21 +29,21 @@ interface AgregarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
   onSave: (candidato: any) => void;
-  aprendices: Aprendiz[];
+  candidatos: Candidato[];
   elecciones: Eleccion[];
 }
 
 const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
-
 // const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
-const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }: AgregarCandidatoModalProps) => {
+
+const AgregarCandidatoModal = ({ show, onHide, onSave, candidatos, elecciones }: AgregarCandidatoModalProps) => {
   const [formData, setFormData] = useState<{
     nombres: string;
     programa: string;
     descripcion: string;
     foto: File | string | null;
-    idaprendiz: number | null;
+    idcandidato: number | null;
     ideleccion: number | null;
     propuesta: string;
     numero_tarjeton: string;
@@ -52,7 +52,7 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
     programa: "",
     descripcion: "",
     foto: null as File | null,
-    idaprendiz: null,
+    idcandidato: null,
     ideleccion: null,
     propuesta: "",
     numero_tarjeton: "",
@@ -60,8 +60,8 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
   const [previewUrl, setPreviewUrl] = useState<string>(""); // para previsualizar
 
 
-  const aprendizOptions = aprendices.map((a) => ({
-    value: a.idaprendiz,
+  const aprendizOptions = candidatos.map((a) => ({
+    value: a.idcandidato,
     label: `${a.nombres} ${a.apellidos}`,
   }));
 
@@ -86,12 +86,10 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
     e.preventDefault();
 
     try {
-      let fotoUrl = formData.foto;
-
       const data = new FormData();
       data.append("nombres", formData.nombres);
       data.append("ideleccion", String(formData.ideleccion));
-      data.append("idaprendiz", String(formData.idaprendiz));
+      data.append("idcandidato", String(formData.idcandidato));
       data.append("propuesta", formData.propuesta);
       data.append("numero_tarjeton", String(formData.numero_tarjeton));
 
@@ -100,7 +98,6 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
       }
 
       const response = await axios.post(
-        // "http://localhost:3333/api/candidatos/crear",
         `${VITE_URL_BACK}/api/candidatos/crear`,
 
         data,
@@ -111,19 +108,19 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
         }
       );
 
-      console.log("✅ Candidato creado:", response.data);
-      alert("Candidato guardado satisfactoriamente ✅");
+      console.log("Candidato creado:", response.data);
+      alert("Candidato guardado satisfactoriamente");
       if (onSave) {
         onSave({
           ...response.data,
-          programa: response.data.aprendiz?.programa?.programa ?? "", 
+          programa: response.data.aprendiz?.programa?.programa ?? "",
         });
       }
 
       onHide();
     } catch (error: any) {
       console.error("Error al crear candidato:", error.response?.data || error.message);
-      alert("Error al guardar candidato ❌");
+      alert("Error al guardar candidato");
     }
   };
 
@@ -133,14 +130,14 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
       setFormData({
         ...formData,
         nombres: selected.label,
-        idaprendiz: selected.value
+        idcandidato: selected.value
         // ideleccion: selected.value,
       });
     } else {
       setFormData({
         ...formData,
         nombres: "",
-        idaprendiz: null,
+        idcandidato: null,
         // ideleccion: null,
       });
     }
@@ -234,29 +231,14 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
                   options={aprendizOptions}
                   placeholder="Buscar aprendiz..."
                   value={
-                    formData.idaprendiz
-                      ? aprendizOptions.find((opt) => opt.value === formData.idaprendiz)
+                    formData.idcandidato
+                      ? aprendizOptions.find((opt) => opt.value === formData.idcandidato)
                       : null
                   }
                   onChange={handleSelectChange}
                   isClearable
                 />
               </Form.Group>
-
-              {/* <Form.Group className="mb-3">
-                <Form.Label>Elección</Form.Label>
-                <Select
-                  options={eleccionOptions}
-                  placeholder="Buscar elección..."
-                  value={
-                    formData.ideleccion
-                      ? eleccionOptions.find((opt) => opt.value === formData.ideleccion)
-                      : null
-                  }
-                  onChange={handleEleccionChange}
-                  isClearable
-                />
-              </Form.Group> */}
 
               <Form.Group className="mb-3">
                 <Form.Label>Elección</Form.Label>
@@ -281,8 +263,6 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
                 />
               </Form.Group>
 
-
-
               <Form.Group className="mb-3">
                 <Form.Label>Propuesta</Form.Label>
                 <Form.Control
@@ -294,8 +274,6 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
                   placeholder="Breve descripción del candidato y sus propuestas"
                 />
               </Form.Group>
-
-              {/* agregar un onput de tipo string para el numero de tarjeton */}
               <Form.Group className="mb-3">
                 <Form.Label>Número de Tarjetón</Form.Label>
                 <Form.Control
