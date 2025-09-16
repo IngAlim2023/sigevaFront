@@ -22,7 +22,7 @@ import { useAuth } from "./context/auth/auth.context";
 import Inicio from "./pages/Inicio";
 import Aprendices from "./pages/administrador/Aprendices";
 import AprendizForm from "./pages/administrador/AprendizForm";
-import { Funcionarios } from "./pages/administrador/Funcionarios";
+import Funcionarios from "./pages/administrador/Funcionarios";
 import { DashboardAdmin } from "./pages/administrador/DashboardAdmin";
 import { Toaster } from "react-hot-toast";
 import CargarAprendicesAdmin from "./pages/administrador/CargarAprendicesAdmin";
