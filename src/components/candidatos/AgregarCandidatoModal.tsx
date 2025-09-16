@@ -14,13 +14,14 @@ interface Programa {
   duracion: number;
 }
 
-interface Candidato {
-  idcandidato: number;
+interface Aprendiz {
+  idaprendiz: number;
   nombres: string;
   apellidos: string;
-  programa: Programa;
+  numeroDocumento: string;
   email: string;
 }
+
 interface Eleccion {
   ideleccion: number;
   nombre: string;
@@ -29,30 +30,27 @@ interface AgregarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
   onSave: (candidato: any) => void;
-  candidatos: Candidato[];
+  // candidatos: Candidato[];
   elecciones: Eleccion[];
+  aprendices: Aprendiz[];
 }
 
 const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
 // const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
-const AgregarCandidatoModal = ({ show, onHide, onSave, candidatos, elecciones }: AgregarCandidatoModalProps) => {
+const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }: AgregarCandidatoModalProps) => {
   const [formData, setFormData] = useState<{
     nombres: string;
-    programa: string;
-    descripcion: string;
     foto: File | string | null;
-    idcandidato: number | null;
+    idaprendiz: number | null;
     ideleccion: number | null;
     propuesta: string;
     numero_tarjeton: string;
   }>({
     nombres: "",
-    programa: "",
-    descripcion: "",
     foto: null as File | null,
-    idcandidato: null,
+    idaprendiz: null,
     ideleccion: null,
     propuesta: "",
     numero_tarjeton: "",
@@ -60,19 +58,23 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, candidatos, elecciones }:
   const [previewUrl, setPreviewUrl] = useState<string>(""); // para previsualizar
 
 
-  const aprendizOptions = candidatos.map((a) => ({
-    value: a.idcandidato,
-    label: `${a.nombres} ${a.apellidos}`,
-  }));
+  const aprendizOptions = Array.isArray(aprendices)
+    ? aprendices.map((a) => ({
+      value: a.idaprendiz,
+      label: `${a.nombres} ${a.apellidos}`.trim(),
 
-  // const eleccionOptions = Array.isArray(elecciones)
-  //   ? elecciones.map((e) => ({
-  //     value: e.ideleccion,
-  //     label: e.nombre,
-  //   }))
-  //   : [];
+      // numeroDocumento: a.numeroDocumento,
+      // email: a.email,
+    }))
+    : [];
 
 
+  const eleccionOptions = Array.isArray(elecciones)
+    ? elecciones.map((e) => ({
+      value: e.ideleccion,
+      label: e.nombre,
+    }))
+    : [];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -89,13 +91,14 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, candidatos, elecciones }:
       const data = new FormData();
       data.append("nombres", formData.nombres);
       data.append("ideleccion", String(formData.ideleccion));
-      data.append("idcandidato", String(formData.idcandidato));
+      data.append("idaprendiz", String(formData.idaprendiz));
       data.append("propuesta", formData.propuesta);
       data.append("numero_tarjeton", String(formData.numero_tarjeton));
 
       if (formData.foto instanceof File) {
         data.append("foto", formData.foto);
       }
+      console.log("Datos a enviar:", formData);
 
       const response = await axios.post(
         `${VITE_URL_BACK}/api/candidatos/crear`,
@@ -125,23 +128,38 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, candidatos, elecciones }:
   };
 
 
+  // const handleSelectChange = (selected: any) => {
+  //   if (selected) {
+  //     setFormData({
+  //       ...formData,
+  //       nombres: selected.label,
+  //       idaprendiz: selected.value
+  //     });
+  //   } else {
+  //     setFormData({
+  //       ...formData,
+  //       nombres: "",
+  //       idaprendiz: null,
+  //     });
+  //   }
+  // };
   const handleSelectChange = (selected: any) => {
     if (selected) {
+      const aprendiz = aprendices.find((a) => a.idaprendiz === selected.value);
       setFormData({
         ...formData,
-        nombres: selected.label,
-        idcandidato: selected.value
-        // ideleccion: selected.value,
+        idaprendiz: selected.value,
+        nombres: aprendiz ? `${aprendiz.nombres} ${aprendiz.apellidos}` : "",
       });
     } else {
       setFormData({
         ...formData,
         nombres: "",
-        idcandidato: null,
-        // ideleccion: null,
+        idaprendiz: null,
       });
     }
   };
+
 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
@@ -152,38 +170,6 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, candidatos, elecciones }:
         <Form onSubmit={handleSubmit}>
           <Row className="g-3">
             <Col md={4}>
-              {/* <div className="text-center mb-3">
-                <div className="position-relative d-inline-block">
-                  <img
-                    src={formData.foto || "https://via.placeholder.com/150"}
-                    alt="Preview"
-                    className="rounded-circle mb-2"
-                    style={{ width: "150px", height: "150px", objectFit: "cover" }}
-                  />
-                  <label className="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2" style={{ cursor: 'pointer' }}>
-                    <FiUpload size={20} />
-                    <input
-                      type="file"
-                      className="d-none"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setFormData(prev => ({
-                              ...prev,
-                              foto: reader.result as string
-                            }));
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                    />
-                  </label>
-                </div>
-                <p className="text-muted small mt-2">Haz clic para subir una foto</p>
-              </div> */}
               <Form.Group className="mb-3">
                 <Form.Label>Foto</Form.Label>
                 <Form.Control
@@ -209,7 +195,6 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, candidatos, elecciones }:
                   }}
                 />
 
-                {/* Preview */}
                 {previewUrl && (
                   <div className="mt-3 text-center">
                     <img
@@ -231,8 +216,8 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, candidatos, elecciones }:
                   options={aprendizOptions}
                   placeholder="Buscar aprendiz..."
                   value={
-                    formData.idcandidato
-                      ? aprendizOptions.find((opt) => opt.value === formData.idcandidato)
+                    formData.idaprendiz
+                      ? aprendizOptions.find((opt) => opt.value === formData.idaprendiz)
                       : null
                   }
                   onChange={handleSelectChange}
@@ -243,20 +228,17 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, candidatos, elecciones }:
               <Form.Group className="mb-3">
                 <Form.Label>Elección</Form.Label>
                 <Select
-                  options={[
-                    { value: 1, label: "1" },
-                    { value: 2, label: "2" },
-                  ]}
+                  options={eleccionOptions}
                   placeholder="Selecciona una opción..."
                   value={
-                    formData.ideleccion !== null && formData.ideleccion !== undefined
-                      ? { value: formData.ideleccion, label: String(formData.ideleccion) }
+                    formData.ideleccion
+                      ? eleccionOptions.find((opt) => opt.value === formData.ideleccion)
                       : null
                   }
                   onChange={(selected) =>
                     setFormData({
                       ...formData,
-                      ideleccion: selected ? selected.value : null, // guarda el número
+                      ideleccion: selected ? selected.value : null,
                     })
                   }
                   isClearable

@@ -22,9 +22,11 @@ import { useAuth } from "./context/auth/auth.context";
 import Inicio from "./pages/Inicio";
 import Aprendices from "./pages/administrador/Aprendices";
 import AprendizForm from "./pages/administrador/AprendizForm";
-import { Funcionarios } from "./pages/administrador/Funcionarios";
+import Funcionarios from "./pages/administrador/Funcionarios";
 import { DashboardAdmin } from "./pages/administrador/DashboardAdmin";
 import { Toaster } from "react-hot-toast";
+import CargarAprendicesAdmin from "./pages/administrador/CargarAprendicesAdmin";
+import Equipo from "./pages/Equipo";
 
 
 function PublicLayout() {
@@ -68,6 +70,7 @@ function App() {
           <Route path="/" element={<Inicio />} />
           <Route path="/login" element={<Login perfil="gestor" />} />
           <Route path="/login-aprendiz" element={<Login perfil="aprendiz" />} />
+          <Route path="/equipo" element={<Equipo />} />
         </Route>
 
         {/* Rutas de Aprendiz */}
@@ -92,6 +95,7 @@ function App() {
             <Route path="/dashboard-admin" element={<DashboardAdmin />} />
             <Route path="/aprendices" element={<Aprendices />} />
             <Route path="/funcionarios" element={<Funcionarios />} />
+             <Route path="/cargar-aprendices-admin" element={<CargarAprendicesAdmin/>} />
             <Route path="/aprendiz-form" element={<AprendizForm />} />
           </Route>
         </Route>
