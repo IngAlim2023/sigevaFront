@@ -10,12 +10,12 @@ interface AuthContextType<T> {
 
 export const AuthContext = createContext({} as AuthContextType<User>);
 
-export const useAuth = <T>() => {
+export const useAuth = () => {
   const context = use(AuthContext);
 
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
 
-  return context as AuthContextType<T>;
+  return context;
 };

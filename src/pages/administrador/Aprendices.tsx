@@ -26,8 +26,9 @@ export interface AprendizResponse {
   tipoDocumento: string;
   numeroDocumento: string;
   email: string;
-  centro_formacion:object;
-  grupo:object;
+  centro_formacion:any;
+  grupo:any;
+  programa:any;
 }
 
 interface TableRow {
@@ -84,7 +85,7 @@ const Aprendices: React.FC = () => {
     },
     {
       name: "Centro de formación",
-      selector: (row) => row.centroFormacionIdcentroFormacion,
+      selector: (row) => row.centro_formacion.centroFormacioncol,
     },
     {
       name: "Celular",
@@ -103,7 +104,7 @@ const Aprendices: React.FC = () => {
       name: "Editar",
       cell: (row) => (
         <>
-        <Button variant="light" size="lg" onClick={()=>navigate('form-aprendiz', {state:{aprendiz:row}})}>
+        <Button variant="light" size="lg" onClick={()=>navigate('/aprendiz-form', {state:{aprendiz:row}})}>
           <FaEdit />
         </Button>
         </>
@@ -118,7 +119,7 @@ const Aprendices: React.FC = () => {
           <strong>Nombre </strong> {data.nombres} {data.apellidos}
         </div>
         <div className="col-md-6 mb-2">
-          <strong>Programa de formación </strong> {data.idprogramaFormacion}
+          <strong>Programa de formación </strong> {data.programa.programa}
         </div>
 
         <div className="col-md-6 mb-2">
@@ -126,14 +127,14 @@ const Aprendices: React.FC = () => {
         </div>
         <div className="col-md-6 mb-2">
           <strong>Centro de formación </strong>{" "}
-          {data.centroFormacionIdcentroFormacion}
+          {data.centro_formacion.centroFormacioncol}
         </div>
 
         <div className="col-md-6 mb-2">
           <strong>Tel </strong> {data.celular}
         </div>
         <div className="col-md-6 mb-2">
-          <strong>Ficha </strong> {data.idgrupo}
+          <strong>Grupo </strong> {data.grupo.grupo}
         </div>
 
         <div className="col-md-6 mb-2">
@@ -173,7 +174,7 @@ const Aprendices: React.FC = () => {
           />
         </Col>
         <Col xs='auto'>
-          <Button style={{backgroundColor:'#5027BC'}} onClick={()=>navigate('/form-aprendiz')}>
+          <Button style={{backgroundColor:'#5027BC'}} onClick={()=>navigate('/aprendiz-form')}>
             <AiOutlinePlusCircle className="me-2 fs-3" />
             Nuevo Aprendiz
           </Button>
