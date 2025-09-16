@@ -26,6 +26,7 @@ import Funcionarios from "./pages/administrador/Funcionarios";
 import { DashboardAdmin } from "./pages/administrador/DashboardAdmin";
 import { Toaster } from "react-hot-toast";
 import CargarAprendicesAdmin from "./pages/administrador/CargarAprendicesAdmin";
+import Equipo from "./pages/Equipo";
 
 function PublicLayout() {
   return <Outlet />;
@@ -68,6 +69,7 @@ function App() {
           <Route path="/" element={<Inicio />} />
           <Route path="/login" element={<Login perfil="gestor" />} />
           <Route path="/login-aprendiz" element={<Login perfil="aprendiz" />} />
+          <Route path="/equipo" element={<Equipo />} />
         </Route>
 
         {/* Rutas de Aprendiz */}
