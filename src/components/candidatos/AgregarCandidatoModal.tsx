@@ -61,7 +61,10 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
   const aprendizOptions = Array.isArray(aprendices)
     ? aprendices.map((a) => ({
       value: a.idaprendiz,
-      label: `${a.nombres} ${a.apellidos}`,
+      label: `${a.nombres} ${a.apellidos}`.trim(),
+
+      // numeroDocumento: a.numeroDocumento,
+      // email: a.email,
     }))
     : [];
 
@@ -95,6 +98,7 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
       if (formData.foto instanceof File) {
         data.append("foto", formData.foto);
       }
+      console.log("Datos a enviar:", formData);
 
       const response = await axios.post(
         `${VITE_URL_BACK}/api/candidatos/crear`,
@@ -124,12 +128,28 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
   };
 
 
+  // const handleSelectChange = (selected: any) => {
+  //   if (selected) {
+  //     setFormData({
+  //       ...formData,
+  //       nombres: selected.label,
+  //       idaprendiz: selected.value
+  //     });
+  //   } else {
+  //     setFormData({
+  //       ...formData,
+  //       nombres: "",
+  //       idaprendiz: null,
+  //     });
+  //   }
+  // };
   const handleSelectChange = (selected: any) => {
     if (selected) {
+      const aprendiz = aprendices.find((a) => a.idaprendiz === selected.value);
       setFormData({
         ...formData,
-        nombres: selected.label,
-        idaprendiz: selected.value
+        idaprendiz: selected.value,
+        nombres: aprendiz ? `${aprendiz.nombres} ${aprendiz.apellidos}` : "",
       });
     } else {
       setFormData({
@@ -139,6 +159,7 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
       });
     }
   };
+
 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
