@@ -1,5 +1,6 @@
 import React from "react";
 import Sigeva from "../assets/sena-sigeva.svg";
+import { GrGithub } from "react-icons/gr";
 
 type Miembro = {
   nombre: string;
@@ -35,7 +36,7 @@ const equipo: Miembro[] = [
     nombre: "Alex Jhoan Chaguendo",
     rol: "Full Stack Developer",
     github: "ALexjh117",
-    avatar: "/avatars/alex.png",
+    avatar: "/avatars/alex.jpg",
     grupo: "Desarrolladores",
   },
   {
@@ -49,7 +50,7 @@ const equipo: Miembro[] = [
     nombre: "Bryan Andrés Hurtado",
     rol: "Front End & Mobile Developer",
     github: "Bryanhurtado0006",
-    avatar: "/avatars/bryan.png",
+    avatar: "/avatars/bryan.jpg",
     grupo: "Desarrolladores",
   },
   {
@@ -63,7 +64,7 @@ const equipo: Miembro[] = [
     nombre: "Víctor Manuel Mosquera",
     rol: "Mobile Developer",
     github: "victormosqueraconejo",
-    avatar: "/avatars/na.png",
+    avatar: "/avatars/victor.jpg",
     grupo: "Desarrolladores",
   },
   {
@@ -77,7 +78,7 @@ const equipo: Miembro[] = [
     nombre: "Jeison Reyes Ruiz ",
     rol: "Back End Developer",
     github: "JEISON101",
-    avatar: "/avatars/na.png",
+    avatar: "/avatars/jeison.jpg",
     grupo: "Desarrolladores",
   },
   {
@@ -131,7 +132,7 @@ const Equipo: React.FC = () => {
             style={{ fontSize: "1.2rem", marginBottom: "1rem", color: "#444" }}
           >
             {grupo === "Manejo"
-              ? "Manejo del proyecto y equipo"
+              ? "Manejo del proyecto"
               : "Desarrolladores"}
           </h3>
 
@@ -179,7 +180,8 @@ const Equipo: React.FC = () => {
                           rel="noopener noreferrer"
                           style={{ textDecoration: "none", color: "#000" }}
                         >
-                          <i className="bi bi-github" /> @{m.github}
+                            
+                          <i className="bi bi-github" /> <GrGithub/>{" "}{m.github}
                         </a>
                       </p>
                     )}

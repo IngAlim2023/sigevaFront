@@ -32,7 +32,7 @@ const Inicio: React.FC = () => {
                 className="px-5 py-2 fw-semibold"
                 style={{ backgroundColor: "#6136BF", border: "none" }}
               >
-                Votar
+                Ingresar
               </Button>
             </div>
           </Col>
