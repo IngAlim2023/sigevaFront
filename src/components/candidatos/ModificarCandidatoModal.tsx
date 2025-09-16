@@ -24,6 +24,7 @@ interface ModificarCandidatoModalProps {
   // candidatos: Candidato[];
   elecciones: Eleccion[];
   aprendices: Aprendiz[];
+  candidato: any;
 }
 
 const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
