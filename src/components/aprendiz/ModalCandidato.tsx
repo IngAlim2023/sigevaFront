@@ -129,7 +129,9 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                                 value={otp}
                             />
                         </Form.Group>
-                        
+                        <Form.Group>
+                            <Button type="submit" className="w-100">
+                                Confirmar Voto
                             </Button>
                         </Form.Group>
                     </Form>
