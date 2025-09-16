@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import Select from "react-select"
 import axios from "axios";
-
-
 
 interface Aprendiz {
   idaprendiz: number;
@@ -20,25 +18,17 @@ interface Eleccion {
 interface ModificarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
+  candidato: any | null;
   onSave: (candidato: any) => void;
-  // candidatos: Candidato[];
-  elecciones: Eleccion[];
-  aprendices: Aprendiz[];
-  candidato: any;
+  elecciones: any[];
+  aprendices: any[];
 }
 
 const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
 
-const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }: ModificarCandidatoModalProps) => {
-  const [formData, setFormData] = useState<{
-    nombres: string;
-    foto: File | string | null;
-    idaprendiz: number | null;
-    ideleccion: number | null;
-    propuesta: string;
-    numero_tarjeton: string;
-  }>({
+const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, elecciones }: ModificarCandidatoModalProps) => {
+  const [formData, setFormData] = useState({
     nombres: "",
     foto: null as File | null,
     idaprendiz: null,
@@ -46,16 +36,29 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
     propuesta: "",
     numero_tarjeton: "",
   });
-  const [previewUrl, setPreviewUrl] = useState<string>(""); // para previsualizar
 
+  const [previewUrl, setPreviewUrl] = useState<string>("");
+
+  useEffect(() => {
+    if (candidato) {
+      setFormData({
+        nombres: candidato.nombres || "",
+        idaprendiz: candidato.idaprendiz || null,
+        ideleccion: candidato.ideleccion || null,
+        propuesta: candidato.propuesta || "",
+        numero_tarjeton: candidato.numeroTarjeton || "",
+        foto: candidato.foto
+      });
+      setPreviewUrl(typeof candidato.foto === "string" ? candidato.foto : "");
+    }
+  }, [candidato])
+  
 
   const aprendizOptions = Array.isArray(aprendices)
     ? aprendices.map((a) => ({
       value: a.idaprendiz,
       label: `${a.nombres} ${a.apellidos}`.trim(),
 
-      // numeroDocumento: a.numeroDocumento,
-      // email: a.email,
     }))
     : [];
 
@@ -91,8 +94,8 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
       }
       console.log("Datos a enviar:", formData);
 
-      const response = await axios.post(
-        `${VITE_URL_BACK}/api/candidatos/crear`,
+      const response = await axios.put(
+        `${VITE_URL_BACK}/api/candidatos/actualizar/${candidato?.idcandidatos}`,
 
         data,
         {
@@ -102,8 +105,8 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
         }
       );
 
-      console.log("Candidato creado:", response.data);
-      alert("Candidato guardado satisfactoriamente");
+      console.log("Candidato actualizado:", response.data);
+      alert("Candidato actualizado satisfactoriamente");
       if (onSave) {
         onSave({
           ...response.data,
@@ -119,21 +122,6 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
   };
 
 
-  // const handleSelectChange = (selected: any) => {
-  //   if (selected) {
-  //     setFormData({
-  //       ...formData,
-  //       nombres: selected.label,
-  //       idaprendiz: selected.value
-  //     });
-  //   } else {
-  //     setFormData({
-  //       ...formData,
-  //       nombres: "",
-  //       idaprendiz: null,
-  //     });
-  //   }
-  // };
   const handleSelectChange = (selected: any) => {
     if (selected) {
       const aprendiz = aprendices.find((a) => a.idaprendiz === selected.value);
@@ -155,7 +143,7 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton className="border-0 pb-0">
-        <Modal.Title className="fw-bold">Agregar Nuevo Candidato</Modal.Title>
+        <Modal.Title className="fw-bold">Modificar Candidato</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>

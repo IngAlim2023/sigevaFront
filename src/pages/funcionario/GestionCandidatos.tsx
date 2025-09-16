@@ -49,27 +49,28 @@ const GestionCandidatos = () => {
   const [loading, setLoading] = useState(false);
   const [elecciones, setElecciones] = useState<Eleccion[]>([]);
 
-  useEffect(() => {
-    const fetchCandidatos = async () => {
-      if (!isAuthenticated || !user) return;
+  const fetchCandidatos = async () => {
+    if (!isAuthenticated || !user) return;
 
-      try {
-        setLoading(true);
-        const res = await api.get(
-          `/api/candidatos/listar/cformacion/${user?.centroFormacion}`
-        );
+    try {
+      setLoading(true);
+      const res = await api.get(
+        `/api/candidatos/listar/cformacion/${user?.centroFormacion}`
+      );
 
-        if (!res.data) {
-          throw new Error("Error al traer aprendices");
-        }
-        console.log("candidatos: ", res.data);
-        setCandidatos(res.data.data || []);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
+      if (!res.data) {
+        throw new Error("Error al traer aprendices");
       }
-    };
+      console.log("candidatos: ", res.data);
+      setCandidatos(res.data.data || []);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+
 
     const fetchAprendices = async () => {
       try {
@@ -110,12 +111,27 @@ const GestionCandidatos = () => {
     setCandidatos(prev => [...prev, nuevo]);
   };
 
-  const onEditar = (id: number) => {
-    const candidato = candidatos.find(c => c.idcandidatos === id);
-    if (candidato) {
-      setCandidatoSeleccionado(candidato);
+  const onEditar = async (id: number) => {
+    try {
+      const candidato = candidatos.find(c => c.idcandidatos === id);
+      if (!candidato) {
+        alert("Candidato no encontrado ❌");
+        return;
+      }
+      // const response = await api.put(`/api/candidatos/actualizar/${id}`);
+
+
+      // const candidato = response.data.data;
+      // console.log(candidato);
+
+      setCandidatoSeleccionado(candidato); // lo mandamos al modal
       setShowModalModificar(true);
+    } catch (error: any) {
+      console.error("Error al obtener candidato:", error.response?.data || error.message);
+      alert("No se pudo cargar el candidato ❌");
     }
+
+
   };
 
   const onEliminar = async (id: number) => {
@@ -236,6 +252,7 @@ const GestionCandidatos = () => {
                 c.idcandidatos === candidatoEditado.idcandidatos ? candidatoEditado : c
               )
             );
+            fetchCandidatos();
             setShowModalModificar(false);
           }}
           elecciones={elecciones || []}
