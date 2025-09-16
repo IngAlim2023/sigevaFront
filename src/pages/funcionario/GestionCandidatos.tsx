@@ -1,45 +1,109 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../../context/auth/auth.context";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AgregarCandidatoModal from "../../components/candidatos/AgregarCandidatoModal";
+import { api } from "../../api";
+
+interface Eleccion {
+  ideleccion: number;
+  nombre: string;
+}
+interface Programa {
+  idprogramaFormacion: number;
+  idnivelFormacion: number;
+  idareaTematica: number;
+  programa: string;
+  codigoPrograma: string;
+  version: string;
+  duracion: number;
+}
+// interface Aprendiz {
+//   idaprendiz: number;
+//   nombres: string;
+//   apellidos: string;
+//   programa: Programa;
+//   email: string;
+// }
 
 interface Candidato {
-  id: number;
-  nombre: string;
-  programa: string;
-  descripcion: string;
-  foto: string;
+  idcandidatos: number;
+  nombres: string;
+  apellidos: string;
+  programa: Programa;
+  email: string;
 }
 
-const MOCK: Candidato[] = [
-  {
-    id: 1,
-    nombre: "Sofía Ramírez",
-    programa: "Tecnología en Desarrollo de Software",
-    descripcion: "Estudiante destacada con habilidades en programación y liderazgo.",
-    foto: "https://i.pravatar.cc/80?img=47",
-  },
-];
+const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
 const GestionCandidatos = () => {
-  const [candidatos, setCandidatos] = useState<Candidato[]>(MOCK);
+  // const [aprendices, setAprendices] = useState<Aprendiz[]>([]);
+  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [elecciones, setElecciones] = useState<Eleccion[]>([]);
 
-  const handleAgregarCandidato = (nuevoCandidato: Candidato) => {
-    setCandidatos(prev => [...prev, nuevoCandidato]);
+  useEffect(() => {
+    const fetchAprendices = async () => {
+      if (!isAuthenticated || !user) return;
+
+      try {
+        setLoading(true);
+        const res = await api.get(
+          `/api/candidatos/listar/cformacion/${user?.centroFormacion}`
+        );
+
+        if (!res.data) {
+          throw new Error("Error al traer aprendices");
+        }
+
+        setCandidatos(res.data.data || []);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchElecciones = async () => {
+      try {
+        const res = await fetch(`${VITE_URL_BACK}/api/eleccion`);
+        if (!res.ok) {
+          throw new Error("Error al traer elecciones");
+        }
+        const data = await res.json();
+        console.log(data);
+        setElecciones(data);
+
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchElecciones();
+
+    fetchAprendices();
+  }, [isAuthenticated, user, elecciones.length]);
+
+  if (!isAuthenticated) {
+    return <p>Debes iniciar sesión para gestionar candidatos</p>;
+  }
+
+  const handleAgregarCandidato = (nuevo: Candidato) => {
+    setCandidatos(prev => [...prev, nuevo]);
   };
 
   const onEditar = (id: number) => {
     // Implementar lógica de edición
-    const candidato = candidatos.find(c => c.id === id);
+    const candidato = candidatos.find(c => c.idcandidatos === id);
     if (candidato) {
       // Aquí podrías abrir un modal de edición con los datos del candidato
-      alert(`Editar candidato: ${candidato.nombre}`);
+      alert(`Editar candidato: ${candidato.nombres} ${candidato.apellidos}`);
     }
   };
 
   const onEliminar = (id: number) => {
     if (confirm("¿Está seguro de eliminar este candidato?")) {
-      setCandidatos(prev => prev.filter(c => c.id !== id));
+      setCandidatos(prev => prev.filter(c => c.idcandidatos !== id));
     }
   };
 
@@ -48,7 +112,7 @@ const GestionCandidatos = () => {
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-5">
         <h2 className="fw-bold m-0">Gestión de Candidatos</h2>
-        <button 
+        <button
           className="btn btn-gradient d-flex align-items-center gap-2"
           onClick={() => setShowModal(true)}
         >
@@ -67,52 +131,61 @@ const GestionCandidatos = () => {
                   <th className="ps-4" style={{ width: 90 }}>Foto</th>
                   <th>Nombre Completo</th>
                   <th>Programa de Formación</th>
-                  <th>Descripción</th>
+                  <th>Correo Electrónico</th>
                   <th className="text-center" style={{ width: 120 }}>Acciones</th>
                 </tr>
               </thead>
               <tbody>
-                {candidatos.map((c) => (
-                  <tr key={c.id}>
-                    <td className="ps-4">
-                      <img
-                        src={c.foto}
-                        alt={c.nombre}
-                        className="rounded-circle"
-                        style={{ width: 48, height: 48, objectFit: "cover" }}
-                      />
-                    </td>
-                    <td className="fw-semibold">{c.nombre}</td>
-                    <td className="text-muted">{c.programa}</td>
-                    <td className="text-muted">{c.descripcion}</td>
-                    <td>
-                      <div className="d-flex justify-content-center gap-3">
-                        <button
-                          className="btn btn-sm p-0 border-0 text-primary"
-                          title="Editar"
-                          onClick={() => onEditar(c.id)}
-                        >
-                          <FiEdit2 size={18} />
-                        </button>
-                        <button
-                          className="btn btn-sm p-0 border-0 text-danger"
-                          title="Eliminar"
-                          onClick={() => onEliminar(c.id)}
-                        >
-                          <FiTrash2 size={18} />
-                        </button>
-                      </div>
+                {loading ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-5 text-muted">
+                      Cargando candidatos...
                     </td>
                   </tr>
-                ))}
-
-                {candidatos.length === 0 && (
+                ) : candidatos.length > 0 ? (
+                  candidatos.map((c) => (
+                    <tr key={c.idcandidatos}>
+                      <td className="ps-4">
+                        <img
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(c.nombres + ' ' + c.apellidos)}&background=random&size=128&rounded=true&bold=true&format=png`}
+                          alt={`${c.nombres} ${c.apellidos}`}
+                          className="rounded-circle"
+                          style={{ width: 48, height: 48, objectFit: "cover" }}
+                        />
+                      </td>
+                      <td className="fw-semibold">
+                        {c.nombres} 
+                      </td>
+                      <td className="text-muted">{c.programa?.programa || "Sin programa"}</td>
+                      <td className="text-muted">{c.email}</td>
+                      <td>
+                        <div className="d-flex justify-content-center gap-3">
+                          <button
+                            className="btn btn-sm p-0 border-0 text-primary"
+                            title="Editar"
+                            onClick={() => onEditar(c.idcandidatos)}
+                          >
+                            <FiEdit2 size={18} />
+                          </button>
+                          <button
+                            className="btn btn-sm p-0 border-0 text-danger"
+                            title="Eliminar"
+                            onClick={() => onEliminar(c.idcandidatos)}
+                          >
+                            <FiTrash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
                   <tr>
-                    <td colSpan={5} className="text-center py-5 text-muted">
-                      No hay candidatos registrados. Haz clic en <strong>Agregar Candidato</strong> para comenzar.
+                    <td colSpan={4} className="text-center py-5 text-muted">
+                      No hay candidatos en este centro de formación.
                     </td>
                   </tr>
                 )}
+
               </tbody>
             </table>
           </div>
@@ -124,6 +197,8 @@ const GestionCandidatos = () => {
         show={showModal}
         onHide={() => setShowModal(false)}
         onSave={handleAgregarCandidato}
+        candidatos={candidatos}
+        elecciones={elecciones || []}
       />
 
       {/* estilos finos en línea para redondeo/card */}

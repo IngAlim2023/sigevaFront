@@ -1,19 +1,14 @@
 import { createContext, use } from "react";
-import type { ResponseType, User } from "./types/authTypes";
+import type { UserNormalizado } from "./types/authTypes";
 
-interface AuthContextType<T> {
+interface AuthContextType {
   isAuthenticated: boolean;
-  user: T | null;
-  login: (response: ResponseType<T>) => void;
+  user: UserNormalizado | null;
+  login: (response: any) => void;   
   logout: () => void;
 }
 
-export const AuthContext = createContext<AuthContextType<User>>({
-  isAuthenticated: false,
-  user: null,
-  login: () => {},
-  logout: () => {},
-});
+export const AuthContext = createContext({} as AuthContextType);
 
 export const useAuth = () => {
   const context = use(AuthContext);

@@ -24,6 +24,8 @@ import Aprendices from "./pages/administrador/Aprendices";
 import AprendizForm from "./pages/administrador/AprendizForm";
 import Funcionarios from "./pages/administrador/Funcionarios";
 import { DashboardAdmin } from "./pages/administrador/DashboardAdmin";
+import { Toaster } from "react-hot-toast";
+import CargarAprendicesAdmin from "./pages/administrador/CargarAprendicesAdmin";
 
 function PublicLayout() {
   return <Outlet />;
@@ -63,18 +65,17 @@ function App() {
       <Routes>
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<Inicio/>} />
-          <Route path="/login-funcionario" element={<Login perfil="funcionario" />} />
-          <Route path="/login-admin" element={<Login perfil="administrador" />} />
+          <Route path="/" element={<Inicio />} />
+          <Route path="/login" element={<Login perfil="gestor" />} />
           <Route path="/login-aprendiz" element={<Login perfil="aprendiz" />} />
         </Route>
 
         {/* Rutas de Aprendiz */}
         <Route element={<PrivateLayout />}>
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
-          <Route path="/seleccion" element={<CandidateSelectionPage />} />
+          <Route path="/seleccion/:id" element={<CandidateSelectionPage />} />
           <Route path="/confirmar-voto" element={<ConfirmarVoto />} />
-          
+
           {/* Rutas de Funcionario */}
           <Route element={<FuncionarioLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
@@ -88,15 +89,17 @@ function App() {
 
           {/* Rutas de Administrador */}
           <Route element={<AdminLayout />}>
-            <Route path="/dashboard-admin" element={<DashboardAdmin/>} />
+            <Route path="/dashboard-admin" element={<DashboardAdmin />} />
             <Route path="/aprendices" element={<Aprendices />} />
             <Route path="/funcionarios" element={<Funcionarios />} />
+             <Route path="/cargar-aprendices-admin" element={<CargarAprendicesAdmin/>} />
             <Route path="/aprendiz-form" element={<AprendizForm />} />
           </Route>
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Toaster position="top-right" reverseOrder={false} />
     </BrowserRouter>
   );
 }
