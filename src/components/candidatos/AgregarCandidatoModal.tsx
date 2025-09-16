@@ -1,8 +1,18 @@
+
+import { useState } from "react";
+import { Modal, Button, Form, Row, Col } from "react-bootstrap";
+import Select from "react-select"
+import axios from "axios";
+
+interface Aprendiz {
+  idaprendiz: number;
+
 import { useState, useEffect } from "react";
 import { Modal, Button, Form, Row, Col, Spinner } from "react-bootstrap";
 
 interface Candidato {
   idcandidatos?: number;
+
   nombres: string;
   apellidos: string;
   email: string;
@@ -14,6 +24,16 @@ interface Candidato {
 interface AgregarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
+
+  onSave: (candidato: any) => void;
+  elecciones: Eleccion[];
+  aprendices: Aprendiz[];
+}
+
+const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
+
+const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }: AgregarCandidatoModalProps) => {
+
   onSave: (formData: FormData) => void;
   loading?: boolean;
   candidato?: Candidato;
@@ -26,6 +46,7 @@ const AgregarCandidatoModal = ({
   loading = false,
   candidato
 }: AgregarCandidatoModalProps) => {
+
   const [formData, setFormData] = useState<{
     nombres: string;
     apellidos: string;
@@ -41,7 +62,20 @@ const AgregarCandidatoModal = ({
     numero_tarjeton: '',
     foto: null
   });
+
+  const [previewUrl, setPreviewUrl] = useState<string>(""); // para previsualizar
+
+
+  const aprendizOptions = Array.isArray(aprendices)
+    ? aprendices.map((a) => ({
+      value: a.idaprendiz,
+      label: `${a.nombres} ${a.apellidos}`.trim(),
+    }))
+    : [];
+
+
   const [previewUrl, setPreviewUrl] = useState<string>('');
+
 
   // Initialize form when candidato prop changes or modal is shown
   useEffect(() => {
@@ -76,6 +110,66 @@ const AgregarCandidatoModal = ({
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const data = new FormData();
+      data.append("nombres", formData.nombres);
+      data.append("ideleccion", String(formData.ideleccion));
+      data.append("idaprendiz", String(formData.idaprendiz));
+      data.append("propuesta", formData.propuesta);
+      data.append("numero_tarjeton", String(formData.numero_tarjeton));
+
+      if (formData.foto instanceof File) {
+        data.append("foto", formData.foto);
+      }
+      console.log("Datos a enviar:", formData);
+
+      const response = await axios.post(
+        `${VITE_URL_BACK}/api/candidatos/crear`,
+
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Candidato creado:", response.data);
+      alert("Candidato guardado satisfactoriamente");
+      if (onSave) {
+        onSave({
+          ...response.data,
+          programa: response.data.aprendiz?.programa?.programa ?? "",
+        });
+      }
+
+      onHide();
+    } catch (error: any) {
+      console.error("Error al crear candidato:", error.response?.data || error.message);
+      alert("Error al guardar candidato");
+    }
+  };
+
+  const handleSelectChange = (selected: any) => {
+    if (selected) {
+      const aprendiz = aprendices.find((a) => a.idaprendiz === selected.value);
+      setFormData({
+        ...formData,
+        idaprendiz: selected.value,
+        nombres: aprendiz ? `${aprendiz.nombres} ${aprendiz.apellidos}` : "",
+      });
+    } else {
+      setFormData({
+        ...formData,
+        nombres: "",
+        idaprendiz: null,
+      });
+    }
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
@@ -103,6 +197,7 @@ const AgregarCandidatoModal = ({
     });
     
     onSave(formDataToSend);
+
   };
 
   return (

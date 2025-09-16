@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/auth/auth.context";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AgregarCandidatoModal from "../../components/candidatos/AgregarCandidatoModal";
+import ModificarCandidatoModal from '../../components/candidatos/ModificarCandidatoModal';
 import { api } from "../../api";
 import toast from 'react-hot-toast';
 
@@ -40,6 +41,8 @@ const GestionCandidatos = () => {
   // const [aprendices, setAprendices] = useState<Aprendiz[]>([]);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [showModalModificar, setShowModalModificar] = useState(false);
+  const [candidatoSeleccionado, setCandidatoSeleccionado] = useState<any | null>(null);
   const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [elecciones, setElecciones] = useState<Eleccion[]>([]);
@@ -134,15 +137,36 @@ const GestionCandidatos = () => {
     // Implementar lógica de edición
     const candidato = candidatos.find(c => c.idcandidatos === id);
     if (candidato) {
+
+      setCandidatoSeleccionado(candidato);
+      setShowModalModificar(true);
+
       // Aquí podrías abrir un modal de edición con los datos del candidato
       alert(`Editar candidato: ${candidato.nombres} ${candidato.apellidos}`);
       setEditingId(id);
+
     }
   };
 
-  const onEliminar = (id: number) => {
-    if (confirm("¿Está seguro de eliminar este candidato?")) {
-      setCandidatos(prev => prev.filter(c => c.idcandidatos !== id));
+  const onEliminar = async (id: number) => {
+    if (window.confirm("¿Está seguro de eliminar este candidato?")) {
+      try {
+        setLoading(true);
+        const response = await api.delete(`/api/candidatos/eliminar/${id}`);
+
+        if (response.status === 200) {
+          // Remove the deleted candidate from the state
+          setCandidatos(prev => prev.filter(c => c.idcandidatos !== id));
+          alert('Candidato eliminado correctamente');
+        } else {
+          throw new Error('Error al eliminar el candidato');
+        }
+      } catch (error) {
+        console.error('Error al eliminar el candidato:', error);
+        alert('Ocurrió un error al eliminar el candidato');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -160,7 +184,6 @@ const GestionCandidatos = () => {
         </button>
       </div>
 
-      {/* Card/Table wrapper */}
       <div className="card border-0 shadow-sm mb-4">
         <div className="card-body p-0">
           <div className="table-responsive">
@@ -231,7 +254,30 @@ const GestionCandidatos = () => {
         </div>
       </div>
 
+
+      {candidatoSeleccionado && (
+        <ModificarCandidatoModal
+          show={showModalModificar}
+          onHide={() => setShowModalModificar(false)}
+          candidato={candidatoSeleccionado}
+          onSave={(candidatoEditado) => {
+            // actualizar la lista en el front
+            setCandidatos(prev =>
+              prev.map(c =>
+                c.idcandidatos === candidatoEditado.idcandidatos ? candidatoEditado : c
+              )
+            );
+            setShowModalModificar(false);
+          }}
+          elecciones={elecciones || []}
+          aprendices={aprendices || []}
+        />
+      )}
+
+
+
       {/* Modal para agregar nuevo candidato */}
+
       <AgregarCandidatoModal
         show={showModal}
         onHide={() => setShowModal(false)}

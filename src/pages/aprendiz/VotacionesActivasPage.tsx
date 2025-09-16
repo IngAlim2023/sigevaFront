@@ -1,5 +1,5 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { VotacionCard } from "../../components/VotacionCard";
+import { VotacionCard } from "../../components/aprendiz/VotacionCard";
 import { useEffect, useState } from "react";
 import { api } from "../../api";
 import { useAuth } from "../../context/auth/auth.context";
