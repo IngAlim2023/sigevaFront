@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Card, Col, Container, Row } from "react-bootstrap";
 import { MdHowToVote, MdOutlineAssignment } from "react-icons/md";
-import { FaUsers ,FaPlusCircle} from "react-icons/fa";
+import { FaUsers, FaPlusCircle } from "react-icons/fa";
 import { api } from "../../api";
-
+import { useNavigate } from "react-router-dom";
 export const DashboardAdmin = () => {
+  const navigate = useNavigate();
   const [votacionesActivas, setVotacionesActivas] = useState<number>(0);
   const [usuariosRegistrados, setUsuariosRegistrados] = useState<number>(0);
   const [votosHoy, setVotosHoy] = useState<number>(0);
@@ -100,28 +101,42 @@ export const DashboardAdmin = () => {
               </Card.Body>
             </Card>
           </Col>
-          <Row className="mb-3">
-          <Col>
-            <h5>Accesos Directos</h5>
-          </Col>
-        </Row>
-        <Row>
-          <Col md={3}>
-            <Card className="shadow-sm text-center p-4">
-              <Card.Body>
-                <FaPlusCircle size={40} className="text-primary mb-2" />
-                <Card.Title>Añadir Usuario</Card.Title>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+          <Row className="mb-3 flex">
+            <Col>
+              <h5>Accesos Directos</h5>
+            </Col>
+          </Row>
+          <Row className="">
+            <Col md="auto">
+              <Card className="shadow-sm text-center p-3">
+                <Card.Body>
+                  <FaPlusCircle
+                    size={40}
+                    className="text-primary mb-2"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate("/aprendiz-form")}
+                  />
+                  <Card.Title>Añadir Aprendiz</Card.Title>
+                </Card.Body>
+              </Card>
+            </Col>
 
+            <Col md="auto">
+              <Card className="shadow-sm tex p-3">
+                <Card.Body>
+                  <FaPlusCircle
+                    size={40}
+                    className="text-primary mb-2"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate("/funcionarios")}
+                  />
+                  <Card.Title>Añadir Funcionario</Card.Title>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
         </Row>
       </Container>
     </div>
   );
-
 };
-
-
-
