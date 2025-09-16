@@ -5,6 +5,7 @@ import { api } from "../../api";
 import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import { useEffect, useState } from "react";
+import { useAuth } from "../../context/auth/auth.context";
 
 export interface ProgramaFormacion {
   idprogramaFormacion: number;
@@ -34,12 +35,11 @@ const AprendizForm = () => {
   const navigate = useNavigate();
   const [centros, setCentros] = useState<CentroFormacion[]>([]);
   const [programas, setProgramas] = useState<ProgramaFormacion[]>([]);
-
+  const {user} = useAuth();
 
 const getCentros = async () => {
   try {
     const res = await api.get("api/centrosFormacion/obtiene");
-    console.log(res.data)
     setCentros(res.data.data || []);
   } catch (err) {
     toast.error("Error cargando centros");
@@ -50,7 +50,6 @@ const getCentros = async () => {
 const getProgramas = async () => {
   try {
     const res = await api.get("api/programasFormacion/listar");
-    console.log(res.data)
     setProgramas(res.data || []);
   } catch (err) {
     toast.error("Error cargando programas");
@@ -59,6 +58,10 @@ const getProgramas = async () => {
 };
 
   useEffect(() => {
+    if (!user?.centroFormacion) {
+      console.log("Usuario o CentroFormacion no disponible");
+      return;
+    }
     getCentros();
     getProgramas();
   }, []);
@@ -99,7 +102,7 @@ const getProgramas = async () => {
           celular: "",
           estado: "activo",
           tipo_documento: "",
-          centro_formacion_idcentro_formacion: 0,
+          centro_formacion_idcentro_formacion: user?.centroFormacion,
           numero_documento: "",
           email: "",
           password: "",
@@ -212,12 +215,13 @@ const getProgramas = async () => {
                     </Form.Select>
                   </Form.Group>
                 </Col>
+                {user?.perfil == "Administrador"?
                 <Col md={6}>
                   <Form.Group>
                     <Form.Label>Centro Formación</Form.Label>
                     <Form.Select
                       {...register("centro_formacion_idcentro_formacion")} required
-                    >
+                      >
                       <option value={0}>Seleccione...</option>
                       {centros.map((c) => (
                         <option value={c.idcentroFormacion}>
@@ -226,7 +230,8 @@ const getProgramas = async () => {
                       ))}
                     </Form.Select>
                   </Form.Group>
-                </Col>
+                </Col>:<></>
+                }
               </Row>
             </>
           ) : (
