@@ -6,20 +6,22 @@ interface Props {
   titulo: string;
   centro: string;
   jornada: string;
+  ideleccion:string;
 }
 
-export const VotacionCard = ({ titulo, centro, jornada }: Props) => {
-  const navigate = useNavigate();
+export const VotacionCard = ({ titulo, centro, jornada, ideleccion }: Props) => {
+  const navigate = useNavigate()
   return (
     <Card className="h-100 border-success border-1 ">
-      <Card.Header className="text-muted"></Card.Header>
       <Card.Body>
         <Card.Title className="fw-bold">{titulo}</Card.Title>
         <Card.Text>{centro}</Card.Text>
         <Card.Text>
-          <span className="fw-semibold">Jornada:</span> {jornada}
+          <span className="fw-semibold">Jornada:</span> {jornada=== null? 'no disponible':jornada}
         </Card.Text>
-        <Button className="btn-gradient" onClick={()=>{navigate("/seleccion")}}>Participar</Button>
+        <Button className="btn-gradient" onClick={()=>{
+          navigate(`/seleccion/${ideleccion}`)
+        }}>Participar</Button>
       </Card.Body>
     </Card>
   );

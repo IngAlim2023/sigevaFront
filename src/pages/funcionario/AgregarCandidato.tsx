@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import type { DragEvent } from "react";
 import { FiUploadCloud } from "react-icons/fi";
 
@@ -6,6 +6,7 @@ type FormData = {
     nombre: string;
     programa: string;
     descripcion: string;
+    eleccion: string;
     foto: File | null;
 };
 
@@ -15,17 +16,42 @@ const PROGRAMAS = [
     "Análisis y Desarrollo de Sistemas de Información",
 ];
 
+const ELECCIONES = [
+    "Representante de Aprendices 2024-1",
+    "Consejo de Centro 2024-1",
+];
+
+
 
 const AgregarCandidato = () => {
     const [data, setData] = useState<FormData>({
         nombre: "",
         programa: "",
         descripcion: "",
+        eleccion: "",
         foto: null,
     });
     const [preview, setPreview] = useState<string | null>(null);
     const [dragOver, setDragOver] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [elecciones, setElecciones] = useState(null)
+
+    const getElecciones = async () => {
+        try {
+            const response = await fetch('/api/eleccion/listar');
+            if (!response.ok) throw new Error('Error al obtener elecciones');
+            const data = await response.json();
+            setElecciones(data);
+            return data;
+        } catch (error) {
+            console.error(error);
+            return [];
+        }
+    };
+    useEffect(() => {
+        getElecciones();
+    }, []);
+
 
     const handleFile = (file?: File) => {
         if (!file) return;
@@ -144,7 +170,7 @@ const AgregarCandidato = () => {
                         {/* DESCRIPCIÓN */}
                         <div className="mb-4">
                             <label className="form-label fw-semibold">
-                                Descripción <span className="text-danger">*</span>
+                                Propuesta <span className="text-danger">*</span>
                             </label>
                             <textarea
                                 className="form-control"
@@ -171,6 +197,23 @@ const AgregarCandidato = () => {
                                 ))}
                             </select>
                         </div>
+
+                        <div className="mb-4">
+                            <label className="form-label fw-semibold">
+                                Elección <span className="text-danger">*</span>
+                            </label>
+                            <select
+                                className="form-select"
+                                value={data.eleccion}
+                                onChange={(e) => setData({ ...data, eleccion: e.target.value })}
+                            >
+                                <option value="">Selecciona una elección</option>
+                                {ELECCIONES.map((e) => (
+                                    <option key={e} value={e}>{e}</option>
+                                ))}
+                            </select>
+                        </div>
+
                     </div>
 
                     {/* FOOTER CON BOTÓN */}

@@ -1,11 +1,12 @@
 import { useState, type PropsWithChildren } from "react";
 import { AuthContext } from "./auth.context";
-import type { ResponseType, User } from "./types/authTypes";
+import type { Aprendiz, Gestor, ResponseType, User, UserNormalizado } from "./types/authTypes";
 import toast from "react-hot-toast";
+
 
 export function AuthProvider({ children }: PropsWithChildren) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserNormalizado | null>(null);
 
   const login = (response: ResponseType<User>) => {
     if (!response.success) {
@@ -15,8 +16,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
       return;
     }
 
+    const rawUser = response.data!;
+
+    const normalizado : UserNormalizado = {
+      ...rawUser,
+      centroFormacion:
+        "centroFormacion" in rawUser
+          ? (rawUser as Gestor).centroFormacion
+          : (rawUser as Aprendiz).centroFormacionIdcentroFormacion,
+    };
+
     setIsAuthenticated(true);
-    setUser(response.data ?? null);
+    setUser(normalizado);
     toast.success("Inicio de Sesión Exitoso!");
   };
 

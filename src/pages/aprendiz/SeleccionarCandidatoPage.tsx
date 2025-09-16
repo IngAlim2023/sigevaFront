@@ -1,67 +1,69 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
-import CandidatoCard from "../../components/CandidatoCard";
-import SelecionarCandidato from "../../components/ModalCandidato";
+import CandidatoCard from "../../components/aprendiz/CandidatoCard";
+import { useParams } from "react-router-dom";
+import { api } from "../../api";
+import SelecionarCandidato from "../../components/aprendiz/ModalCandidato";
 
-const candidatos = [
-  {
-    nombre: "Ana Rodríguez",
-    programa: "Desarrollo de Software",
-    propuesta:
-      "Implementar nuevos laboratorios de innovación y tecnología para todos los aprendices.",
-    foto: "/images/candidate1.png",
-  },
-  {
-    nombre: "Carlos Mendoza",
-    programa: "Gestión Empresarial",
-    propuesta:
-      "Fomentar el emprendimiento a través de alianzas estratégicas con el sector productivo.",
-    foto: "/images/candidate2.png",
-  },
-  {
-    nombre: "Sofía Ramírez",
-    programa: "Diseño Gráfico",
-    propuesta:
-      "Crear más espacios de exposición para visibilizar el talento de los aprendices de diseño.",
-    foto: "/images/candidate3.png",
-  },
-  {
-    nombre: "Diego Vargas",
-    programa: "Mecánica Industrial",
-    propuesta:
-      "Actualizar la maquinaria y herramientas de los talleres para una formación de vanguardia.",
-    foto: "/images/candidate4.png",
-  },
-];
+
 
 export default function CandidateSelectionPage() {
-  const [candidatoSeleccionado, setCandidatoSeleccionado] =useState<typeof candidatos[0] | null>(null);
+  const { id } = useParams();
+  const [candidatos, setCandidatos] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
-  
+  const [idCandidato, setIdCandidato] = useState("");
+
+  useEffect(() => {
+    const loadData = async () => {
+      const response = await api.get(`/api/candidatos/listar/${id}`);
+      setCandidatos(response.data.data);
+    };
+    loadData();
+  }, []);
+
+  const [candidatoSeleccionado, setCandidatoSeleccionado] = useState<{
+    nombre: string;
+    programa: string;
+    propuesta: string;
+    foto: string;
+    numeroTarjeton: string;
+  } | null>(null);
+
 
   return (
     <>
-      <Container className="my-4 text-center">
-        <h3 className="fw-bold">Selección de Candidato</h3>
-        <p className="text-muted">
-          Seleccione un candidato para ver sus propuestas y emitir su voto.
-        </p>
+      {candidatos.length === 0 ? (
+        <Container className="my-4 text-center">
+          <div>
+            No hay candicatos en esta eleccion disponibles.
+          </div>
+        </Container>
+      ) : (
+        <Container className="my-4 text-center">
+          <h3 className="fw-bold">Selección de Candidato</h3>
+          <p className="text-muted">
+            Seleccione un candidato para ver sus propuestas y emitir su voto.
+          </p>
 
-        <Row className="g-4 my-4">
-          {candidatos.map((c, index) => (
-            <Col key={index} xs={12} md={6} lg={3}>
-              <CandidatoCard
-                {...c}
-                seleccionado={candidatoSeleccionado?.nombre === c.nombre}
-                onSelect={() => setCandidatoSeleccionado(c)}
-                onMoreInfo={()=>{setShowModal(true), setCandidatoSeleccionado(c)} }
-                  
-              />
-            </Col>
-          ))}
-        </Row>
+          <Row className="g-4 my-4">
+            {candidatos.map((c, index) => (
+              <Col key={index} xs={12} md={6} lg={3} onClick={() => setIdCandidato(c.idcandidatos)}>
+                <CandidatoCard
+                  {...c}
+                  seleccionado={candidatoSeleccionado === c.aprendiz.nombres}
+                  onSelect={() => setCandidatoSeleccionado(c.aprendiz.nombres)}
+                  onMoreInfo={(data) => {
+                    setCandidatoSeleccionado(data);
+                    setShowModal(true);
+                  }}
+                  idCandidato={idCandidato}
+                  setIdCandidato={setIdCandidato}
+                />
+              </Col>
+            ))}
+          </Row>
 
-        {/* {candidatoSeleccionado && (
+          {/* {candidatoSeleccionado && (
           <div className="d-flex justify-content-center mt-4">
             <Button className="btn-gradient">
               Votar por {candidatoSeleccionado}
@@ -69,13 +71,15 @@ export default function CandidateSelectionPage() {
           </div>
         )} */}
 
-        <SelecionarCandidato
-          show={showModal}
-          onHide={() => setShowModal(false)}
-          candidato={candidatoSeleccionado}
-        />
+          <SelecionarCandidato
+            show={showModal}
+            onHide={() => setShowModal(false)}
+            candidato={candidatoSeleccionado}
 
-      </Container>
+          />
+
+        </Container>
+      )}
 
     </>
   );
