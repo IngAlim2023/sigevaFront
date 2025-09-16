@@ -28,6 +28,7 @@ import { Toaster } from "react-hot-toast";
 import CargarAprendicesAdmin from "./pages/administrador/CargarAprendicesAdmin";
 import Equipo from "./pages/Equipo";
 
+
 function PublicLayout() {
   return <Outlet />;
 }
