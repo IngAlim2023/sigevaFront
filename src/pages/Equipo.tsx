@@ -33,7 +33,7 @@ const equipo: Miembro[] = [
   },
   {
     nombre: "Alex Jhoan Chaguendo",
-    rol: "Back End Developer",
+    rol: "Full Stack Developer",
     github: "ALexjh117",
     avatar: "/avatars/alex.png",
     grupo: "Desarrolladores",
@@ -82,7 +82,7 @@ const equipo: Miembro[] = [
   },
   {
     nombre: "Camilo Hurtado",
-    rol: "Front End Developer",
+    rol: "Full Stack Developer",
     github: "oKCam04",
     avatar: "/avatars/camilo.png",
     grupo: "Desarrolladores",
