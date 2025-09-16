@@ -52,7 +52,7 @@ export default function Login({ perfil }: Props) {
             navigate("/dashboard");
             break;
           case "Administrador":
-            navigate("/aprendices");
+            navigate("/dashboard-admin");
             break;
         }
       }

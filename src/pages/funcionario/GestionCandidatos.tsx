@@ -17,26 +17,29 @@ interface Programa {
   version: string;
   duracion: number;
 }
-// interface Aprendiz {
-//   idaprendiz: number;
-//   nombres: string;
-//   apellidos: string;
-//   programa: Programa;
-//   email: string;
-// }
-
-interface Candidato {
-  idcandidatos: number;
+interface Aprendiz {
+  idaprendiz: number;
   nombres: string;
   apellidos: string;
+  numeroDocumento: string;
   programa: Programa;
   email: string;
 }
 
-const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
+interface Candidato {
+  idcandidatos: number;
+  ideleccion: number;
+  idaprendiz: number;
+  nombres: string;
+  numeroTarjeton: string;
+  propuesta: string;
+  foto: string;
+}
+
+// const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
 const GestionCandidatos = () => {
-  // const [aprendices, setAprendices] = useState<Aprendiz[]>([]);
+  const [aprendices, setAprendices] = useState<Aprendiz[]>([]);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [showModal, setShowModal] = useState(false);
   const { user, isAuthenticated } = useAuth();
@@ -44,7 +47,7 @@ const GestionCandidatos = () => {
   const [elecciones, setElecciones] = useState<Eleccion[]>([]);
 
   useEffect(() => {
-    const fetchAprendices = async () => {
+    const fetchCandidatos = async () => {
       if (!isAuthenticated || !user) return;
 
       try {
@@ -56,7 +59,7 @@ const GestionCandidatos = () => {
         if (!res.data) {
           throw new Error("Error al traer aprendices");
         }
-
+        console.log("candidatos: ", res.data);
         setCandidatos(res.data.data || []);
       } catch (error) {
         console.error(error);
@@ -65,24 +68,36 @@ const GestionCandidatos = () => {
       }
     };
 
-    const fetchElecciones = async () => {
+    const fetchAprendices = async () => {
       try {
-        const res = await fetch(`${VITE_URL_BACK}/api/eleccion`);
-        if (!res.ok) {
-          throw new Error("Error al traer elecciones");
+        const res = await api.get(`/api/aprendiz/centros/${user?.centroFormacion}`);
+        if (!res.data) {
+          throw new Error("Error al traer aprendices");
         }
-        const data = await res.json();
-        console.log(data);
-        setElecciones(data);
-
+        console.log("aprendices: ", res.data);
+        setAprendices(res.data || []);
       } catch (error) {
         console.error(error);
       }
     };
-    fetchElecciones();
 
+    const fetchElecciones = async () => {
+      try {
+        const res = await api.get(`/api/eleccion/centrof/${user?.centroFormacion}`);
+        if (!res.data) {
+          throw new Error("Error al traer elecciones");
+        }
+        console.log("elecciones: ", res.data);
+        setElecciones(res.data.data || []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchElecciones();
+    fetchCandidatos();
     fetchAprendices();
-  }, [isAuthenticated, user, elecciones.length]);
+  }, [isAuthenticated, user, elecciones.length, candidatos.length, aprendices.length]);
 
   if (!isAuthenticated) {
     return <p>Debes iniciar sesión para gestionar candidatos</p>;
@@ -93,11 +108,9 @@ const GestionCandidatos = () => {
   };
 
   const onEditar = (id: number) => {
-    // Implementar lógica de edición
     const candidato = candidatos.find(c => c.idcandidatos === id);
     if (candidato) {
-      // Aquí podrías abrir un modal de edición con los datos del candidato
-      alert(`Editar candidato: ${candidato.nombres} ${candidato.apellidos}`);
+      alert(`Editar candidato: ${candidato.nombres}`);
     }
   };
 
@@ -130,8 +143,8 @@ const GestionCandidatos = () => {
                 <tr>
                   <th className="ps-4" style={{ width: 90 }}>Foto</th>
                   <th>Nombre Completo</th>
-                  <th>Programa de Formación</th>
-                  <th>Correo Electrónico</th>
+                  <th>Numero voto</th>
+                  <th>Propuesta</th>
                   <th className="text-center" style={{ width: 120 }}>Acciones</th>
                 </tr>
               </thead>
@@ -147,17 +160,17 @@ const GestionCandidatos = () => {
                     <tr key={c.idcandidatos}>
                       <td className="ps-4">
                         <img
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(c.nombres + ' ' + c.apellidos)}&background=random&size=128&rounded=true&bold=true&format=png`}
-                          alt={`${c.nombres} ${c.apellidos}`}
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(c.nombres)}&background=random&size=128&rounded=true&bold=true&format=png`}
+                          alt={`${c.nombres} `}
                           className="rounded-circle"
                           style={{ width: 48, height: 48, objectFit: "cover" }}
                         />
                       </td>
                       <td className="fw-semibold">
-                        {c.nombres} 
+                        {c.nombres}
                       </td>
-                      <td className="text-muted">{c.programa?.programa || "Sin programa"}</td>
-                      <td className="text-muted">{c.email}</td>
+                      <td className="text-muted">{c.numeroTarjeton || "Sin programa"}</td>
+                      <td className="text-muted">{c.propuesta}</td>
                       <td>
                         <div className="d-flex justify-content-center gap-3">
                           <button
@@ -192,16 +205,14 @@ const GestionCandidatos = () => {
         </div>
       </div>
 
-      {/* Modal para agregar nuevo candidato */}
       <AgregarCandidatoModal
         show={showModal}
         onHide={() => setShowModal(false)}
         onSave={handleAgregarCandidato}
-        candidatos={candidatos}
         elecciones={elecciones || []}
+        aprendices={aprendices || []}
       />
 
-      {/* estilos finos en línea para redondeo/card */}
       <style>{`
         .card { border-radius: 14px; }
         thead tr th { border-top: none; }
