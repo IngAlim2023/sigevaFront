@@ -23,3 +23,13 @@ export interface ResponseType<T> {
   message: string;
   data?: T;
 }
+
+export interface UserNormalizado {
+  id: number;
+  email?: string;  
+  apellidos?: string;  
+  estado: string;
+  perfil: "Funcionario" | "Administrador" | "Aprendiz";
+  jornada?: string;    
+  centroFormacion: number; 
+}
