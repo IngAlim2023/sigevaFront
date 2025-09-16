@@ -118,9 +118,25 @@ const GestionCandidatos = () => {
     }
   };
 
-  const onEliminar = (id: number) => {
-    if (confirm("¿Está seguro de eliminar este candidato?")) {
-      setCandidatos(prev => prev.filter(c => c.idcandidatos !== id));
+  const onEliminar = async (id: number) => {
+    if (window.confirm("¿Está seguro de eliminar este candidato?")) {
+      try {
+        setLoading(true);
+        const response = await api.delete(`/api/candidatos/eliminar/${id}`);
+
+        if (response.status === 200) {
+          // Remove the deleted candidate from the state
+          setCandidatos(prev => prev.filter(c => c.idcandidatos !== id));
+          alert('Candidato eliminado correctamente');
+        } else {
+          throw new Error('Error al eliminar el candidato');
+        }
+      } catch (error) {
+        console.error('Error al eliminar el candidato:', error);
+        alert('Ocurrió un error al eliminar el candidato');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -212,7 +228,7 @@ const GestionCandidatos = () => {
         <ModificarCandidatoModal
           show={showModalModificar}
           onHide={() => setShowModalModificar(false)}
-          candidato={candidatoSeleccionado}   
+          candidato={candidatoSeleccionado}
           onSave={(candidatoEditado) => {
             // actualizar la lista en el front
             setCandidatos(prev =>
