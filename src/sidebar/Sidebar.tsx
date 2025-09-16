@@ -77,6 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
           items: [
             { to: '/aprendices', icon: <FaUserGraduate />, text: 'Aprendices' },
             { to: '/funcionarios', icon: <FaUserTie />, text: 'Funcionarios' },
+             { to: '/cargar-aprendices-admin', icon: <FaUserTie />, text: 'CargarAprendicesAdmin' },
           ] 
         },
         { to: '/aprendiz-form', icon: <FaUserPlus />, text: 'Añadir Aprendiz', type: 'link' },

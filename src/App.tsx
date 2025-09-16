@@ -25,6 +25,7 @@ import AprendizForm from "./pages/administrador/AprendizForm";
 import { Funcionarios } from "./pages/administrador/Funcionarios";
 import { DashboardAdmin } from "./pages/administrador/DashboardAdmin";
 import { Toaster } from "react-hot-toast";
+import CargarAprendicesAdmin from "./pages/administrador/CargarAprendicesAdmin";
 
 function PublicLayout() {
   return <Outlet />;
@@ -91,6 +92,7 @@ function App() {
             <Route path="/dashboard-admin" element={<DashboardAdmin />} />
             <Route path="/aprendices" element={<Aprendices />} />
             <Route path="/funcionarios" element={<Funcionarios />} />
+             <Route path="/cargar-aprendices-admin" element={<CargarAprendicesAdmin/>} />
             <Route path="/aprendiz-form" element={<AprendizForm />} />
           </Route>
         </Route>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import Container from "react-bootstrap/Container";
 import Form from "react-bootstrap/Form";
@@ -10,12 +10,9 @@ import ProgressBar from "react-bootstrap/ProgressBar";
 import Spinner from "react-bootstrap/Spinner";
 import { api } from "../../api";
 import { useAuth } from "../../context/auth/auth.context";
-import type { User, Gestor } from "../../context/auth/types/authTypes";
+import type { Gestor } from "../../context/auth/types/authTypes";
 
 
-import { Toast } from "react-bootstrap";
-import ToastContainer from "react-bootstrap/ToastContainer";
-// listo para explicar el codigoooooo
 type FilaExcel = {
   ["Tipo de Documento"]?: string;
   ["Número de Documento"]?: string | number;
@@ -28,14 +25,29 @@ type FilaExcel = {
 };
 
 
+type CentroFormacion = {
+  id: string | number;
+  nombre: string;
+};
+
+
 const UPLOAD_URL = "/api/aprendices/importarExcel";
+const CENTROS_URL = "/api/centrosFormacion/obtiene";
 
 
 export default function CargarAprendices() {
   const { user, isAuthenticated } = useAuth();
-  const isFuncionario =
-    isAuthenticated && (user as User)?.perfil === "Funcionario";
-  const userId = isFuncionario ? (user as Gestor).id : null;
+  const isAdmin =
+    isAuthenticated &&
+    user?.perfil?.toString().trim().toLowerCase() === "administrador";
+
+
+  const userId = isAdmin ? (user as Gestor).id : null;
+
+
+  const [centros, setCentros] = useState<CentroFormacion[]>([]);
+  const [centroId, setCentroId] = useState<string>("");
+  const [cargandoCentros, setCargandoCentros] = useState(false);
 
 
   const [file, setFile] = useState<File | null>(null);
@@ -49,7 +61,38 @@ export default function CargarAprendices() {
   } | null>(null);
   const [uploadPct, setUploadPct] = useState(0);
   const [subiendo, setSubiendo] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+
+
+  useEffect(() => {
+   const fetchCentros = async () => {
+  setCargandoCentros(true);
+  try {
+    const res = await api.get(CENTROS_URL, { params: { activos: true } });
+    console.log("Respuesta centros:", res.data);
+
+
+    const lista = res.data?.data ?? [];
+    setCentros(
+      lista.map((c: any) => ({
+        id: c.idcentroFormacion,
+        nombre: c.centroFormacioncol,
+      }))
+    );
+  } catch (e: any) {
+    setMsg({
+      type: "danger",
+      text:
+        e?.response?.data?.message ||
+        "No se pudieron cargar los centros de formación",
+    });
+  } finally {
+    setCargandoCentros(false);
+  }
+};
+
+
+    fetchCentros();
+  }, []);
 
 
   const leerExcelParaPreview = async (archivo: File) => {
@@ -107,32 +150,39 @@ export default function CargarAprendices() {
 
 
   const onSubmit = async () => {
-    if (!isFuncionario) {
+    if (!isAdmin) {
       setMsg({
         type: "warning",
-        text: "Solo los usuarios con perfil Funcionario pueden importar aprendices.",
+        text:
+          "Solo los usuarios con perfil Administrador pueden importar aprendices.",
       });
-      setShowToast(true);
       return;
     }
     if (!userId) {
       setMsg({ type: "danger", text: "No se encontró el userId en sesión." });
-      setShowToast(true);
       return;
     }
     if (!file) {
       setMsg({ type: "danger", text: "Selecciona un archivo Excel primero." });
-      setShowToast(true);
+      return;
+    }
+    if (!centroId) {
+      setMsg({
+        type: "danger",
+        text: "Selecciona un Centro de formación primero.",
+      });
       return;
     }
 
 
     const fd = new FormData();
-    fd.append("excel", file);
+   fd.append("excel", file, file.name);
     fd.append("userId", String(userId));
     fd.append("jornada", jornada);
-
-
+    fd.append("centroFormacionId", String(centroId));
+  for (const pair of fd.entries()) {
+    console.log(pair[0], pair[1]);
+  }
     setSubiendo(true);
     setMsg(null);
     setUploadPct(0);
@@ -140,7 +190,7 @@ export default function CargarAprendices() {
 
     try {
       const res = await api.post(UPLOAD_URL, fd, {
-        headers: { "Content-Type": "multipart/form-data" },
+          headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (pe) => {
           if (!pe.total) return;
           const pct = Math.round((pe.loaded * 100) / pe.total);
@@ -153,24 +203,27 @@ export default function CargarAprendices() {
         type: "success",
         text: res?.data?.message || "Aprendices importados con éxito",
       });
-      setShowToast(true);
     } catch (err: any) {
       const apiMsg =
         err?.response?.data?.message ||
         err?.message ||
         "Error al importar aprendices. Revisa el formato del archivo y los campos requeridos.";
       setMsg({ type: "danger", text: apiMsg });
-      setShowToast(true);
     } finally {
       setSubiendo(false);
     }
   };
 
 
+  const centroSeleccionado = centros.find(
+    (c) => String(c.id) === String(centroId)
+  );
+
+
   return (
     <div>
       <Container className="mb-5">
-        <h1>Cargar Archivos De Votantes</h1>
+        <h1>Cargar Archivos de Aprendices2 Admin</h1>
         <p>
           Seleccione un archivo Excel (.xlsx / .xls) con los datos de los
           aprendices. Cabeceras esperadas:
@@ -182,9 +235,9 @@ export default function CargarAprendices() {
           . En la celda <strong>C2</strong> debe venir <em>FICHA - PROGRAMA</em>
           .
         </p>
-        {!isFuncionario && (
+        {!isAdmin && (
           <Alert variant="warning" className="mt-3">
-            Debes iniciar sesión como <strong>Funcionario</strong> para importar
+            Debes iniciar sesión como <strong>Admin</strong> para importar
             aprendices
           </Alert>
         )}
@@ -204,8 +257,34 @@ export default function CargarAprendices() {
               type="file"
               accept=".xlsx,.xls"
               onChange={onFileChange}
-              disabled={!isFuncionario || subiendo}
+              disabled={!isAdmin || subiendo}
             />
+          </Form.Group>
+
+
+          <Form.Group controlId="centroSelect">
+            <Form.Label>Centro de Formación</Form.Label>
+            <Form.Select
+              value={centroId}
+              onChange={(e) => setCentroId(e.target.value)}
+              disabled={!isAdmin || subiendo || cargandoCentros}
+            >
+              <option value="">
+                {cargandoCentros
+                  ? "Cargando centros..."
+                  : "Seleccione un centro"}
+              </option>
+              {centros.map((c, i) => (
+                <option key={`${String(c.id)}-${i}`} value={String(c.id)}>
+                  {c.nombre}
+                </option>
+              ))}
+            </Form.Select>
+            {cargandoCentros && (
+              <div className="mt-2">
+                <Spinner animation="border" size="sm" /> Cargando…
+              </div>
+            )}
           </Form.Group>
 
 
@@ -214,22 +293,21 @@ export default function CargarAprendices() {
             <Form.Select
               value={jornada}
               onChange={(e) => setJornada(e.target.value)}
-              disabled={!isFuncionario || subiendo}
+              disabled={!isAdmin || subiendo}
             >
               <option value="Diurna">Diurna</option>
-
-
               <option value="Nocturna">Nocturna</option>
             </Form.Select>
           </Form.Group>
         </div>
 
 
-        {(fichaDetectada || programaDetectado) && (
+        {(fichaDetectada || programaDetectado || centroSeleccionado) && (
           <div className="mt-2">
             <small className="text-muted">
-              <strong>Ficha detectada:</strong> {fichaDetectada || "—"} |{" "}
-              <strong>Programa:</strong> {programaDetectado || "—"}
+              <strong>Ficha detectada:</strong> {fichaDetectada || "—"} {" | "}
+              <strong>Programa:</strong> {programaDetectado || "—"} {" | "}
+              <strong>Centro:</strong> {centroSeleccionado?.nombre || "—"}
             </small>
           </div>
         )}
@@ -245,7 +323,7 @@ export default function CargarAprendices() {
 
       <Container>
         <div className="d-flex justify-content-between align-items-center mb-2">
-          <h2 className="m-0">Vista Previa De los Datos</h2>
+          <h2 className="m-0">Vista Previa de los Datos</h2>
           <small className="text-muted">
             Mostrando {preview.length} filas (solo vista previa)
           </small>
@@ -261,22 +339,22 @@ export default function CargarAprendices() {
                 <th>Correo</th>
                 <th>Programa (C2)</th>
                 <th>Jornada</th>
+                <th>Centro</th>
                 <th>Estado</th>
               </tr>
             </thead>
             <tbody>
               {preview.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-4">
+                  <td colSpan={7} className="text-center py-4">
                     No hay datos para mostrar.
                   </td>
                 </tr>
               ) : (
                 preview.map((fila, i) => {
                   const nombre =
-                    `${fila["Nombre"] || ""} ${
-                      fila["Apellidos"] || ""
-                    }`.trim() || "—";
+                    `${fila["Nombre"] || ""} ${fila["Apellidos"] || ""}`.trim() ||
+                    "—";
                   const doc = fila["Número de Documento"]?.toString() || "—";
                   const correo = fila["Correo Electrónico"] || "—";
                   const estado = (fila["Estado"] || "").toString().trim();
@@ -288,6 +366,7 @@ export default function CargarAprendices() {
                       <td>{correo}</td>
                       <td>{programaDetectado || "—"}</td>
                       <td>{jornada}</td>
+                      <td>{centroSeleccionado?.nombre || "-"}</td>
                       <td>
                         {estado ? (
                           <Badge bg={activo ? "success" : "secondary"} pill>
@@ -311,7 +390,7 @@ export default function CargarAprendices() {
         <Button
           variant="primary"
           onClick={onSubmit}
-          disabled={!isFuncionario || !file || subiendo}
+          disabled={!isAdmin || !file || subiendo || !centroId}
         >
           {subiendo ? (
             <>
@@ -323,32 +402,8 @@ export default function CargarAprendices() {
           )}
         </Button>
       </Container>
-      <ToastContainer position="top-end" className="p-3">
-        <Toast
-          bg={
-            msg?.type === "success"
-              ? "success"
-              : msg?.type === "danger"
-              ? "danger"
-              : "warning"
-          }
-          show={showToast}
-          onClose={() => setShowToast(false)}
-          delay={4000}
-          autohide
-        >
-          <Toast.Header>
-            <strong className="me-auto">
-              {msg?.type === "success"
-                ? "Éxito"
-                : msg?.type === "danger"
-                ? "Error"
-                : "Aviso"}
-            </strong>
-          </Toast.Header>
-          <Toast.Body className="text-white">{msg?.text}</Toast.Body>
-        </Toast>
-      </ToastContainer>
     </div>
   );
 }
+
+
