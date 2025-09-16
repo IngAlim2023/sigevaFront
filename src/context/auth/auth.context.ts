@@ -1,5 +1,5 @@
 import { createContext, use } from "react";
-import type { ResponseType } from "./types/authTypes";
+import type { ResponseType, User } from "./types/authTypes";
 
 interface AuthContextType<T> {
   isAuthenticated: boolean;
@@ -8,7 +8,7 @@ interface AuthContextType<T> {
   logout: () => void;
 }
 
-export const AuthContext = createContext({} as AuthContextType<any>);
+export const AuthContext = createContext({} as AuthContextType<User>);
 
 export const useAuth = <T>() => {
   const context = use(AuthContext);
