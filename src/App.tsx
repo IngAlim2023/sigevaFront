@@ -72,7 +72,7 @@ function App() {
         {/* Rutas de Aprendiz */}
         <Route element={<PrivateLayout />}>
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
-          <Route path="/seleccion" element={<CandidateSelectionPage />} />
+          <Route path="/seleccion/:id" element={<CandidateSelectionPage />} />
           <Route path="/confirmar-voto" element={<ConfirmarVoto />} />
 
           {/* Rutas de Funcionario */}
