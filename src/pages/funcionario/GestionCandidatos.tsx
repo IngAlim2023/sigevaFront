@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/auth/auth.context";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AgregarCandidatoModal from "../../components/candidatos/AgregarCandidatoModal";
+import { api } from "../../api";
 
 interface Eleccion {
   ideleccion: number;
@@ -38,7 +39,7 @@ const GestionCandidatos = () => {
   // const [aprendices, setAprendices] = useState<Aprendiz[]>([]);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const { user, isAuthenticated } = useAuth<any>();
+  const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [elecciones, setElecciones] = useState<Eleccion[]>([]);
 
@@ -48,17 +49,15 @@ const GestionCandidatos = () => {
 
       try {
         setLoading(true);
-        const res = await fetch(
-          //utlizar vite_url_back
-          `${VITE_URL_BACK}/api/candidatos/listar/cformacion/${user?.centroFormacion}`
-
+        const res = await api.get(
+          `/api/candidatos/listar/cformacion/${user?.centroFormacion}`
         );
-        if (!res.ok) {
+
+        if (!res.data) {
           throw new Error("Error al traer aprendices");
         }
-        const data = await res.json();
-        console.log(data);
-        setCandidatos(data.data || []);
+
+        setCandidatos(res.data.data || []);
       } catch (error) {
         console.error(error);
       } finally {
