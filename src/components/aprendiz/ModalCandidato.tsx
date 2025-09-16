@@ -3,11 +3,12 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../../api";
 import Form from "react-bootstrap/Form";
 import { useState } from "react";
 import { useAuth } from "../../context/auth/auth.context";
+import Swal from "sweetalert2"
 
 interface Props {
     show: boolean;
@@ -26,11 +27,14 @@ interface Props {
 export default function SelecionarCandidato({ show, onHide, candidato }: Props) {
     const { id } = useParams();
 
-
-    if (!candidato) return null;
+    const navigate=useNavigate();
+    
     const [shotModal, setShowModal] = useState(false);
     const [otp, setOtp] = useState("");
     const { user } = useAuth();
+
+    if (!candidato) return null;
+
     const enviarOTP = async () => {
 
         try {
@@ -55,14 +59,53 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
             if (data.success === true) {
                 try {
                     
-                    await api.post('/api/votoXCandidato/crear/', {
+                    const {data}=await api.post('/api/votoXCandidato/crear/', {
                         idcandidatos: Number(candidato.idCandidato),
                         idaprendiz: Number(user.id),
                         contador: 1,
                         ideleccion: id
-                    })
+                    });
+                    if(data.success===true){
+                        Swal.fire({
+                            title:"Tu Voto Fue Registrado Con Éxito",
+                            icon: "success",
+                            draggable: true,
+                            showConfirmButton:true,
+                            confirmButtonText:"Volver"
+                        }).then((result)=>{
+                            if(result.isConfirmed){
+                                navigate("/votaciones")
+                            }
+                        })
+                    }else{
+                        Swal.fire({
+                            title:"Tu Voto No Fue Registrado Con Éxito",
+                            icon: "error",
+                            draggable: true,
+                            showConfirmButton:true,
+                            confirmButtonText:"Intenta votar de nuevo"
+                        }).then((result)=>{
+                            if(result.isConfirmed){
+                                navigate("/votaciones")
+                            }
+                        })
+                    }
+
+                    
+                    
                 } catch (error) {
-                    console.log("Error al registrar el voto:", error);
+                    Swal.fire({
+                        title:"Tu Voto No Fue Registrado Con Éxito",
+                        icon: "error",
+                        draggable: true,
+                        showConfirmButton:true,
+                        confirmButtonText:"Intenta votar de nuevo"
+                    }).then((result)=>{
+                        if(result.isConfirmed){
+                            navigate("/votaciones")
+                        }
+                        })
+
                 }
             } else {
                 alert("Código OTP inválido");
