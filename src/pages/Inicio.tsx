@@ -24,6 +24,7 @@ const Inicio: React.FC = () => {
               elegir a sus representantes, ejercer su voz y ser parte activa del
               cambio.
             </p>
+            <a href="/equipo" target="_blank" className="text-decoration color-[#6136BF] text-muted mt-2 dec" style={{ color: '#6136BF' }}>Nuestro equipo</a>
 
             <div className="mb-4" style={{ marginTop: 50 }}>
               <Button
@@ -37,12 +38,14 @@ const Inicio: React.FC = () => {
           </Col>
 
           <Col xs={12} md={6} className="d-none d-md-flex justify-content-end">
+          <div className="d-flex flex-column align-items-center">
             <img
               src="/landing.png"
               alt="Aprendiz SENA votando"
               className="img-fluid rounded-4 shadow-sm"
               style={{ maxHeight: 500, objectFit: "cover" }}
             />
+            </div>
           </Col>
         </Row>
       </Container>
