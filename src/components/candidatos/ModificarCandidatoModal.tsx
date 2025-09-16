@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import Select from "react-select"
 import axios from "axios";
-
-
 
 interface Aprendiz {
   idaprendiz: number;
@@ -20,25 +18,18 @@ interface Eleccion {
 interface ModificarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
+  candidato: any | null;
   onSave: (candidato: any) => void;
-  // candidatos: Candidato[];
+  candidatos: any | null;
   elecciones: Eleccion[];
   aprendices: Aprendiz[];
-  candidato: any;
 }
 
 const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
 
-const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }: ModificarCandidatoModalProps) => {
-  const [formData, setFormData] = useState<{
-    nombres: string;
-    foto: File | string | null;
-    idaprendiz: number | null;
-    ideleccion: number | null;
-    propuesta: string;
-    numero_tarjeton: string;
-  }>({
+const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, elecciones }: ModificarCandidatoModalProps) => {
+  const [formData, setFormData] = useState({
     nombres: "",
     foto: null as File | null,
     idaprendiz: null,
@@ -47,6 +38,20 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
     numero_tarjeton: "",
   });
   const [previewUrl, setPreviewUrl] = useState<string>(""); // para previsualizar
+
+  useEffect(() => {
+    if (candidato) {
+      setFormData({
+        nombres: candidato.nombres || "",
+        idaprendiz: candidato.idaprendiz || null,
+        ideleccion: candidato.ideleccion || null,
+        propuesta: candidato.propuesta || "",
+        numero_tarjeton: candidato.numeroTarjeton || "",
+        foto: candidato.foto
+      });
+      setPreviewUrl(typeof candidato.foto === "string" ? candidato.foto : "");
+    }
+  }, [candidato])
 
 
   const aprendizOptions = Array.isArray(aprendices)
@@ -91,8 +96,8 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
       }
       console.log("Datos a enviar:", formData);
 
-      const response = await axios.post(
-        `${VITE_URL_BACK}/api/candidatos/crear`,
+      const response = await axios.put(
+        `${VITE_URL_BACK}/api/candidatos/actualizar/${candidato?.idcandidatos}`,
 
         data,
         {
@@ -101,6 +106,7 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
           },
         }
       );
+
 
       console.log("Candidato creado:", response.data);
       alert("Candidato guardado satisfactoriamente");

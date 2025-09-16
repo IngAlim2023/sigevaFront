@@ -110,17 +110,44 @@ const GestionCandidatos = () => {
     setCandidatos(prev => [...prev, nuevo]);
   };
 
-  const onEditar = (id: number) => {
-    const candidato = candidatos.find(c => c.idcandidatos === id);
-    if (candidato) {
-      setCandidatoSeleccionado(candidato);
+  const onEditar = async (id: number) => {
+    try {
+      const response = await api.put(`/api/candidatos/actualizar/${id}`);
+
+
+      const candidato = response.data.data;
+      console.log(candidato);
+
+      setCandidatoSeleccionado(candidato); // lo mandamos al modal
       setShowModalModificar(true);
+
+    } catch (error: any) {
+      console.error("Error al obtener candidato:", error.response?.data || error.message);
+      alert("No se pudo cargar el candidato ❌");
     }
+
+
   };
 
-  const onEliminar = (id: number) => {
-    if (confirm("¿Está seguro de eliminar este candidato?")) {
-      setCandidatos(prev => prev.filter(c => c.idcandidatos !== id));
+  const onEliminar = async (id: number) => {
+    if (window.confirm("¿Está seguro de eliminar este candidato?")) {
+      try {
+        setLoading(true);
+        const response = await api.delete(`/api/candidatos/eliminar/${id}`);
+
+        if (response.status === 200) {
+          // Remove the deleted candidate from the state
+          setCandidatos(prev => prev.filter(c => c.idcandidatos !== id));
+          alert('Candidato eliminado correctamente');
+        } else {
+          throw new Error('Error al eliminar el candidato');
+        }
+      } catch (error) {
+        console.error('Error al eliminar el candidato:', error);
+        alert('Ocurrió un error al eliminar el candidato');
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -212,7 +239,7 @@ const GestionCandidatos = () => {
         <ModificarCandidatoModal
           show={showModalModificar}
           onHide={() => setShowModalModificar(false)}
-          candidato={candidatoSeleccionado}   
+          candidato={candidatoSeleccionado}
           onSave={(candidatoEditado) => {
             // actualizar la lista en el front
             setCandidatos(prev =>
