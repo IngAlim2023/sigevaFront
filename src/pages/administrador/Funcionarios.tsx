@@ -259,7 +259,7 @@ const Funcionarios: React.FC = () => {
             </InputGroup.Text>
             <Form.Control
               type="search"
-              placeholder="Buscar por correo, centro o regional..."
+              placeholder="Buscar por correo..."
               className="border-start-0"
               value={busqueda}
               onChange={(e) => {
