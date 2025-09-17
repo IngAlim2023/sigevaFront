@@ -1,6 +1,9 @@
 import React from "react";
 import Sigeva from "../assets/sena-sigeva.svg";
 import { GrGithub } from "react-icons/gr";
+import { useNavigate } from "react-router-dom";
+import { Button } from "react-bootstrap";
+import { FaArrowLeft } from "react-icons/fa";
 
 type Miembro = {
   nombre: string;
@@ -113,12 +116,24 @@ const equipo: Miembro[] = [
 
 const Equipo: React.FC = () => {
   const grupos = ["Manejo", "Desarrolladores"] as const;
+  const navigate = useNavigate();
 
   return (
     <main style={{ padding: "2rem" }}>
+      <div className="mb-3">
+        <Button 
+          variant="outline-primary" 
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="d-flex align-items-center gap-2"
+        >
+          <FaArrowLeft /> Volver
+        </Button>
+      </div>
       <div className="d-flex justify-content-center justify-content-md-start align-items-center gap-2 mb-3">
         <img src={Sigeva} alt="Logo SIGEVA" height={40} />
       </div>
+      
       <h1 style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>
         Nuestro equipo
       </h1>
@@ -189,9 +204,12 @@ const Equipo: React.FC = () => {
                 </div>
               ))}
           </div>
+          
         </section>
+        
       ))}
     </main>
+    
   );
 };
 
