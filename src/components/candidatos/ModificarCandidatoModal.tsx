@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import Select from "react-select"
-import axios from "axios";
+import { api } from "../../api";
 
 interface Aprendiz {
   idaprendiz: number;
@@ -20,20 +20,16 @@ interface ModificarCandidatoModalProps {
   onHide: () => void;
   candidato: any | null;
   onSave: (candidato: any) => void;
-  candidatos: any | null;
   elecciones: Eleccion[];
   aprendices: Aprendiz[];
 }
-
-const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
-
 
 const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, elecciones }: ModificarCandidatoModalProps) => {
   const [formData, setFormData] = useState({
     nombres: "",
     foto: null as File | null,
-    idaprendiz: null,
-    ideleccion: null,
+    idaprendiz: null as number | null,
+    ideleccion: null as number | null,
     propuesta: "",
     numero_tarjeton: "",
   });
@@ -96,8 +92,8 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
       }
       console.log("Datos a enviar:", formData);
 
-      const response = await axios.put(
-        `${VITE_URL_BACK}/api/candidatos/actualizar/${candidato?.idcandidatos}`,
+      const response = await api.put(
+        `/api/candidatos/actualizar/${candidato?.idcandidatos}`,
 
         data,
         {
@@ -106,7 +102,6 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
           },
         }
       );
-
 
       console.log("Candidato creado:", response.data);
       alert("Candidato guardado satisfactoriamente");
@@ -124,22 +119,6 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
     }
   };
 
-
-  // const handleSelectChange = (selected: any) => {
-  //   if (selected) {
-  //     setFormData({
-  //       ...formData,
-  //       nombres: selected.label,
-  //       idaprendiz: selected.value
-  //     });
-  //   } else {
-  //     setFormData({
-  //       ...formData,
-  //       nombres: "",
-  //       idaprendiz: null,
-  //     });
-  //   }
-  // };
   const handleSelectChange = (selected: any) => {
     if (selected) {
       const aprendiz = aprendices.find((a) => a.idaprendiz === selected.value);
@@ -161,7 +140,7 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton className="border-0 pb-0">
-        <Modal.Title className="fw-bold">Agregar Nuevo Candidato</Modal.Title>
+        <Modal.Title className="fw-bold">Modificar Candidato</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
@@ -176,13 +155,11 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
                     if (e.target.files && e.target.files[0]) {
                       const file = e.target.files[0];
 
-                      // Guardar el File en formData
                       setFormData((prev) => ({
                         ...prev,
                         foto: file,
                       }));
 
-                      // Crear la URL para previsualizar
                       const reader = new FileReader();
                       reader.onloadend = () => {
                         setPreviewUrl(reader.result as string);
@@ -203,8 +180,6 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
                   </div>
                 )}
               </Form.Group>
-
-
             </Col>
             <Col md={8}>
               <Form.Group className="mb-3">
@@ -265,13 +240,12 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
               </Form.Group>
             </Col>
           </Row>
-
           <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
             <Button variant="outline-secondary" onClick={onHide}>
               Cancelar
             </Button>
             <Button type="submit" className="btn-gradient">
-              Guardar Candidato
+              Actualizar Candidato
             </Button>
           </div>
         </Form>

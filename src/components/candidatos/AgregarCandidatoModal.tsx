@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import Select from "react-select"
-import axios from "axios";
+import { api } from "../../api";
 
 interface Aprendiz {
   idaprendiz: number;
@@ -22,8 +22,6 @@ interface AgregarCandidatoModalProps {
   elecciones: Eleccion[];
   aprendices: Aprendiz[];
 }
-
-const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
 const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }: AgregarCandidatoModalProps) => {
   const [formData, setFormData] = useState<{
@@ -83,8 +81,8 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
       }
       console.log("Datos a enviar:", formData);
 
-      const response = await axios.post(
-        `${VITE_URL_BACK}/api/candidatos/crear`,
+      const response = await api.post(
+        `/api/candidatos/crear`,
 
         data,
         {
