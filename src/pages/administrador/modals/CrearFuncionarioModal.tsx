@@ -60,6 +60,7 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
 
     const submissionData = { ...data, idcentro_formacion: idCentroFormacion };
 
+
     try {
       await api.post("/api/usuarios/crear", submissionData);
       setIdCentroFormacion(0);
@@ -116,6 +117,58 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
                 {errors.email?.message}
               </Form.Control.Feedback>
             </Form.Group>
+            <Form.Group className="col-md-6">
+              <Form.Label>Nombres</Form.Label>
+              <Form.Control
+                type="text"
+                {...register("nombres", { required: "Los nombres son requeridos" })}
+                isInvalid={!!errors.nombres}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.nombres?.message}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="col-md-6">
+              <Form.Label>Apellidos</Form.Label>
+              <Form.Control
+                type="text"
+                {...register("apellidos", { required: "Los apellidos son requeridos" })}
+                isInvalid={!!errors.apellidos}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.apellidos?.message}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="col-md-6">
+              <Form.Label>Telefono</Form.Label>
+              <Form.Control
+                type="text"
+                {...register("celular", { required: "El celular es requerido" })}
+                isInvalid={!!errors.celular}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.nombres?.message}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="col-md-6">
+              <Form.Label>Estado</Form.Label>
+              <Form.Select {...register("tipo_documento", { required: "Seleccione un estado" })}>
+                <option value="">Tipo documento</option>
+                <option value="CC">Cédula de ciudadanía</option>
+              </Form.Select>
+            </Form.Group>
+            
+            <Form.Group className="col-md-6">
+              <Form.Label>Número de documento</Form.Label>
+              <Form.Control
+                type="number"
+                {...register("numero_documento", { required: "El tipo de documento es requerido" })}
+                isInvalid={!!errors.numero_documento}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.numero_documento?.message}
+              </Form.Control.Feedback>
+            </Form.Group>
 
             {/* <Form.Group className="col-md-6">
               <Form.Label>Teléfono</Form.Label>
@@ -142,11 +195,7 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
               </Form.Control.Feedback>
             </Form.Group>
 
-            {/* Cargo */}
-            <Form.Group className="col-md-6">
-              <Form.Label>Cargo</Form.Label>
-              <Form.Control type="text" {...register("cargo")} />
-            </Form.Group>
+            
 
             {/* Regional */}
             <div className="col-md-6">
