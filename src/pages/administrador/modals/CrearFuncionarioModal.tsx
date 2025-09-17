@@ -107,17 +107,6 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
             </Form.Group> */}
 
             <Form.Group className="col-md-6">
-              <Form.Label>Correo</Form.Label>
-              <Form.Control
-                type="email"
-                {...register("email", { required: "El correo es requerido" })}
-                isInvalid={!!errors.email}
-              />
-              <Form.Control.Feedback type="invalid">
-                {errors.email?.message}
-              </Form.Control.Feedback>
-            </Form.Group>
-            <Form.Group className="col-md-6">
               <Form.Label>Nombres</Form.Label>
               <Form.Control
                 type="text"
@@ -181,6 +170,17 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
                 {errors.telefono?.message}
               </Form.Control.Feedback>
             </Form.Group> */}
+            <Form.Group className="col-md-6">
+              <Form.Label>Correo</Form.Label>
+              <Form.Control
+                type="email"
+                {...register("email", { required: "El correo es requerido" })}
+                isInvalid={!!errors.email}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.email?.message}
+              </Form.Control.Feedback>
+            </Form.Group>
 
             {/* Contraseña (solo en crear) */}
             <Form.Group className="col-md-6">
