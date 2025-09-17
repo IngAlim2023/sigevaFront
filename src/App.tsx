@@ -1,58 +1,110 @@
-import { BrowserRouter, Route, Routes, Navigate, Outlet} from 'react-router-dom'
-import './App.css'
-import Home from './pages/Home'
-import Dashboard from './pages/Dashboard'
-import VotacionesActivasPage from './pages/aprendiz/VotacionesActivasPage'
-import Login from './pages/Login'
-import CandidateSelectionPage from './pages/aprendiz/SeleccionarCandidatoPage'
-import ConfirmarVoto from './pages/aprendiz/ConfirmarVoto'
-import Navbar from './pages/Navbar'
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  Navigate,
+  Outlet,
+} from "react-router-dom";
+import "./App.css";
+import Dashboard from "./pages/Dashboard";
+import VotacionesActivasPage from "./pages/aprendiz/VotacionesActivasPage";
+import Login from "./pages/Login";
+import CandidateSelectionPage from "./pages/aprendiz/SeleccionarCandidatoPage";
+import ConfirmarVoto from "./pages/aprendiz/ConfirmarVoto";
+import GestionCandidatos from "./pages/funcionario/GestionCandidatos";
+import CargarAprendices from "./pages/funcionario/CargarAprendices";
+import PanelMetricas from "./pages/funcionario/PanelMetricas";
+import EleccionesActivasPage from "./pages/funcionario/EleccionesActivasPage";
+import AgregarCandidato from "./pages/funcionario/AgregarCandidato";
+import FormEleccion from "./pages/funcionario/FormEleccion";
+import MainLayout from "./layouts/MainLayout";
+import { useAuth } from "./context/auth/auth.context";
+import Inicio from "./pages/Inicio";
+import Aprendices from "./pages/administrador/Aprendices";
+import AprendizForm from "./pages/administrador/AprendizForm";
+import Funcionarios from "./pages/administrador/Funcionarios";
+import { DashboardAdmin } from "./pages/administrador/DashboardAdmin";
+import { Toaster } from "react-hot-toast";
+import CargarAprendicesAdmin from "./pages/administrador/CargarAprendicesAdmin";
+import Equipo from "./pages/Equipo";
+
 
 function PublicLayout() {
   return <Outlet />;
 }
 
-// Layout con navbar + guard
 function PrivateLayout() {
-  // const isAuth = !!localStorage.getItem("token"); 
+  const { isAuthenticated } = useAuth();
+  // const isAuth = !!localStorage.getItem("token");
   // if (!isAuth) return <Navigate to="/" replace />;
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Outlet />;
+}
+
+function FuncionarioLayout() {
   return (
-    <>
-      <Navbar />
+    <MainLayout showSidebar={true}>
       <Outlet />
-    </>
+    </MainLayout>
+  );
+}
+
+function AdminLayout() {
+  return (
+    <MainLayout showSidebar={true}>
+      <Outlet />
+    </MainLayout>
   );
 }
 
 function App() {
-
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/' element={<Home/>}/>
-        <Route path='/dashboard' element={<Dashboard/>}/>
-        <Route path='/votaciones' element={<VotacionesActivasPage/>}/>
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/seleccion' element={<CandidateSelectionPage/>}/>
-     
         {/* Rutas públicas */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<Inicio />} />
+          <Route path="/login" element={<Login perfil="gestor" />} />
+          <Route path="/login-aprendiz" element={<Login perfil="aprendiz" />} />
+          <Route path="/equipo" element={<Equipo />} />
         </Route>
 
-        {/* Rutas privadas */}
+        {/* Rutas de Aprendiz */}
         <Route element={<PrivateLayout />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/votaciones" element={<VotacionesActivasPage />} />
-          <Route path='/confirmar-voto' element={<ConfirmarVoto/>} />
+          <Route path="/seleccion/:id" element={<CandidateSelectionPage />} />
+          <Route path="/confirmar-voto" element={<ConfirmarVoto />} />
+
+          {/* Rutas de Funcionario */}
+          <Route element={<FuncionarioLayout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/gestion-candidatos" element={<GestionCandidatos />} />
+            <Route path="/cargar-aprendices" element={<CargarAprendices />} />
+            <Route path="/panel-metricas" element={<PanelMetricas />} />
+            <Route path="/elecciones" element={<EleccionesActivasPage />} />
+            <Route path="/agregar-candidato" element={<AgregarCandidato />} />
+            <Route path="/nueva-eleccion" element={<FormEleccion />} />
+          </Route>
+
+          {/* Rutas de Administrador */}
+          <Route element={<AdminLayout />}>
+            <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+            <Route path="/aprendices" element={<Aprendices />} />
+            <Route path="/funcionarios" element={<Funcionarios />} />
+             <Route path="/cargar-aprendices-admin" element={<CargarAprendicesAdmin/>} />
+            <Route path="/aprendiz-form" element={<AprendizForm />} />
+          </Route>
         </Route>
 
-        {/* Redirección en caso de ruta no encontrada */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <Toaster position="top-right" reverseOrder={false} />
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

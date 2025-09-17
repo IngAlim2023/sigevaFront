@@ -1,0 +1,188 @@
+/* Estilos generales del footer */
+.footer {
+  background-color: #ffffff;
+  color: #4a5568;
+  padding: 2rem 0 1.5rem;
+  margin-top: auto;
+  border-top: 1px solid #e2e8f0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  position: relative;
+  z-index: 10;
+  margin-left: 0;
+  transition: margin-left 0.3s ease;
+}
+
+@media (min-width: 992px) {
+  .footer {
+    margin-left: 192px;
+    width: calc(100% - 192px);
+  }
+}
+
+/* Estilos para los títulos de sección */
+.footer h6 {
+  color: #2d3748;
+  font-weight: 600;
+  font-size: 1.05rem;
+  margin-bottom: 1.25rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+  letter-spacing: 0.5px;
+}
+
+.footer h6::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 36px;
+  height: 3px;
+  background-color: #5027BC;
+  border-radius: 2px;
+}
+
+/* Estilos para los enlaces */
+.footer a {
+  color: #4a5568;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  font-size: 0.925rem;
+  display: inline-block;
+  margin-bottom: 0.5rem;
+}
+
+.footer a:hover {
+  color: #5027BC;
+  transform: translateX(3px);
+  text-decoration: none;
+}
+
+/* Estilos para los iconos de redes sociales */
+.social-links {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background-color: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  color: #4a5568;
+  transition: all 0.2s ease;
+}
+
+.social-links a:hover {
+  background-color: #5027BC;
+  color: white !important;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(80, 39, 188, 0.2);
+  border-color: #5027BC;
+}
+
+/* Estilo para el botón de ir arriba */
+.bg-primary {
+  background-color: #5027BC !important;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.bg-primary:hover {
+  background-color: #3f1fa1 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(80, 39, 188, 0.25);
+}
+
+/* Ajustes responsivos */
+@media (max-width: 991.98px) {
+  .footer {
+    text-align: center;
+    padding: 1.5rem 0;
+  }
+  
+  .footer h6 {
+    margin-top: 1.5rem;
+  }
+  
+  .footer h6::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .social-links {
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  
+  .list-unstyled {
+    padding-left: 0;
+    margin-bottom: 1.5rem;
+  }
+  
+  .position-fixed {
+    right: 1rem !important;
+    bottom: 1rem !important;
+  }
+}
+
+/* Animación y posición del botón flotante */
+.position-fixed {
+  opacity: 0.9;
+  transition: all 0.3s ease;
+  z-index: 99;
+  right: 2rem;
+  bottom: 2rem;
+  margin-left: 192px; /* Same as sidebar width */
+}
+
+@media (max-width: 991.98px) {
+  .position-fixed {
+    margin-left: 0;
+  }
+}
+
+.position-fixed:hover {
+  opacity: 1;
+  transform: translateY(-3px);
+}
+
+/* Animación suave para el botón de ir arriba */
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0); }
+}
+
+/* Mostrar/ocultar botón basado en el scroll */
+.position-fixed {
+  animation: float 3s ease-in-out infinite;
+  animation-play-state: paused;
+}
+
+.position-fixed:hover {
+  animation-play-state: running;
+}
+
+/* Estilos para el copyright */
+.footer .text-muted {
+  font-size: 0.85rem;
+  color: #718096 !important;
+}
+
+/* Mejoras en la separación de secciones */
+.footer .row > div {
+  margin-bottom: 1.5rem;
+}
+
+/* Ajuste para el logo */
+.footer img {
+  max-height: 42px;
+  width: auto;
+  margin-bottom: 1rem;
+}

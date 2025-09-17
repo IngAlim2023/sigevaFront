@@ -6,14 +6,14 @@ const Navbar = () => {
 
 
   return (
-    <nav className="navbar navbar-light bg-light shadow">
+    <nav className="navbar navbar-light bg-light shadow mb-3" >
       <div className="container-fluid d-flex justify-content-between align-items-center">
         {/* Título o Logo */}
         <Link className="navbar-brand fw-bold text-primary m-0 logo-text" to="/home">
           <img
             src={"../public/Sigeva.svg"}
             alt="Logo"
-            style={{ height: "40px" }} // puedes ajustar tamaño
+            style={{ height: "30px" }} // puedes ajustar tamaño
           />
         </Link>
 
