@@ -57,28 +57,47 @@ export const EditarFuncionarioModal: React.FC<EditarFuncionarioModalProps> = ({
 
         <Form onSubmit={onSubmit}>
           <div className="row g-3">
-            {/* Nombre */}
-            {/* <Form.Group className="col-md-6">
-              <Form.Label>Nombre</Form.Label>
+
+            {/* nombres */}
+            <Form.Group className="col-md-6">
+              <Form.Label>Nombres</Form.Label>
               <Form.Control
                 type="text"
-                name="nombre"
-                value={formData?.nombre || ""}
+                name="nombres"
+                value={formData?.nombres || ""}
                 onChange={onInputChange}
               />
-            </Form.Group> */}
-
-            {/* Documento */}
-            {/* <Form.Group className="col-md-6">
-              <Form.Label>Documento</Form.Label>
+            </Form.Group>
+            {/* apellidos */}
+            <Form.Group className="col-md-6">
+              <Form.Label>Apellidos</Form.Label>
               <Form.Control
                 type="text"
-                name="documento"
-                value={formData?.documento || ""}
+                name="apellidos"
+                value={formData?.apellidos || ""}
                 onChange={onInputChange}
               />
-            </Form.Group> */}
-
+            </Form.Group>
+            {/* apellidos */}
+            <Form.Group className="col-md-6">
+              <Form.Label>Celular</Form.Label>
+              <Form.Control
+                type="text"
+                name="celular"
+                value={formData?.celular || ""}
+                onChange={onInputChange}
+              />
+            </Form.Group>
+            {/* apellidos */}
+            <Form.Group className="col-md-6">
+              <Form.Label>Numero documento</Form.Label>
+              <Form.Control
+                type="text"
+                name="numero_documento"
+                value={formData?.numero_documento || ""}
+                onChange={onInputChange}
+              />
+            </Form.Group>
             {/* Email */}
             <Form.Group className="col-md-6">
               <Form.Label>Correo</Form.Label>
@@ -89,25 +108,12 @@ export const EditarFuncionarioModal: React.FC<EditarFuncionarioModalProps> = ({
                 onChange={onInputChange}
               />
             </Form.Group>
-
-            {/* Teléfono */}
-            {/* <Form.Group className="col-md-6">
-              <Form.Label>Teléfono</Form.Label>
+             <Form.Group className="col-md-6">
+              <Form.Label>Password</Form.Label>
               <Form.Control
-                type="text"
-                name="telefono"
-                value={formData?.telefono || ""}
-                onChange={onInputChange}
-              />
-            </Form.Group> */}
-
-            {/* Cargo */}
-            <Form.Group className="col-md-6">
-              <Form.Label>Cargo</Form.Label>
-              <Form.Control
-                type="text"
-                name="cargo"
-                value={formData?.cargo || ""}
+                type="password"
+                name="password"
+                value={formData?.email || ""}
                 onChange={onInputChange}
               />
             </Form.Group>
