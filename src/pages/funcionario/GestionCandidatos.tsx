@@ -4,6 +4,7 @@ import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AgregarCandidatoModal from "../../components/candidatos/AgregarCandidatoModal";
 import ModificarCandidatoModal from '../../components/candidatos/ModificarCandidatoModal';
 import { api } from "../../api";
+import toast from 'react-hot-toast';
 
 interface Eleccion {
   ideleccion: number;
@@ -18,29 +19,26 @@ interface Programa {
   version: string;
   duracion: number;
 }
-interface Aprendiz {
-  idaprendiz: number;
+// interface Aprendiz {
+//   idaprendiz: number;
+//   nombres: string;
+//   apellidos: string;
+//   programa: Programa;
+//   email: string;
+// }
+
+interface Candidato {
+  idcandidatos: number;
   nombres: string;
   apellidos: string;
-  numeroDocumento: string;
   programa: Programa;
   email: string;
 }
 
-interface Candidato {
-  idcandidatos: number;
-  ideleccion: number;
-  idaprendiz: number;
-  nombres: string;
-  numeroTarjeton: string;
-  propuesta: string;
-  foto: string;
-}
-
-// const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
+const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
 
 const GestionCandidatos = () => {
-  const [aprendices, setAprendices] = useState<Aprendiz[]>([]);
+  // const [aprendices, setAprendices] = useState<Aprendiz[]>([]);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [showModalModificar, setShowModalModificar] = useState(false);
@@ -48,6 +46,7 @@ const GestionCandidatos = () => {
   const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [elecciones, setElecciones] = useState<Eleccion[]>([]);
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const fetchCandidatos = async () => {
     if (!isAuthenticated || !user) return;
@@ -87,21 +86,22 @@ const GestionCandidatos = () => {
 
     const fetchElecciones = async () => {
       try {
-        const res = await api.get(`/api/eleccion/centrof/${user?.centroFormacion}`);
-        if (!res.data) {
+        const res = await fetch(`${VITE_URL_BACK}/api/eleccion`);
+        if (!res.ok) {
           throw new Error("Error al traer elecciones");
         }
-        console.log("elecciones: ", res.data);
-        setElecciones(res.data.data || []);
+        const data = await res.json();
+        console.log(data);
+        setElecciones(data);
+
       } catch (error) {
         console.error(error);
       }
     };
-
     fetchElecciones();
-    fetchCandidatos();
+
     fetchAprendices();
-  }, [isAuthenticated, user, elecciones.length, candidatos.length, aprendices.length]);
+  }, [isAuthenticated, user, elecciones.length]);
 
   if (!isAuthenticated) {
     return <p>Debes iniciar sesión para gestionar candidatos</p>;
@@ -109,6 +109,42 @@ const GestionCandidatos = () => {
 
   const handleAgregarCandidato = (nuevo: Candidato) => {
     setCandidatos(prev => [...prev, nuevo]);
+  };
+
+  const handleSaveCandidato = async (formData: FormData) => {
+    try {
+      setLoading(true);
+      
+      if (editingId) {
+        // Update existing candidate
+        await api.put(`/api/candidatos/actualizar/${editingId}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        toast.success('Candidato actualizado correctamente');
+      } else {
+        // Create new candidate
+        await api.post('/api/candidatos/crear', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        toast.success('Candidato creado correctamente');
+      }
+      
+      // Refresh the list
+      const res = await api.get(`/api/candidatos/listar/cformacion/${user?.centroFormacion}`);
+      setCandidatos(res.data.data || []);
+      setShowModal(false);
+      setEditingId(null);
+    } catch (error: any) {
+      console.error('Error al guardar el candidato:', error);
+      const errorMessage = error.response?.data?.message || 'Error al guardar el candidato';
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onEditar = async (id: number) => {
@@ -172,8 +208,8 @@ const GestionCandidatos = () => {
                 <tr>
                   <th className="ps-4" style={{ width: 90 }}>Foto</th>
                   <th>Nombre Completo</th>
-                  <th>Numero voto</th>
-                  <th>Propuesta</th>
+                  <th>Programa de Formación</th>
+                  <th>Correo Electrónico</th>
                   <th className="text-center" style={{ width: 120 }}>Acciones</th>
                 </tr>
               </thead>
@@ -189,17 +225,17 @@ const GestionCandidatos = () => {
                     <tr key={c.idcandidatos}>
                       <td className="ps-4">
                         <img
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(c.nombres)}&background=random&size=128&rounded=true&bold=true&format=png`}
-                          alt={`${c.nombres} `}
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(c.nombres + ' ' + c.apellidos)}&background=random&size=128&rounded=true&bold=true&format=png`}
+                          alt={`${c.nombres} ${c.apellidos}`}
                           className="rounded-circle"
                           style={{ width: 48, height: 48, objectFit: "cover" }}
                         />
                       </td>
                       <td className="fw-semibold">
-                        {c.nombres}
+                        {c.nombres} 
                       </td>
-                      <td className="text-muted">{c.numeroTarjeton || "Sin programa"}</td>
-                      <td className="text-muted">{c.propuesta}</td>
+                      <td className="text-muted">{c.programa?.programa || "Sin programa"}</td>
+                      <td className="text-muted">{c.email}</td>
                       <td>
                         <div className="d-flex justify-content-center gap-3">
                           <button
@@ -234,10 +270,12 @@ const GestionCandidatos = () => {
         </div>
       </div>
 
+
       {candidatoSeleccionado && (
         <ModificarCandidatoModal
           show={showModalModificar}
           onHide={() => setShowModalModificar(false)}
+          candidato={candidatoSeleccionado}
           candidato={candidatoSeleccionado}
           onSave={(candidatoEditado) => {
             // actualizar la lista en el front
@@ -256,14 +294,18 @@ const GestionCandidatos = () => {
       )}
 
 
+
+      {/* Modal para agregar nuevo candidato */}
+
       <AgregarCandidatoModal
         show={showModal}
         onHide={() => setShowModal(false)}
-        onSave={handleAgregarCandidato}
+        onSave={handleSaveCandidato}
+        candidatos={candidatos}
         elecciones={elecciones || []}
-        aprendices={aprendices || []}
       />
 
+      {/* estilos finos en línea para redondeo/card */}
       <style>{`
         .card { border-radius: 14px; }
         thead tr th { border-top: none; }

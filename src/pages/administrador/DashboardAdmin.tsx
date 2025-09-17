@@ -117,12 +117,14 @@ export const DashboardAdmin = () => {
                     onClick={() => navigate("/aprendiz-form")}
                   />
                   <Card.Title>Añadir Aprendiz</Card.Title>
+
+                  
                 </Card.Body>
               </Card>
             </Col>
 
             <Col md="auto">
-              <Card className="shadow-sm tex p-3">
+              <Card className="shadow-sm text-center p-3">
                 <Card.Body>
                   <FaPlusCircle
                     size={40}
