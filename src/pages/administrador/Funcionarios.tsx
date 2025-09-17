@@ -2,29 +2,48 @@ import React, { useEffect, useState } from "react";
 import { Button, Table, Form, Pagination, InputGroup } from "react-bootstrap";
 import Swal from "sweetalert2";
 import { FaEdit, FaPlus, FaSearch } from "react-icons/fa";
-import { FuncionarioFormModal } from "./modals/FuncionarioFormModal";
+import { EditarFuncionarioModal } from "./modals/EditarFuncionarioModal";
+import { CrearFuncionarioModal } from "./modals/CrearFuncionarioModal";
 import { FuncionarioDetalleModal } from "./modals/FuncionarioDetalleModal"; 
 import { api } from "../../api";
+
+// ----------------- Interfaces -----------------
+interface Regional {
+  idregional: number;
+  regional: string;
+  telefono: string;
+  direccion: string;
+}
+
+interface CentroFormacion {
+  idcentroFormacion: number;
+  centroFormacioncol: string;
+  direccion: string;
+  telefono: string;
+  correo: string;
+  subdirector: string;
+  correosubdirector: string;
+  regional: Regional;
+}
 
 interface Funcionario {
   id: number;
   email: string;
   estado: string;
-  idcentro_formacion: number;
+  centroFormacion?: CentroFormacion; // opcional por seguridad
 }
-
-const getNombrePerfil = (idcentro_formacion: number): string =>
-  idcentro_formacion === 1 ? "Funcionario" : `Centro ${idcentro_formacion}`;
 
 const ITEMS_PER_PAGE = 5;
 
+// ----------------- Componente -----------------
 const Funcionarios: React.FC = () => {
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // estados de formulario
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState({
     email: "",
     estado: "activo",
@@ -34,15 +53,38 @@ const Funcionarios: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [formLoading, setFormLoading] = useState(false);
 
-  //  estados para el modal de detalle
+  // estados de detalle
   const [detalleFuncionario, setDetalleFuncionario] = useState<Funcionario | null>(null);
   const [showDetalle, setShowDetalle] = useState(false);
 
+  // estados de tabla
+  const [currentPage, setCurrentPage] = useState(1);
+  const [busqueda, setBusqueda] = useState("");
+
+  // --------- FILTRO ---------
+  const funcionariosFiltrados = funcionarios.filter((func) =>
+    func.email.toLowerCase().includes(busqueda.toLowerCase()) ||
+    func.centroFormacion?.centroFormacioncol
+      ?.toLowerCase()
+      .includes(busqueda.toLowerCase()) ||
+    func.centroFormacion?.regional?.regional
+      ?.toLowerCase()
+      .includes(busqueda.toLowerCase())
+  );
+
+  // --------- PAGINACIÓN ---------
+  const totalPages = Math.ceil(funcionariosFiltrados.length / ITEMS_PER_PAGE);
+  const currentFuncionarios = funcionariosFiltrados.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // --------- CARGA DE DATOS ---------
   const cargarFuncionarios = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get("/api/usuarios/funcionarios");
+      const response = await api.get("api/usuarios/funcionarios");
       setFuncionarios(response.data);
     } catch (err) {
       const message =
@@ -62,12 +104,13 @@ const Funcionarios: React.FC = () => {
     }
   };
 
+  // --------- CREAR / EDITAR ---------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
     try {
       const isEditing = Boolean(editingId);
-      const url = isEditing ? `/usuarios/${editingId}` : "/api/usuarios/crear";
+      const url = isEditing ? `api/usuarios/${editingId}` : "api/usuarios/crear";
       const requestData = {
         email: formData.email,
         estado: formData.estado,
@@ -103,6 +146,7 @@ const Funcionarios: React.FC = () => {
     }
   };
 
+  // --------- ACTIVAR/DESACTIVAR ---------
   const handleToggleStatus = async (id: number, nuevoEstado: string) => {
     const result = await Swal.fire({
       title: "¿Estás seguro?",
@@ -118,7 +162,7 @@ const Funcionarios: React.FC = () => {
     });
     if (!result.isConfirmed) return;
     try {
-      await api.put(`/usuarios/${id}`, { estado: nuevoEstado });
+      await api.put(`/api/usuarios/${id}`, { estado: nuevoEstado });
       setFuncionarios(
         funcionarios.map((func) =>
           func.id === id ? { ...func, estado: nuevoEstado } : func
@@ -146,6 +190,7 @@ const Funcionarios: React.FC = () => {
     }
   };
 
+  // --------- HANDLERS ---------
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -157,7 +202,7 @@ const Funcionarios: React.FC = () => {
     setFormData({
       email: funcionario.email,
       estado: funcionario.estado,
-      idcentro_formacion: funcionario.idcentro_formacion,
+      idcentro_formacion: funcionario.centroFormacion?.idcentroFormacion || 1,
       password: "",
     });
     setEditingId(funcionario.id);
@@ -181,16 +226,11 @@ const Funcionarios: React.FC = () => {
     setEditingId(null);
   };
 
-  const totalPages = Math.ceil(funcionarios.length / ITEMS_PER_PAGE);
-  const currentFuncionarios = funcionarios.slice(
-    (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
-  );
-
   useEffect(() => {
     cargarFuncionarios();
   }, []);
 
+  // ----------------- Render -----------------
   return (
     <div className="container mt-4">
       <div className="mb-4">
@@ -201,6 +241,8 @@ const Funcionarios: React.FC = () => {
           formación.
         </p>
       </div>
+
+      {/* Buscador + Botón */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div className="w-50">
           <InputGroup>
@@ -209,8 +251,13 @@ const Funcionarios: React.FC = () => {
             </InputGroup.Text>
             <Form.Control
               type="search"
-              placeholder="Buscar por correo o centro de formación..."
+              placeholder="Buscar por correo, centro o regional..."
               className="border-start-0"
+              value={busqueda}
+              onChange={(e) => {
+                setBusqueda(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </InputGroup>
         </div>
@@ -225,34 +272,31 @@ const Funcionarios: React.FC = () => {
           <FaPlus className="me-2" /> Nuevo Funcionario
         </Button>
       </div>
+
+      {/* Tabla */}
       <div className="table-responsive">
         <Table striped bordered hover className="mt-3">
           <thead>
             <tr>
               <th>Email</th>
               <th>Estado</th>
-              <th>Perfil</th>
+              <th>Centro de Formación</th>
+              <th>Regional</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={4} className="text-center">
-                  Cargando...
-                </td>
+                <td colSpan={5} className="text-center">Cargando...</td>
               </tr>
             ) : error ? (
               <tr>
-                <td colSpan={4} className="text-center text-danger">
-                  {error}
-                </td>
+                <td colSpan={5} className="text-center text-danger">{error}</td>
               </tr>
             ) : funcionarios.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center">
-                  No hay funcionarios registrados
-                </td>
+                <td colSpan={5} className="text-center">No hay funcionarios registrados</td>
               </tr>
             ) : (
               currentFuncionarios.map((funcionario) => (
@@ -267,7 +311,8 @@ const Funcionarios: React.FC = () => {
                       {funcionario.estado}
                     </span>
                   </td>
-                  <td>{getNombrePerfil(funcionario.idcentro_formacion)}</td>
+                  <td>{funcionario.centroFormacion?.centroFormacioncol || "Sin centro"}</td>
+                  <td>{funcionario.centroFormacion?.regional?.regional || "Sin regional"}</td>
                   <td>
                     <Button
                       variant="outline-info"
@@ -295,9 +340,7 @@ const Funcionarios: React.FC = () => {
                         )
                       }
                     >
-                      {funcionario.estado === "activo"
-                        ? "Desactivar"
-                        : "Activar"}
+                      {funcionario.estado === "activo" ? "Desactivar" : "Activar"}
                     </Button>
                   </td>
                 </tr>
@@ -306,6 +349,8 @@ const Funcionarios: React.FC = () => {
           </tbody>
         </Table>
       </div>
+
+      {/* Paginación */}
       {totalPages > 1 && (
         <Pagination className="d-flex justify-content-center mt-3">
           <Pagination.Prev
@@ -334,21 +379,33 @@ const Funcionarios: React.FC = () => {
           />
         </Pagination>
       )}
-      <FuncionarioFormModal
-        show={showModal}
-        onHide={resetForm}
-        onSubmit={handleSubmit}
-        formData={formData}
-        onInputChange={handleInputChange}
-        isEditing={!!editingId}
-        error={formError}
-        loading={formLoading}
-      />
-      <FuncionarioDetalleModal
-        show={showDetalle}
-        onHide={() => setShowDetalle(false)}
-        funcionario={detalleFuncionario}
-      />
+
+      {/* Modal Crear */}
+<CrearFuncionarioModal
+  show={showModal && !editingId}
+  onHide={resetForm}
+  error={formError || undefined}
+  loading={formLoading}
+/>
+
+{/* Modal Editar */}
+<EditarFuncionarioModal
+  show={showModal && !!editingId}
+  onHide={resetForm}
+  onSubmit={handleSubmit}
+  formData={formData}
+  onInputChange={handleInputChange}
+  error={formError || undefined}
+  loading={formLoading}
+/>
+
+{/* Modal Detalle */}
+<FuncionarioDetalleModal
+  showModal={showDetalle}
+  handleClose={() => setShowDetalle(false)}
+  funcionario={detalleFuncionario}
+/>
+
     </div>
   );
 };
