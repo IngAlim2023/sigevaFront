@@ -16,7 +16,7 @@ export const DashboardAdmin = () => {
     const fetchData = async () => {
       try {
         // Votaciones activas
-        const resActivas = await api.get("/api/eleccion/activas");
+        const resActivas = await api.get(user?.perfil =="Administrador"? "api/eleccion/activas":`api/eleccionPorCentro/${user?.centroFormacion}`);
         setVotacionesActivas(resActivas.data.eleccionesActivas?.length || 0);
 
         // Usuarios registrados (aprendices)
@@ -49,7 +49,7 @@ export const DashboardAdmin = () => {
                   color: "#5F2EEA",
                 }}
               >
-                Administrador
+                {user?.perfil}
               </span>
             </h2>
             <p className="text-muted">
