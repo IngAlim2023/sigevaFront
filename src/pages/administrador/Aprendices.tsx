@@ -12,6 +12,7 @@ import { api } from "../../api";
 import DataTable from "react-data-table-component";
 import { AiOutlinePlusCircle } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/auth/auth.context";
 
 export interface AprendizResponse {
   idaprendiz: number;
@@ -42,15 +43,23 @@ const Aprendices: React.FC = () => {
   const navigate = useNavigate();
   const [buscar, setBuscar] = useState("");
   const [aprendices, setAprendices] = useState<AprendizResponse[]>([]);
-
-  const getAprendices = async () => {
-    const res = await api.get("api/aprendiz/listar");
-    setAprendices(res.data);
-  };
+  const { user } = useAuth();
 
   useEffect(() => {
-    getAprendices();
-  }, []);
+      const loadData = async () => {
+      if (!user?.centroFormacion) {
+        console.log("Usuario o CentroFormacion no disponible");
+        return;
+      }
+      try {
+        const res = await api.get(`api/aprendiz/centros/${user?.centroFormacion}`);
+        setAprendices(res.data)
+      } catch (error) {
+        console.error("Error al cargar las votaciones:", error);
+      }
+    };
+    loadData();
+  }, [user?.centroFormacion]);
 
   const filteredData = aprendices.filter((a) =>
     [a.nombres, a.apellidos, a.numeroDocumento, a.email]
@@ -94,7 +103,9 @@ const Aprendices: React.FC = () => {
     {
       name: "Estado",
       cell: (row) => (
-        <Badge bg={row.estado === "activo" ? "success" : "danger"}>
+        <Badge bg={row.estado.toLowerCase() === "activo" || row.estado.toLowerCase() == 'en formacion' || row.estado.toLowerCase() == 'certificado'?
+          "success" : row.estado.toLowerCase() == 'trasladado'?
+          "warning" : "danger"}>
           {row.estado}
         </Badge>
       ),
@@ -142,9 +153,11 @@ const Aprendices: React.FC = () => {
         </div>
         <div className="col-md-6 mb-2">
           <strong>Estado </strong>{" "}
-          <Badge bg={data.estado === "activo" ? "success" : "danger"}>
-            {data.estado}
-          </Badge>
+            <Badge bg={data.estado.toLowerCase() === "activo" || data.estado.toLowerCase() == 'en formacion' || data.estado.toLowerCase() == 'certificado'?
+              "success" : data.estado.toLowerCase() == 'trasladado'?
+              "warning" : "danger"}>
+              {data.estado}
+            </Badge>
         </div>
       </div>
     </div>
