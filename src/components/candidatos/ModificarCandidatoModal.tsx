@@ -1,9 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import Select from "react-select"
-import axios from "axios";
-
-
+import { api } from "../../api";
 
 interface Aprendiz {
   idaprendiz: number;
@@ -20,33 +18,36 @@ interface Eleccion {
 interface ModificarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
+  candidato: any | null;
   onSave: (candidato: any) => void;
-  // candidatos: Candidato[];
   elecciones: Eleccion[];
   aprendices: Aprendiz[];
-  candidato: any;
 }
 
-const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
-
-
-const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }: ModificarCandidatoModalProps) => {
-  const [formData, setFormData] = useState<{
-    nombres: string;
-    foto: File | string | null;
-    idaprendiz: number | null;
-    ideleccion: number | null;
-    propuesta: string;
-    numero_tarjeton: string;
-  }>({
+const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, elecciones }: ModificarCandidatoModalProps) => {
+  const [formData, setFormData] = useState({
     nombres: "",
     foto: null as File | null,
-    idaprendiz: null,
-    ideleccion: null,
+    idaprendiz: null as number | null,
+    ideleccion: null as number | null,
     propuesta: "",
     numero_tarjeton: "",
   });
   const [previewUrl, setPreviewUrl] = useState<string>(""); // para previsualizar
+
+  useEffect(() => {
+    if (candidato) {
+      setFormData({
+        nombres: candidato.nombres || "",
+        idaprendiz: candidato.idaprendiz || null,
+        ideleccion: candidato.ideleccion || null,
+        propuesta: candidato.propuesta || "",
+        numero_tarjeton: candidato.numeroTarjeton || "",
+        foto: candidato.foto
+      });
+      setPreviewUrl(typeof candidato.foto === "string" ? candidato.foto : "");
+    }
+  }, [candidato])
 
 
   const aprendizOptions = Array.isArray(aprendices)
@@ -91,8 +92,8 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
       }
       console.log("Datos a enviar:", formData);
 
-      const response = await axios.post(
-        `${VITE_URL_BACK}/api/candidatos/crear`,
+      const response = await api.put(
+        `/api/candidatos/actualizar/${candidato?.idcandidatos}`,
 
         data,
         {
@@ -118,22 +119,6 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
     }
   };
 
-
-  // const handleSelectChange = (selected: any) => {
-  //   if (selected) {
-  //     setFormData({
-  //       ...formData,
-  //       nombres: selected.label,
-  //       idaprendiz: selected.value
-  //     });
-  //   } else {
-  //     setFormData({
-  //       ...formData,
-  //       nombres: "",
-  //       idaprendiz: null,
-  //     });
-  //   }
-  // };
   const handleSelectChange = (selected: any) => {
     if (selected) {
       const aprendiz = aprendices.find((a) => a.idaprendiz === selected.value);
@@ -155,7 +140,7 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
       <Modal.Header closeButton className="border-0 pb-0">
-        <Modal.Title className="fw-bold">Agregar Nuevo Candidato</Modal.Title>
+        <Modal.Title className="fw-bold">Modificar Candidato</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form onSubmit={handleSubmit}>
@@ -170,13 +155,11 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
                     if (e.target.files && e.target.files[0]) {
                       const file = e.target.files[0];
 
-                      // Guardar el File en formData
                       setFormData((prev) => ({
                         ...prev,
                         foto: file,
                       }));
 
-                      // Crear la URL para previsualizar
                       const reader = new FileReader();
                       reader.onloadend = () => {
                         setPreviewUrl(reader.result as string);
@@ -197,8 +180,6 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
                   </div>
                 )}
               </Form.Group>
-
-
             </Col>
             <Col md={8}>
               <Form.Group className="mb-3">
@@ -259,13 +240,12 @@ const ModificarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones 
               </Form.Group>
             </Col>
           </Row>
-
           <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
             <Button variant="outline-secondary" onClick={onHide}>
               Cancelar
             </Button>
             <Button type="submit" className="btn-gradient">
-              Guardar Candidato
+              Actualizar Candidato
             </Button>
           </div>
         </Form>
