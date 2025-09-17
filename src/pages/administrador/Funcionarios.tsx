@@ -45,6 +45,10 @@ const Funcionarios: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
+    nombres:"",
+    apellidos:"",
+    celular:"",
+    numero_documento:"",
     email: "",
     estado: "activo",
     idcentro_formacion: 1,
@@ -112,6 +116,10 @@ const Funcionarios: React.FC = () => {
       const isEditing = Boolean(editingId);
       const url = isEditing ? `api/usuarios/${editingId}` : "api/usuarios/crear";
       const requestData = {
+        nombres:formData.nombres,
+        apellidos:formData.apellidos,
+        celular:formData.celular,
+        numero_documento:formData.numero_documento,
         email: formData.email,
         estado: formData.estado,
         idcentro_formacion: formData.idcentro_formacion.toString(),
