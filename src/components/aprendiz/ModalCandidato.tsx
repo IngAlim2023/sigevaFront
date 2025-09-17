@@ -52,7 +52,19 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            if (otp.length === 0 || otp.length > 6) return alert("El código OTP debe tener 6 dígitos");
+            if (otp.length === 0 || otp.length > 6) 
+                return Swal.fire({
+                            title:"Tu código OTP debe tener los 6 dígitos!",
+                            icon: "error",
+                            draggable: true,
+                            showConfirmButton:true,
+                            confirmButtonText:"Intenta votar de nuevo"
+                        }).then((result)=>{
+                            if(result.isConfirmed){
+                                navigate("/votaciones")
+                            }
+                        }) ;
+
             const { data } = await api.post('api/validaciones/validarOtp', {
                 codigo_otp: otp
             })

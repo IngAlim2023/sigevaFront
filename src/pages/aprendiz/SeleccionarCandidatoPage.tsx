@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import CandidatoCard from "../../components/aprendiz/CandidatoCard";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../../api";
 import SelecionarCandidato from "../../components/aprendiz/ModalCandidato";
-
+import { FaArrowAltCircleLeft } from "react-icons/fa";
 
 
 export default function CandidateSelectionPage() {
@@ -12,6 +12,7 @@ export default function CandidateSelectionPage() {
   const [candidatos, setCandidatos] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [idCandidato, setIdCandidato] = useState("");
+  const navigate=useNavigate();
 
   useEffect(() => {
     const loadData = async () => {
@@ -27,6 +28,7 @@ export default function CandidateSelectionPage() {
     propuesta: string;
     foto: string;
     numeroTarjeton: string;
+    idCandidato: string;
   } | null>(null);
 
 
@@ -36,6 +38,8 @@ export default function CandidateSelectionPage() {
         <Container className="my-4 text-center">
           <div>
             No hay candicatos en esta eleccion disponibles.
+          <div className="d-flex justify-content-start">
+              <Button variant="success" onClick={()=>navigate("/votaciones")}><FaArrowAltCircleLeft/> Volver</Button></div>
           </div>
         </Container>
       ) : (
@@ -44,6 +48,10 @@ export default function CandidateSelectionPage() {
           <p className="text-muted">
             Seleccione un candidato para ver sus propuestas y emitir su voto.
           </p>
+          <div className="d-flex justify-content-start">
+              <Button variant="success" onClick={()=>navigate("/votaciones")}><FaArrowAltCircleLeft/> Volver</Button>
+          </div>
+         
 
           <Row className="g-4 my-4">
             {candidatos.map((c, index) => (
