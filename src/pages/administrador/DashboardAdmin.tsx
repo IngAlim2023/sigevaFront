@@ -4,11 +4,13 @@ import { MdHowToVote, MdOutlineAssignment } from "react-icons/md";
 import { FaUsers, FaPlusCircle } from "react-icons/fa";
 import { api } from "../../api";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/auth/auth.context";
 export const DashboardAdmin = () => {
   const navigate = useNavigate();
   const [votacionesActivas, setVotacionesActivas] = useState<number>(0);
   const [usuariosRegistrados, setUsuariosRegistrados] = useState<number>(0);
   const [votosHoy, setVotosHoy] = useState<number>(0);
+  const {user} = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -18,7 +20,7 @@ export const DashboardAdmin = () => {
         setVotacionesActivas(resActivas.data.eleccionesActivas?.length || 0);
 
         // Usuarios registrados (aprendices)
-        const resUsuarios = await api.get("/api/aprendiz/listar");
+        const resUsuarios = await api.get(user?.perfil == 'Administrador'? "/api/aprendiz/listar" : `api/aprendiz/centros/${user?.centroFormacion}`);
         setUsuariosRegistrados(resUsuarios.data?.length || 0);
 
         // Votos totales hoy
