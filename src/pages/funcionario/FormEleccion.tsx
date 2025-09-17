@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
+import { Form, Button, Container, Row, Col, FormLabel } from "react-bootstrap";
 import "../funcionario/form.css";
 import { useAuth } from "../../context/auth/auth.context";
 import { api } from "../../api";
@@ -8,7 +8,7 @@ import { api } from "../../api";
 function FormEleccion() {
 
   const [nombre, setNombre] = useState("");
-  //const [jornada, setJornada] = useState<string>("");
+  const [jornada, setJornada] = useState<string>("");
   const [fecha_inicio, setFechaInicio] = useState("");
   const [fecha_fin, setFechaCierre] = useState("");
   const [hora_inicio, setHoraInicio] = useState("");
@@ -28,6 +28,7 @@ function FormEleccion() {
           {
             idcentro_formacion: user?.centroFormacion,
             nombre,
+            jornada,
             fecha_inicio,
             fecha_fin,
             hora_inicio: `${fecha_inicio} ${hora_inicio}:00`,
@@ -58,16 +59,31 @@ function FormEleccion() {
               </p>
 
               <Form onSubmit={handleSubmit2}>
-                <Form.Group className="mb-4">
-                  <Form.Label>Nombre de la elección</Form.Label>
-                  <Form.Control
-                    type="text"
-                    value={nombre}
-                    onChange={(e) => setNombre(e.target.value)}
-                    placeholder="Ej: Elección de representante estudiantil 2024"
-                    required
-                  />
-                </Form.Group>
+              <Row className="g-3 mb-4">
+                <Col md={8}>
+                  <Form.Group className="mb-4">
+                    <Form.Label>Nombre de la elección</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        placeholder="Ej: Elección de representante estudiantil 2024"
+                        required
+                      />
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
+                  <Form.Group className="mb-4">
+                    <FormLabel>Selecciona la jornada</FormLabel>
+                    <Form.Select required onChange={(e)=>setJornada(e.target.value)}>
+                      <option value="">Seleccione...</option>
+                      <option value="Mañana">Mañana</option>
+                      <option value="Tarde">Tarde</option>
+                      <option value="Noche">Noche</option>
+                    </Form.Select>
+                    </Form.Group>
+                </Col>
+                </Row>
 
                 <Row className="g-3 mb-4">
                   <Col md={6}>
