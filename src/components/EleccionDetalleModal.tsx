@@ -5,7 +5,7 @@ interface Eleccion {
   regional: string;
   titulo: string;
   fechaInicio: string;
-  fechaTerminacion: string;
+  fechaFin: string;
   jornada: string;
 }
 
@@ -28,7 +28,7 @@ export default function EleccionModal({
             <h4 className="fw-bold mb-3">{eleccion.titulo}</h4>
             <p className="text-muted">
               <FaCalendarAlt className="me-2" />
-              {eleccion.fechaInicio} - {eleccion.fechaTerminacion}
+              {eleccion.fechaInicio} - {eleccion.fechaFin}
             </p>
             <p>
               <strong>Jornada:</strong> {eleccion.jornada}
