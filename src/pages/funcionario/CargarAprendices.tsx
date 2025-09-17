@@ -139,36 +139,32 @@ export default function CargarAprendices() {
 
 
     try {
-  const res = await api.post(UPLOAD_URL, fd, {
-    headers: { "Content-Type": "multipart/form-data" },
-    onUploadProgress: (pe) => {
-      if (!pe.total) return;
-      const pct = Math.round((pe.loaded * 100) / pe.total);
-      setUploadPct(pct);
-    },
-  });
+      const res = await api.post(UPLOAD_URL, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (pe) => {
+          if (!pe.total) return;
+          const pct = Math.round((pe.loaded * 100) / pe.total);
+          setUploadPct(pct);
+        },
+      });
 
-  const inserted = res?.data?.inserted ?? 0;
-  const skipped = res?.data?.skipped ?? 0;
 
-  setMsg({
-    type: "success",
-    text: `Importación completada. Insertados: ${inserted}. Saltados: ${skipped}.`,
-  });
-  setShowToast(true);
-} catch (err: any) {
-   console.error('Error al subir Excel (axios error):', err);
-  console.error('Error response data:', err?.response?.data);
-  const apiMsg =
-    err?.response?.data?.message ||
-    err?.message ||
-    "Error al importar aprendices. Revisa el formato del archivo y los campos requeridos.";
-  setMsg({ type: "danger", text: apiMsg });
-  setShowToast(true);
-} finally {
-  setSubiendo(false);
-}
-  }
+      setMsg({
+        type: "success",
+        text: res?.data?.message || "Aprendices importados con éxito",
+      });
+      setShowToast(true);
+    } catch (err: any) {
+      const apiMsg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Error al importar aprendices. Revisa el formato del archivo y los campos requeridos.";
+      setMsg({ type: "danger", text: apiMsg });
+      setShowToast(true);
+    } finally {
+      setSubiendo(false);
+    }
+  };
 
 
   return (
