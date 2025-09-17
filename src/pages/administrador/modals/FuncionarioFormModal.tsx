@@ -7,15 +7,6 @@ import { useForm } from "react-hook-form";
 interface FuncionarioFormModalProps {
   show: boolean;
   onHide: () => void;
-  formData: {
-    email: string;
-    estado: string;
-    perfil: string;
-    password?: string;
-  };
-  onInputChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => void;
   isEditing: boolean;
   error?: string;
   loading?: boolean;
@@ -24,15 +15,14 @@ interface FuncionarioFormModalProps {
 export const FuncionarioFormModal: React.FC<FuncionarioFormModalProps> = ({
   show,
   onHide,
-  formData,
   isEditing,
   error,
   loading = false,
 }) => {
-  const [regionales, setRegionales] = useState<any>([]);
-  const [centros, setCentros] = useState<any>([]);
-  const [idcentro_formacion, setIdcentro_formacion] = useState<any>(0);
-  const [idRegional, setIdRegional] = useState(0);
+  const [regionales, setRegionales] = useState<any[]>([]);
+  const [centros, setCentros] = useState<any[]>([]);
+  const [idRegional, setIdRegional] = useState<number>(0);
+  const [idCentroFormacion, setIdCentroFormacion] = useState<number>(0);
 
   const {
     register,
@@ -40,174 +30,162 @@ export const FuncionarioFormModal: React.FC<FuncionarioFormModalProps> = ({
     formState: { errors },
   } = useForm();
 
+  // Traer regionales al abrir modal
   useEffect(() => {
-    const loadData = async () => {
-      const regio = await api.get(
-        "https://sigevaback-real.onrender.com/api/regionales"
-      );
-      setRegionales(regio.data);
-    };
-    loadData();
+    api.get("/api/regionales").then((res) => setRegionales(res.data));
   }, []);
 
+  // Traer centros cuando se seleccione un regional
   useEffect(() => {
-    const loadData = async () => {
-      const centrosF = await api.get(
-        `https://sigevaback-real.onrender.com/api/centrosFormacion/obtiene/porRegional/${idRegional}`
-      );
-      setCentros(centrosF.data.data);
-    };
-    loadData();
+    if (!idRegional) return;
+    api
+      .get(`/api/centrosFormacion/obtiene/porRegional/${idRegional}`)
+      .then((res) => setCentros(res.data.data));
   }, [idRegional]);
 
-  const options = regionales.map((value: any) => ({
-    value: value.idregional,
-    label: value.regional,
+  // Generar opciones para react-select
+  const optionsRegionales = regionales.map((r) => ({
+    value: r.idregional,
+    label: r.regional,
   }));
 
-  const optionsCentro = centros.map((value: any) => ({
-    value: value.idcentroFormacion,
-    label: value.centroFormacioncol,
+  const optionsCentros = centros.map((c) => ({
+    value: c.idcentroFormacion,
+    label: c.centroFormacioncol,
   }));
 
   const onSubmit = async (data: any) => {
-  const submissionData = {
-    ...data,
-    idcentro_formacion
-  };
-  if(idcentro_formacion=== 0){
-    return alert('Selecciona un centro de formacion')
-  }
-  try{
-    const res = await api.post('/api/usuarios/crear', submissionData);
-    setIdcentro_formacion(0);
-  }catch(e){
-    alert('No se logro crear el usuario')
-  }
-};
+    if (!idCentroFormacion) {
+      return alert("Selecciona un centro de formación");
+    }
 
+    const submissionData = {
+      ...data,
+      idcentro_formacion: idCentroFormacion,
+    };
 
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
+    try {
+      await api.post("/api/usuarios/crear", submissionData);
+      setIdCentroFormacion(0);
+      onHide();
+    } catch {
+      alert("No se logró crear el usuario");
+    }
   };
 
   return (
     <Modal show={show} onHide={onHide} size="lg" centered>
-      <Modal.Header closeButton className="border-0 pb-0">
-        <div>
-          <Modal.Title className="fw-bold fs-4">
-            {isEditing ? "Editar Funcionario" : "Nuevo Funcionario"}
-          </Modal.Title>
-          <p className="text-muted mb-0">
-            {isEditing
-              ? "Actualiza la información del funcionario"
-              : "Registra un nuevo funcionario en el sistema."}
-          </p>
-        </div>
+      <Modal.Header closeButton>
+        <Modal.Title>
+          {isEditing ? "Editar Funcionario" : "Nuevo Funcionario"}
+        </Modal.Title>
       </Modal.Header>
 
       <Modal.Body>
         {error && <Alert variant="danger">{error}</Alert>}
 
-        <Form
-          noValidate
-          onSubmit={handleSubmit(onSubmit)}
-        >
+        <Form noValidate onSubmit={handleSubmit(onSubmit)}>
           <div className="row g-3">
-            <Form.Group className="col-md-6" controlId="email">
-              <Form.Label>
-                Correo Electrónico <span className="text-danger">*</span>
-              </Form.Label>
+            {/* Correo */}
+            <Form.Group className="col-md-6">
+              <Form.Label>Correo Electrónico</Form.Label>
               <Form.Control
                 type="email"
                 {...register("email", {
-                  required: "El correo electrónico es requerido", // Custom error message
+                  required: "El correo electrónico es requerido",
                   pattern: {
                     value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                    message: "Ingrese un correo electrónico válido", // Custom pattern error
+                    message: "Ingrese un correo válido",
                   },
                 })}
-                isInvalid={!!errors.email} // Show invalid state if error exists
+                isInvalid={!!errors.email}
               />
               <Form.Control.Feedback type="invalid">
-                {!formData.email
-                  ? "El correo electrónico es requerido"
-                  : "Ingrese un correo electrónico válido"}
+                {errors.email?.message as string}
               </Form.Control.Feedback>
             </Form.Group>
 
+            {/* Contraseña (solo al crear) */}
             {!isEditing && (
-              <Form.Group className="col-md-6" controlId="password">
-                <Form.Label>
-                  Contraseña <span className="text-danger">*</span>
-                </Form.Label>
-
+              <Form.Group className="col-md-6">
+                <Form.Label>Contraseña</Form.Label>
                 <Form.Control
                   type="password"
                   {...register("password", {
-                    required: true,
+                    required: "La contraseña es requerida",
                   })}
+                  isInvalid={!!errors.password}
                 />
                 <Form.Control.Feedback type="invalid">
-                  {!formData.password
-                    ? "La contraseña es requerida"
-                    : "La contraseña debe tener al menos 8 caracteres"}
+                  {errors.password?.message as string}
                 </Form.Control.Feedback>
               </Form.Group>
             )}
-            <Select
-              options={options}
-              onChange={(e: any) => setIdRegional(e?.value)}
-            />
-            <Select options={optionsCentro} onChange={(e: any) => setIdcentro_formacion(e?.value)} />
 
-            <Form.Group className="col-md-6" controlId="estado">
-              <Form.Label>
-                Estado <span className="text-danger">*</span>
-              </Form.Label>
+            {/* Select Regional */}
+            <div className="col-md-6">
+              <Form.Label>Regional</Form.Label>
+              <Select
+                options={optionsRegionales}
+                placeholder="Busca o selecciona una regional..."
+                isSearchable
+                isClearable
+                onChange={(option) => setIdRegional(option ? option.value : 0)}
+              />
+            </div>
+
+            {/* Select Centro */}
+            <div className="col-md-6">
+              <Form.Label>Centro de Formación</Form.Label>
+              <Select
+                options={optionsCentros}
+                placeholder="Busca o selecciona un centro..."
+                isSearchable
+                isClearable
+                onChange={(option) =>
+                  setIdCentroFormacion(option ? option.value : 0)
+                }
+              />
+            </div>
+
+            {/* Estado */}
+            <Form.Group className="col-md-6">
+              <Form.Label>Estado</Form.Label>
               <Form.Select
-                {...register("estado", {
-                  required: "Seleccione un estado",
-                })}
-                isInvalid={!!errors.estado} // ✅ Uses react-hook-form's errors
-                defaultValue={formData.estado || ""} // ✅ Handles editing mode
+                {...register("estado", { required: "Seleccione un estado" })}
+                isInvalid={!!errors.estado}
               >
                 <option value="">Seleccione un estado</option>
                 <option value="activo">Activo</option>
                 <option value="inactivo">Inactivo</option>
               </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                {errors.estado?.message as string}
+              </Form.Control.Feedback>
             </Form.Group>
 
-            <Form.Group className="col-md-6" controlId="perfil">
-              <Form.Label>
-                Perfil <span className="text-danger">*</span>
-              </Form.Label>
+            {/* Perfil */}
+            <Form.Group className="col-md-6">
+              <Form.Label>Perfil</Form.Label>
               <Form.Select
-                {...register("idperfil", {
-                  required: "Seleccione un perfil",
-                  validate: (value) => value !== "" || "Seleccione un perfil",
-                })}
-                isInvalid={!!errors.perfil}
-                defaultValue={formData.perfil || ""}
+                {...register("idperfil", { required: "Seleccione un perfil" })}
+                isInvalid={!!errors.idperfil}
               >
                 <option value="">Seleccione un perfil</option>
                 <option value="2">Funcionario</option>
                 <option value="1">Administrador</option>
               </Form.Select>
-              
+              <Form.Control.Feedback type="invalid">
+                {errors.idperfil?.message as string}
+              </Form.Control.Feedback>
             </Form.Group>
           </div>
 
-          <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-            <Button
-              variant="outline-secondary"
-              onClick={onHide}
-              disabled={loading}
-            >
+          <div className="d-flex justify-content-end gap-2 mt-4">
+            <Button variant="outline-secondary" onClick={onHide} disabled={loading}>
               Cancelar
             </Button>
-            <Button variant="primary" type="submit" disabled={loading}>
+            <Button type="submit" variant="primary" disabled={loading}>
               {loading
                 ? "Guardando..."
                 : isEditing
