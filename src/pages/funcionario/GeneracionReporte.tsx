@@ -11,6 +11,8 @@ interface Candidato {
   porcentaje: number;
 }
 
+//hola
+
 interface Participante {
   id: number;
   nombre: string;
