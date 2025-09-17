@@ -70,14 +70,14 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
             })
             if (data.success === true) {
                 try {
-                    
+                    console.log("id"+id)
                     const {data}=await api.post('/api/votoXCandidato/crear/', {
                         idcandidatos: Number(candidato.idCandidato),
                         idaprendiz: Number(user.id),
                         contador: 1,
                         ideleccion: id
                     });
-                    if(data.success===true){
+                    if(data.mensaje==="Éxito"){
                         Swal.fire({
                             title:"Tu Voto Fue Registrado Con Éxito",
                             icon: "success",
