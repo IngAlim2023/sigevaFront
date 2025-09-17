@@ -1,54 +1,50 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import axios from "axios";
-
 import "../funcionario/form.css";
+import { useAuth } from "../../context/auth/auth.context";
+import { api } from "../../api";
 
 function FormEleccion() {
-  const [idcentro_formacion, setidCentroFormacion] = useState("");
-  const [centroFormacion, setCentroFormacion] = useState<any[]>([]);
+
   const [nombre, setNombre] = useState("");
   //const [jornada, setJornada] = useState<string>("");
   const [fecha_inicio, setFechaInicio] = useState("");
   const [fecha_fin, setFechaCierre] = useState("");
   const [hora_inicio, setHoraInicio] = useState("");
   const [hora_fin, setHoraFin] = useState("");
+  
+  const {user} = useAuth()
+
   const navigate = useNavigate();
 
-  useEffect(() => {
-    axios
-      .get("https://sigevaback-real.onrender.com/api/centrosFormacion/obtiene")
-      .then((respuesta) => {
-        setCentroFormacion(respuesta.data.data);
-      })
-      .catch((error) => {
-        console.error("Error al obtener los centros", error);
-      });
-  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post(
-        "https://sigevaback-real.onrender.com/api/eleccion/crear",
-        {
-          idcentro_formacion: idcentro_formacion, 
-          nombre,
-          fecha_inicio: fecha_inicio,
-          fecha_fin: fecha_fin,
-          hora_inicio: `${fecha_inicio} ${hora_inicio}:00`,
-          hora_fin: `${fecha_fin} ${hora_fin}:00`
-        }
-      );
-      console.log("Elección creada:", response.data);
+
+  const handleSubmit2 = async (e:React.FormEvent) =>{
+    e.preventDefault()
+      if(!user?.centroFormacion)return
+      try {
+        const response = await api.post(`/api/eleccion/crear`, 
+          {
+            idcentro_formacion: user?.centroFormacion,
+            nombre,
+            fecha_inicio,
+            fecha_fin,
+            hora_inicio: `${fecha_inicio} ${hora_inicio}:00`,
+            hora_fin: `${fecha_fin} ${hora_fin}:00`,
+            
+          })
+
       alert("Elección creada exitosamente");
       navigate("/elecciones");
-    } catch (e) {
-      console.error("Error al crear elección:", e);
-      alert("Error al crear la elección");
-    }
-  };
+      console.log(response)
+
+      } catch (error) {
+        console.error("Error al crear eleccion", error)
+      }
+  }
+  
+
 
   return (
     <div className="d-flex">
@@ -61,7 +57,7 @@ function FormEleccion() {
                 Complete el formulario para configurar una nueva votación.
               </p>
 
-              <Form onSubmit={handleSubmit}>
+              <Form onSubmit={handleSubmit2}>
                 <Form.Group className="mb-4">
                   <Form.Label>Nombre de la elección</Form.Label>
                   <Form.Control
@@ -72,43 +68,6 @@ function FormEleccion() {
                     required
                   />
                 </Form.Group>
-
-                <Form.Group className="mb-4">
-                  <Form.Label>Centro de formación al que pertenece</Form.Label>
-                  <Form.Select
-                    value={idcentro_formacion}
-                    onChange={(e) => setidCentroFormacion(e.target.value)}
-                    required
-                  >
-                    <option value="">Seleccione centro de formación</option>
-                    {centroFormacion.map((centro) => (
-                      <option
-                        value={centro.idcentroFormacion}
-                        key={centro.idcentroFormacion}
-                      >
-                        {centro.centroFormacioncol}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-
-                {/*<Form.Group className="mb-4">
-                  <Form.Label>Jornada</Form.Label>
-                  <div className="d-flex gap-2">
-                    {["Mañana", "Tarde", "Noche"].map((opcion) => (
-                      <Button
-                        key={opcion}
-                        variant={
-                          jornada === opcion ? "primary" : "outline-primary"
-                        }
-                        onClick={() => setJornada(opcion)}
-                        className="flex-grow-1"
-                      >
-                        {opcion}
-                      </Button>
-                    ))}
-                  </div>
-                </Form.Group>*/}
 
                 <Row className="g-3 mb-4">
                   <Col md={6}>
