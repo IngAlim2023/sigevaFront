@@ -80,7 +80,7 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                     
                     if(data.mensaje==="Éxito"){
                         Swal.fire({
-                            title:"Tu Voto Fue Registrado Con Éxito",
+                            title:"Tu voto fue registrado con éxito",
                             icon: "success",
                             draggable: true,
                             showConfirmButton:true,
@@ -92,7 +92,7 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                         })
                     }else{
                         Swal.fire({
-                            title:"Tu Voto No Fue Registrado, ¿Ya votaste?, Intenta nuevamente",
+                            title:"Error. Ya votaste, no puedes volver a votar.",
                             icon: "error",
                             draggable: true,
                             showConfirmButton:true,
