@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../../api";
 import SelecionarCandidato from "../../components/aprendiz/ModalCandidato";
 import { FaArrowAltCircleLeft } from "react-icons/fa";
-
+import Navbar from "../../components/aprendiz/Navbar";
 
 export default function CandidateSelectionPage() {
   const { id } = useParams();
@@ -34,6 +34,7 @@ export default function CandidateSelectionPage() {
 
   return (
     <>
+      <Navbar />
       {candidatos.length === 0 ? (
         <Container className="my-4 text-center">
           <div>

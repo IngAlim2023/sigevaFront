@@ -1,4 +1,5 @@
 import { Container, Row, Col, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
 import Sigeva from "../assets/sena-sigeva.svg";
 
 const Inicio: React.FC = () => {
@@ -24,11 +25,14 @@ const Inicio: React.FC = () => {
               elegir a sus representantes, ejercer su voz y ser parte activa del
               cambio.
             </p>
-            <a href="/equipo" target="_blank" className="text-decoration color-[#6136BF] text-muted mt-2 dec" style={{ color: '#6136BF' }}>Nuestro equipo</a>
+            <Link to="/equipo" className="text-decoration-none text-muted mt-2" style={{ color: '#6136BF' }}>
+              Nuestro equipo
+            </Link>
 
             <div className="mb-4" style={{ marginTop: 50 }}>
               <Button
-                href="/login-aprendiz"
+                as={Link}
+                to="/login-aprendiz"
                 className="px-5 py-2 fw-semibold"
                 style={{ backgroundColor: "#6136BF", border: "none" }}
               >
