@@ -7,6 +7,18 @@ import { useAuth } from "../../context/auth/auth.context";
 import { api } from "../../api";
 import { useNavigate } from "react-router-dom";
 
+interface Aprendiz {
+  nombres: string;
+  apellidos: string;
+}
+
+interface Candidato {
+  idcandidatos: string;
+  numeroTarjeton: string;
+  foto: string;
+  aprendiz: Aprendiz;
+}
+
 interface Eleccion {
   ideleccion: number;
   titulo: string;
@@ -18,34 +30,29 @@ interface Eleccion {
 
 export default function EleccionesActivasPage() {
   const [showModal, setShowModal] = useState(false);
-  const [selectedEleccion, setSelectedEleccion] = useState<any | null>(null);
+  const [selectedEleccion, setSelectedEleccion] = useState<Eleccion | null>(null);
   const [eleccionActiva, setEleccionActiva] = useState<Eleccion[]>([]);
   const [loading, setLoading] = useState(true);
-  const {user} = useAuth();
-
-  const navegar = useNavigate()
-
+  const [loadingCandidatos, setLoadingCandidatos] = useState(false)
+  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
+  const { user } = useAuth();
+  const navegar = useNavigate();
 
   useEffect(() => {
-    const loadData = async ()=> {
-      if (!user?.centroFormacion) {
-        return;
+    const loadData = async () => {
+      if (!user?.centroFormacion) return;
+      try {
+        const res = await api.get(`/api/eleccion/traerTodas/${user?.centroFormacion}`);
+        setEleccionActiva(res.data.eleccionesActivas);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error al cargar las votaciones:", error);
       }
-      try{
-      const res = await api.get(`/api/eleccion/traerTodas/${user?.centroFormacion}`)
-      setEleccionActiva(res.data.eleccionesActivas)
-      setLoading(false)
-      } catch (error){
-        console.error("Error al cargar las votaciones:", error)
-      }
-      
-    }
-    loadData()
+    };
+    loadData();
   }, [user?.centroFormacion]);
 
-  
-
-  const formatDate = (dateStr: string ) => {
+  const formatDate = (dateStr: string) => {
     if (!dateStr) return "Fecha no disponible";
     return new Date(dateStr).toLocaleDateString("es-ES", {
       day: "numeric",
@@ -54,13 +61,25 @@ export default function EleccionesActivasPage() {
     });
   };
 
-  const handleDetalles = (eleccion: Eleccion) => {
+  const handleDetalles = async (eleccion: Eleccion) => {
+    if(loadingCandidatos) return
     setSelectedEleccion({
       ...eleccion,
       fechaInicio: formatDate(eleccion.fechaInicio),
       fechaFin: formatDate(eleccion.fechaFin),
     });
     setShowModal(true);
+    setLoadingCandidatos(true)
+
+    try {
+      const res = await api.get(`/api/candidatos/listar/${eleccion.ideleccion}`);
+      setCandidatos(res.data.data);
+    } catch (error) {
+      console.error("Error al cargar candidatos:", error);
+    }
+    finally{
+      setLoadingCandidatos(false)
+    }
   };
 
   return (
@@ -73,6 +92,16 @@ export default function EleccionesActivasPage() {
 
       {/* Subtítulo */}
       <h5 className="fw-semibold mt-5">Resumen de Elecciones Activas</h5>
+
+       <div className="d-flex justify-content-end gap-3 mt-5">
+        <Button className="btn-gradient" onClick={() => navegar("/cargar-aprendices")}>
+          <FaPlusCircle /> Agregar votantes
+        </Button>
+
+        <Button className="btn-gradient" onClick={() => navegar("/nueva-eleccion")}>
+          <FaPlusCircle /> Crear elección
+        </Button>
+      </div>
 
       {/* Cards */}
       <Row className="g-2 my-2">
@@ -96,22 +125,12 @@ export default function EleccionesActivasPage() {
         )}
       </Row>
 
-      {/* Botones inferiores */}
-      <div className="d-flex justify-content-end gap-3 mt-5">
-        <Button className="btn-gradient" onClick={()=> navegar('/cargar-aprendices')}>
-          <FaPlusCircle /> Agregar votantes
-        </Button>
-
-        <Button className="btn-gradient" onClick={() => navegar('/nueva-eleccion')}>
-          <FaPlusCircle /> Crear elección
-        </Button>
-      </div>
-
       {/* Modal de detalles */}
       <EleccionDetalleModal
         show={showModal}
-        onHide={() => setShowModal(false)}
+        onClose={() => {setShowModal(false); setCandidatos([])}}
         eleccion={selectedEleccion}
+        candidatos={candidatos}
       />
     </Container>
   );
