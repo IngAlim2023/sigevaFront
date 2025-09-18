@@ -36,13 +36,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     setIsAuthenticated(true);
     setUser(normalizado);
-    toast.success("Inicio de Sesión Exitoso!");
+    toast.success("Inicio de sesión exitoso!");
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setUser(null);
-    toast.success("Se cerró la Sesión Correctamente!");
+    toast.success("Se cerró la sesión correctamente!");
   };
 
   return (

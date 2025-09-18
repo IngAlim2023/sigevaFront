@@ -29,10 +29,10 @@ const equipo: Miembro[] = [
     grupo: "Manejo",
   },
   {
-    nombre: "Jorge Enrique Porras",
-    rol: "Scrum Master",
-    github: "IngAlim2023",
-    avatar: "/avatars/jorge.png",
+    nombre: "Fernanda Gonzalez",
+    rol: "Back End Developer",
+    github: "feeer-28",
+    avatar: "/avatars/na.png",
     grupo: "Desarrolladores",
   },
   {
@@ -92,13 +92,6 @@ const equipo: Miembro[] = [
     grupo: "Desarrolladores",
   },
   {
-    nombre: "Fernanda Gonzalez",
-    rol: "Back End Developer",
-    github: "feeer-28",
-    avatar: "/avatars/na.png",
-    grupo: "Desarrolladores",
-  },
-  {
     nombre: "Daniela Paredes",
     rol: "Back End Developer",
     github: "renteria08P",
@@ -110,6 +103,13 @@ const equipo: Miembro[] = [
     rol: "Front End & Mobile Developer",
     github: "DavidRengifo12",
     avatar: "/avatars/na.png",
+    grupo: "Desarrolladores",
+  },
+  {
+    nombre: "Jorge Enrique Porras",
+    rol: "Scrum Master",
+    github: "IngAlim2023",
+    avatar: "/avatars/jorge.png",
     grupo: "Desarrolladores",
   },
 ];
