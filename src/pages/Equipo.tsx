@@ -43,10 +43,10 @@ const equipo: Miembro[] = [
     grupo: "Desarrolladores",
   },
   {
-    nombre: "Dovin Richard Arboleda",
-    rol: "Front End Developer",
+    nombre: "Dovin Richard Hoyos",
+    rol: "Full Stack Developer",
     github: "dovinhoyos",
-    avatar: "/avatars/na.png",
+    avatar: "/avatars/dovin.jpeg",
     grupo: "Desarrolladores",
   },
   {
@@ -102,7 +102,7 @@ const equipo: Miembro[] = [
     nombre: "Daniela Paredes",
     rol: "Back End Developer",
     github: "renteria08P",
-    avatar: "/avatars/na.png",
+    avatar: "/avatars/dani.jpeg",
     grupo: "Desarrolladores",
   },
   {
