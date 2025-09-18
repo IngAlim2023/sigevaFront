@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaFilePdf } from 'react-icons/fa6';
 import jsPDF from 'jspdf';
-
+//HOLA
 interface Candidato {
   id: number;
   nombre: string;
