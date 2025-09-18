@@ -62,7 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         },
         { to: '/gestion-candidatos', icon: <FaUserTie />, text: 'Gestión de Candidatos', type: 'link' },
         { to: '/cargar-aprendices', icon: <FaUserPlus />, text: 'Cargar Aprendices', type: 'link' },
-        { to: '/panel-metricas', icon: <FaChartBar />, text: 'Métricas', type: 'link' },
+        //{ to: '/panel-metricas', icon: <FaChartBar />, text: 'Métricas', type: 'link' },
         { to: '/elecciones', icon: <FaClipboardList />, text: 'Elecciones', type: 'link' },
       ];
     }
@@ -77,7 +77,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
           items: [
             { to: '/aprendices', icon: <FaUserGraduate />, text: 'Aprendices' },
             { to: '/funcionarios', icon: <FaUserTie />, text: 'Funcionarios' },
-             { to: '/cargar-aprendices-admin', icon: <FaUserPlus/>, text: 'CargarAprendicesAdmin' },
+             { to: '/cargar-aprendices-admin', icon: <FaUserPlus/>, text: 'Cargar aprendices' },
           ] 
         },
         { to: '/aprendiz-form', icon: <FaUserPlus />, text: 'Añadir Aprendiz', type: 'link' },

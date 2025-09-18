@@ -38,10 +38,13 @@ export const FuncionarioDetalleModal: React.FC<FuncionarioDetalleModalProps> = (
 
           <hr />
           <h6>Centro de Formación</h6>
-          <p><strong>Centro:</strong> {funcionario.centroFormacion?.centroFormacioncol}</p>
+          <p><strong>Nombres:</strong> {funcionario.nombres}</p>
+          <p><strong>Apellidos:</strong> {funcionario.apellidos}</p>
+          <p><strong>Telefono:</strong> {funcionario.celular}</p>
+          <p><strong>Documento:</strong> {funcionario.numeroDocumento}</p>
+          <p><strong>Correo:</strong> {funcionario.email}</p>
           <p><strong>Dirección:</strong> {funcionario.centroFormacion?.direccion}</p>
           <p><strong>Teléfono:</strong> {funcionario.centroFormacion?.telefono}</p>
-          <p><strong>Correo:</strong> {funcionario.centroFormacion?.correo}</p>
 
           <hr />
           <h6>Regional</h6>

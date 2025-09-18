@@ -6,7 +6,6 @@ import {
   Outlet,
 } from "react-router-dom";
 import "./App.css";
-import Dashboard from "./pages/Dashboard";
 import VotacionesActivasPage from "./pages/aprendiz/VotacionesActivasPage";
 import Login from "./pages/Login";
 import CandidateSelectionPage from "./pages/aprendiz/SeleccionarCandidatoPage";
@@ -81,7 +80,7 @@ function App() {
 
           {/* Rutas de Funcionario */}
           <Route element={<FuncionarioLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<DashboardAdmin />} />
             <Route path="/gestion-candidatos" element={<GestionCandidatos />} />
             <Route path="/cargar-aprendices" element={<CargarAprendices />} />
             <Route path="/panel-metricas" element={<PanelMetricas />} />

@@ -3,7 +3,7 @@ import { VotacionCard } from "../../components/aprendiz/VotacionCard";
 import { useEffect, useState } from "react";
 import { api } from "../../api";
 import { useAuth } from "../../context/auth/auth.context";
-
+import Navbar from "../../components/aprendiz/Navbar";
 
 const VotacionesActivasPage = () => {
   const [votaciones, setVotaciones] = useState<any[]>([]);
@@ -30,6 +30,7 @@ const VotacionesActivasPage = () => {
 
   return (
     <>
+      <Navbar />
       <Container className="my-4">
         <h3 className="fw-bold">Votaciones Activas</h3>
         <p className="text-muted">
