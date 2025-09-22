@@ -9,6 +9,7 @@ export const DashboardAdmin = () => {
   const navigate = useNavigate();
   const [votacionesActivas, setVotacionesActivas] = useState<number>(0);
   const [usuariosRegistrados, setUsuariosRegistrados] = useState<number>(0);
+  const [aprendizDisponible, setAprendizDisponible] = useState<number>(0);
   const [votosHoy, setVotosHoy] = useState<number>(0);
   const {user} = useAuth();
 
@@ -19,9 +20,14 @@ export const DashboardAdmin = () => {
         const resActivas = await api.get(user?.perfil =="Administrador"? "api/eleccion/activas":`api/eleccionPorCentro/${user?.centroFormacion}`);
         setVotacionesActivas(resActivas.data.eleccionesActivas?.length || 0);
 
+        // Votaciones activas
+        const resAprendizActivo = await api.get(user?.perfil =="Administrador"? "api/aprendiz/disponibles/":`api/aprendiz/disponibles/centros/${user?.centroFormacion}`);
+        
+        setAprendizDisponible(resAprendizActivo.data.data.length || 0);
+
         // Usuarios registrados (aprendices)
-        const resUsuarios = await api.get(user?.perfil == 'Administrador'? "/api/aprendiz/listar" : `api/aprendiz/centros/${user?.centroFormacion}`);
-        setUsuariosRegistrados(resUsuarios.data?.length || 0);
+        const resUsuarios = await api.get(user?.perfil == 'Administrador'? "/api/aprendiz/listar" : `api/aprendiz/inscritos/centro/${user?.centroFormacion}`);
+        setUsuariosRegistrados(resUsuarios.data.data?.length || 0);
 
         // Votos totales hoy
         const resVotos = await api.get("/api/votoXCandidato/traer");
@@ -85,9 +91,21 @@ export const DashboardAdmin = () => {
             <Card className="shadow-sm text-center p-3">
               <Card.Body>
                 <FaUsers size={40} color="#28a745" />
-                <Card.Title>Usuarios Registrados</Card.Title>
+                <Card.Title>Aprendices Registrados</Card.Title>
                 <Card.Text className="fs-4 fw-bold">
                   {usuariosRegistrados}
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+          {/* Aprendices Habilitados */}
+          <Col md={4}>
+            <Card className="shadow-sm text-center p-3">
+              <Card.Body>
+                <MdHowToVote size={40} color="brown" />
+                <Card.Title>Aprendices habilitados</Card.Title>
+                <Card.Text className="fs-4 fw-bold">
+                  {aprendizDisponible}
                 </Card.Text>
               </Card.Body>
             </Card>
