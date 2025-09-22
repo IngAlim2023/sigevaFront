@@ -74,7 +74,7 @@ const equipo: Miembro[] = [
     nombre: "Andrés Santiago Arias",
     rol: "Full Stack Developer",
     github: "AndresArias28",
-    avatar: "/avatars/na.png",
+    avatar: "/avatars/ariasavatar.jpg",
     grupo: "Desarrolladores",
   },
   {
