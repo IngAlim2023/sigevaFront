@@ -62,7 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         },
         { to: '/gestion-candidatos', icon: <FaUserTie />, text: 'Gestión de Candidatos', type: 'link' },
         { to: '/cargar-aprendices', icon: <FaUserPlus />, text: 'Cargar Aprendices', type: 'link' },
-        { to: '/panel-metricas', icon: <FaChartBar />, text: 'Métricas', type: 'link' },
+        //{ to: '/panel-metricas', icon: <FaChartBar />, text: 'Métricas', type: 'link' },
         { to: '/elecciones', icon: <FaClipboardList />, text: 'Elecciones', type: 'link' },
       ];
     }
