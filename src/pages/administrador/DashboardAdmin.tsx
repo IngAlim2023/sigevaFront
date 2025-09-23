@@ -27,7 +27,7 @@ export const DashboardAdmin = () => {
 
         // Usuarios registrados (aprendices)
         const resUsuarios = await api.get(user?.perfil == 'Administrador'? "/api/aprendiz/listar" : `api/aprendiz/inscritos/centro/${user?.centroFormacion}`);
-        setUsuariosRegistrados(resUsuarios.data.data?.length || 0);
+        user?.perfil == 'Administrador'? setUsuariosRegistrados(resUsuarios.data?.length || 0) : setUsuariosRegistrados(resUsuarios.data.data?.length || 0);
 
         // Votos totales hoy
         const resVotos = await api.get("/api/votoXCandidato/traer");
