@@ -1,55 +1,91 @@
 import { Row, Col, Container, Button } from "react-bootstrap";
 import EleccionCard from "../../components/EleccionCard";
 import { FaPlusCircle } from "react-icons/fa";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import EleccionDetalleModal from "../../components/EleccionDetalleModal";
+import { useAuth } from "../../context/auth/auth.context";
+import { api } from "../../api";
+import { useNavigate } from "react-router-dom";
 
-interface Eleccion {
-  regional: string;
-  titulo: string;
-  fechaInicio: string;
-  fechaTerminacion: string;
-  jornada: string;
+interface Aprendiz {
+  nombres: string;
+  apellidos: string;
 }
 
-const elecciones = [
-  {
-    regional: "Regional Cauca",
-    titulo: "Representante de Aprendices 2024",
-    fechaInicio: "15 de mayo de 2024",
-    fechaTerminacion: "22 de mayo de 2024",
-    jornada: "Diurna",
-  },
-  {
-    regional: "Regional Cauca",
-    titulo: "Elección Delegados Curriculares",
-    fechaInicio: "1 de julio de 2024",
-    fechaTerminacion: "16 de julio de 2024",
-    jornada: "Nocturna",
-  },
-  {
-    regional: "Regional Cauca",
-    titulo: "Representante Bienestar al Aprendiz",
-    fechaInicio: "1 de junio de 2024",
-    fechaTerminacion: "8 de junio de 2024",
-    jornada: "Diurna",
-  },
-];
+interface Candidato {
+  idcandidatos: string;
+  numeroTarjeton: string;
+  foto: string;
+  aprendiz: Aprendiz;
+}
+
+interface Eleccion {
+  ideleccion: number;
+  titulo: string;
+  centro: string;
+  jornada: string | null;
+  fechaInicio: string;
+  fechaFin: string;
+}
 
 export default function EleccionesActivasPage() {
   const [showModal, setShowModal] = useState(false);
-  const [selectedEleccion, setSelectedEleccion] = useState<Eleccion | null>(null)
+  const [selectedEleccion, setSelectedEleccion] = useState<Eleccion | null>(null);
+  const [eleccionActiva, setEleccionActiva] = useState<Eleccion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingCandidatos, setLoadingCandidatos] = useState(false)
+  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
+  const { user } = useAuth();
+  const navegar = useNavigate();
 
-  const handleDetalles = (eleccion: Eleccion) => {
-    setSelectedEleccion(eleccion);
-    setShowModal(true);
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user?.centroFormacion) return;
+      try {
+        const res = await api.get(`/api/eleccion/traerTodas/${user?.centroFormacion}`);
+        setEleccionActiva(res.data.eleccionesActivas);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error al cargar las votaciones:", error);
+      }
+    };
+    loadData();
+  }, [user?.centroFormacion]);
+
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return "Fecha no disponible";
+    return new Date(dateStr).toLocaleDateString("es-ES", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   };
 
+  const handleDetalles = async (eleccion: Eleccion) => {
+    if(loadingCandidatos) return
+    setSelectedEleccion({
+      ...eleccion,
+      fechaInicio: formatDate(eleccion.fechaInicio),
+      fechaFin: formatDate(eleccion.fechaFin),
+    });
+    setShowModal(true);
+    setLoadingCandidatos(true)
+
+    try {
+      const res = await api.get(`/api/candidatos/listar/${eleccion.ideleccion}`);
+      setCandidatos(res.data.data);
+    } catch (error) {
+      console.error("Error al cargar candidatos:", error);
+    }
+    finally{
+      setLoadingCandidatos(false)
+    }
+  };
 
   return (
     <Container className="my-4">
       {/* Título de bienvenida */}
-      <h3 className="fw-bold">Bienvenido, Dr. Ricardo García</h3>
+      <h3 className="fw-bold">Bienvenido</h3>
       <p className="text-muted">
         Aquí tiene un resumen de la actividad reciente en SIGEVA.
       </p>
@@ -57,30 +93,44 @@ export default function EleccionesActivasPage() {
       {/* Subtítulo */}
       <h5 className="fw-semibold mt-5">Resumen de Elecciones Activas</h5>
 
-      {/* Cards */}
-      <Row className="g-2 my-2">
-        {elecciones.map((vote, index) => (
-          <Col key={index} xs={12} md={6} lg={4}>
-            <EleccionCard {...vote} onDetalles={() => handleDetalles(vote)} />
-          </Col>
-        ))}
-      </Row>
-
-      {/* Botones inferiores */}
-      <div className="d-flex justify-content-end gap-3 mt-5">
-        <Button className="btn-gradient">
+       <div className="d-flex justify-content-end gap-3 mt-5">
+        <Button className="btn-gradient" onClick={() => navegar("/cargar-aprendices")}>
           <FaPlusCircle /> Agregar votantes
         </Button>
 
-        <Button className="btn-gradient">
+        <Button className="btn-gradient" onClick={() => navegar("/nueva-eleccion")}>
           <FaPlusCircle /> Crear elección
         </Button>
       </div>
 
+      {/* Cards */}
+      <Row className="g-2 my-2">
+        {loading ? (
+          <p>Cargando elecciones...</p>
+        ) : eleccionActiva.length > 0 ? (
+          eleccionActiva.map((vote) => (
+            <Col key={vote.ideleccion} xs={12} md={6} lg={4}>
+              <EleccionCard
+                titulo={vote.titulo}
+                regional={vote.centro}
+                jornada={vote.jornada ?? "Sin jornada"}
+                fechaInicio={formatDate(vote.fechaInicio)}
+                fechaTerminacion={formatDate(vote.fechaFin)}
+                onDetalles={() => handleDetalles(vote)}
+              />
+            </Col>
+          ))
+        ) : (
+          <p>No hay elecciones activas en este momento.</p>
+        )}
+      </Row>
+
+      {/* Modal de detalles */}
       <EleccionDetalleModal
         show={showModal}
-        onHide={() => setShowModal(false)}
+        onClose={() => {setShowModal(false); setCandidatos([])}}
         eleccion={selectedEleccion}
+        candidatos={candidatos}
       />
     </Container>
   );

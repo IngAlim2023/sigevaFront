@@ -52,7 +52,19 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            if (otp.length === 0 || otp.length > 6) return alert("El código OTP debe tener 6 dígitos");
+            if (otp.length === 0 || otp.length > 6) 
+                return Swal.fire({
+                            title:"Tu código OTP debe tener los 6 dígitos!",
+                            icon: "error",
+                            draggable: true,
+                            showConfirmButton:true,
+                            confirmButtonText:"Intenta votar de nuevo"
+                        }).then((result)=>{
+                            if(result.isConfirmed){
+                                navigate("/votaciones")
+                            }
+                        }) ;
+
             const { data } = await api.post('api/validaciones/validarOtp', {
                 codigo_otp: otp
             })
@@ -63,11 +75,12 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                         idcandidatos: Number(candidato.idCandidato),
                         idaprendiz: Number(user.id),
                         contador: 1,
-                        ideleccion: id
+                        ideleccion: Number(id)
                     });
-                    if(data.success===true){
+                    
+                    if(data.mensaje==="Éxito"){
                         Swal.fire({
-                            title:"Tu Voto Fue Registrado Con Éxito",
+                            title:"Tu voto fue registrado con éxito",
                             icon: "success",
                             draggable: true,
                             showConfirmButton:true,
@@ -79,7 +92,7 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                         })
                     }else{
                         Swal.fire({
-                            title:"Tu Voto No Fue Registrado Con Éxito",
+                            title:"Error. Ya votaste, no puedes volver a votar.",
                             icon: "error",
                             draggable: true,
                             showConfirmButton:true,
@@ -95,7 +108,7 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                     
                 } catch (error) {
                     Swal.fire({
-                        title:"Tu Voto No Fue Registrado Con Éxito",
+                        title:"Tu Voto No Fue Registrado, Intenta nuevamente",
                         icon: "error",
                         draggable: true,
                         showConfirmButton:true,
@@ -108,11 +121,31 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
 
                 }
             } else {
-                alert("Código OTP inválido");
+                Swal.fire({
+                        title:"Código OTP Incorrecto, Intenta nuevamente",
+                        icon: "error",
+                        draggable: true,
+                        showConfirmButton:true,
+                        confirmButtonText:"Intenta votar de nuevo"
+                    }).then((result)=>{
+                        if(result.isConfirmed){
+                            navigate("/votaciones")
+                        }
+                        })
             }
 
         } catch (error) {
-            alert("Error al validar el código OTP");
+                    Swal.fire({
+                        title:"Código OTP Incorrecto, Intenta nuevamente",
+                        icon: "error",
+                        draggable: true,
+                        showConfirmButton:true,
+                        confirmButtonText:"Intenta votar de nuevo"
+                    }).then((result)=>{
+                        if(result.isConfirmed){
+                            navigate("/votaciones")
+                        }
+                        })
         }
     }
 

@@ -2,7 +2,7 @@
 :root {
   --sidebar-width: 250px;
   --sidebar-bg: #5027BC;
-  --sidebar-admin-bg: #1A1C1E; /* Nuevo color para admin */
+  --sidebar-admin-bg: #5027BC; /* Nuevo color para admin */
   --sidebar-text: #ffffff;
   --sidebar-hover: rgba(255, 255, 255, 0.1);
   --submenu-bg: rgba(0, 0, 0, 0.15);

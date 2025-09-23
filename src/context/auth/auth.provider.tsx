@@ -15,6 +15,14 @@ export function AuthProvider({ children }: PropsWithChildren) {
       toast.error("Correo o contraseña incorrectos");
       return;
     }
+    
+    if (
+        response.data?.estado.toLowerCase() != "activo" && 
+        response.data?.estado.toLowerCase() != "en formacion"
+      ){
+      toast.error("Usuario desactivado!");
+      return
+    }
 
     const rawUser = response.data!;
 
@@ -28,13 +36,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     setIsAuthenticated(true);
     setUser(normalizado);
-    toast.success("Inicio de Sesión Exitoso!");
+    toast.success("Inicio de sesión exitoso!");
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setUser(null);
-    toast.success("Se cerró la Sesión Correctamente!");
+    toast.success("Se cerró la sesión correctamente!");
   };
 
   return (

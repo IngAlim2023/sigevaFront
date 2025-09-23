@@ -1,6 +1,9 @@
 import React from "react";
 import Sigeva from "../assets/sena-sigeva.svg";
 import { GrGithub } from "react-icons/gr";
+import { useNavigate } from "react-router-dom";
+import { Button } from "react-bootstrap";
+import { FaArrowLeft } from "react-icons/fa";
 
 type Miembro = {
   nombre: string;
@@ -26,10 +29,10 @@ const equipo: Miembro[] = [
     grupo: "Manejo",
   },
   {
-    nombre: "Jorge Enrique Porras",
-    rol: "Scrum Master",
-    github: "IngAlim2023",
-    avatar: "/avatars/jorge.png",
+    nombre: "Fernanda Gonzalez",
+    rol: "Back End Developer",
+    github: "feeer-28",
+    avatar: "/avatars/na.png",
     grupo: "Desarrolladores",
   },
   {
@@ -40,10 +43,10 @@ const equipo: Miembro[] = [
     grupo: "Desarrolladores",
   },
   {
-    nombre: "Dovin Richard Arboleda",
-    rol: "Front End Developer",
+    nombre: "Dovin Richard Hoyos",
+    rol: "Full Stack Developer",
     github: "dovinhoyos",
-    avatar: "/avatars/na.png",
+    avatar: "/avatars/dovin.jpeg",
     grupo: "Desarrolladores",
   },
   {
@@ -71,7 +74,7 @@ const equipo: Miembro[] = [
     nombre: "Andrés Santiago Arias",
     rol: "Full Stack Developer",
     github: "AndresArias28",
-    avatar: "/avatars/na.png",
+    avatar: "/avatars/ariasavatar.jpg",
     grupo: "Desarrolladores",
   },
   {
@@ -89,17 +92,10 @@ const equipo: Miembro[] = [
     grupo: "Desarrolladores",
   },
   {
-    nombre: "Fernanda Gonzalez",
-    rol: "Back End Developer",
-    github: "feeer-28",
-    avatar: "/avatars/na.png",
-    grupo: "Desarrolladores",
-  },
-  {
     nombre: "Daniela Paredes",
     rol: "Back End Developer",
     github: "renteria08P",
-    avatar: "/avatars/na.png",
+    avatar: "/avatars/dani.jpeg",
     grupo: "Desarrolladores",
   },
   {
@@ -109,16 +105,35 @@ const equipo: Miembro[] = [
     avatar: "/avatars/na.png",
     grupo: "Desarrolladores",
   },
+  {
+    nombre: "Jorge Enrique Porras",
+    rol: "Scrum Master",
+    github: "IngAlim2023",
+    avatar: "/avatars/jorge.png",
+    grupo: "Desarrolladores",
+  },
 ];
 
 const Equipo: React.FC = () => {
   const grupos = ["Manejo", "Desarrolladores"] as const;
+  const navigate = useNavigate();
 
   return (
     <main style={{ padding: "2rem" }}>
+      <div className="mb-3">
+        <Button 
+          variant="outline-primary" 
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="d-flex align-items-center gap-2"
+        >
+          <FaArrowLeft /> Volver
+        </Button>
+      </div>
       <div className="d-flex justify-content-center justify-content-md-start align-items-center gap-2 mb-3">
         <img src={Sigeva} alt="Logo SIGEVA" height={40} />
       </div>
+      
       <h1 style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>
         Nuestro equipo
       </h1>
@@ -189,9 +204,12 @@ const Equipo: React.FC = () => {
                 </div>
               ))}
           </div>
+          
         </section>
+        
       ))}
     </main>
+    
   );
 };
 

@@ -69,8 +69,8 @@ const GestionCandidatos = () => {
       setLoading(false);
     }
   };
+  
   useEffect(() => {
-
 
     const fetchAprendices = async () => {
       try {
@@ -113,19 +113,15 @@ const GestionCandidatos = () => {
 
   const onEditar = async (id: number) => {
     try {
-      const candidato = candidatos.find(c => c.idcandidatos === id);
-      if (!candidato) {
-        alert("Candidato no encontrado ❌");
-        return;
-      }
-      // const response = await api.put(`/api/candidatos/actualizar/${id}`);
+      const response = await api.put(`/api/candidatos/actualizar/${id}`);
 
 
-      // const candidato = response.data.data;
-      // console.log(candidato);
+      const candidato = response.data.data;
+      console.log(candidato);
 
-      setCandidatoSeleccionado(candidato); // lo mandamos al modal
+      setCandidatoSeleccionado(candidato);
       setShowModalModificar(true);
+
     } catch (error: any) {
       console.error("Error al obtener candidato:", error.response?.data || error.message);
       alert("No se pudo cargar el candidato ❌");
@@ -254,6 +250,8 @@ const GestionCandidatos = () => {
             );
             fetchCandidatos();
             setShowModalModificar(false);
+            //referescar lista
+            fetchCandidatos();
           }}
           elecciones={elecciones || []}
           aprendices={aprendices || []}

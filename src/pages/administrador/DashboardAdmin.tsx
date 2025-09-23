@@ -4,22 +4,30 @@ import { MdHowToVote, MdOutlineAssignment } from "react-icons/md";
 import { FaUsers, FaPlusCircle } from "react-icons/fa";
 import { api } from "../../api";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/auth/auth.context";
 export const DashboardAdmin = () => {
   const navigate = useNavigate();
   const [votacionesActivas, setVotacionesActivas] = useState<number>(0);
   const [usuariosRegistrados, setUsuariosRegistrados] = useState<number>(0);
+  const [aprendizDisponible, setAprendizDisponible] = useState<number>(0);
   const [votosHoy, setVotosHoy] = useState<number>(0);
+  const {user} = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Votaciones activas
-        const resActivas = await api.get("/api/eleccion/activas");
+        const resActivas = await api.get(user?.perfil =="Administrador"? "api/eleccion/activas":`api/eleccionPorCentro/${user?.centroFormacion}`);
         setVotacionesActivas(resActivas.data.eleccionesActivas?.length || 0);
 
+        // Votaciones activas
+        const resAprendizActivo = await api.get(user?.perfil =="Administrador"? "api/aprendiz/disponibles/":`api/aprendiz/disponibles/centros/${user?.centroFormacion}`);
+        
+        setAprendizDisponible(resAprendizActivo.data.data.length || 0);
+
         // Usuarios registrados (aprendices)
-        const resUsuarios = await api.get("/api/aprendiz/listar");
-        setUsuariosRegistrados(resUsuarios.data?.length || 0);
+        const resUsuarios = await api.get(user?.perfil == 'Administrador'? "/api/aprendiz/listar" : `api/aprendiz/inscritos/centro/${user?.centroFormacion}`);
+        user?.perfil == 'Administrador'? setUsuariosRegistrados(resUsuarios.data?.length || 0) : setUsuariosRegistrados(resUsuarios.data.data?.length || 0);
 
         // Votos totales hoy
         const resVotos = await api.get("/api/votoXCandidato/traer");
@@ -47,7 +55,7 @@ export const DashboardAdmin = () => {
                   color: "#5F2EEA",
                 }}
               >
-                Administrador
+                {user?.perfil}
               </span>
             </h2>
             <p className="text-muted">
@@ -83,9 +91,21 @@ export const DashboardAdmin = () => {
             <Card className="shadow-sm text-center p-3">
               <Card.Body>
                 <FaUsers size={40} color="#28a745" />
-                <Card.Title>Usuarios Registrados</Card.Title>
+                <Card.Title>Aprendices Registrados</Card.Title>
                 <Card.Text className="fs-4 fw-bold">
                   {usuariosRegistrados}
+                </Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+          {/* Aprendices Habilitados */}
+          <Col md={4}>
+            <Card className="shadow-sm text-center p-3">
+              <Card.Body>
+                <MdHowToVote size={40} color="brown" />
+                <Card.Title>Aprendices habilitados</Card.Title>
+                <Card.Text className="fs-4 fw-bold">
+                  {aprendizDisponible}
                 </Card.Text>
               </Card.Body>
             </Card>
@@ -117,12 +137,14 @@ export const DashboardAdmin = () => {
                     onClick={() => navigate("/aprendiz-form")}
                   />
                   <Card.Title>Añadir Aprendiz</Card.Title>
+
+                  
                 </Card.Body>
               </Card>
             </Col>
 
             <Col md="auto">
-              <Card className="shadow-sm tex p-3">
+              <Card className="shadow-sm text-center p-3">
                 <Card.Body>
                   <FaPlusCircle
                     size={40}
