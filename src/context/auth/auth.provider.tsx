@@ -12,15 +12,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
     if (!response.success) {
       setIsAuthenticated(false);
       setUser(null);
-      toast.error("Correo o contraseña incorrectos");
+      toast.error(response.message);
       return;
     }
     
     if (
         response.data?.estado.toLowerCase() != "activo" && 
-        response.data?.estado.toLowerCase() != "en formacion"
+        response.data?.estado.toLowerCase() != "en formacion" &&
+        response.data?.estado.toLowerCase() != "condicionado"
       ){
-      toast.error("Usuario desactivado!");
+      toast.error("Usuario no habilitado. Contacta con Bienestar al Aprendiz.");
       return
     }
 
@@ -36,13 +37,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
     setIsAuthenticated(true);
     setUser(normalizado);
-    toast.success("Inicio de sesión exitoso!");
+    toast.success("¡Inicio de sesión exitoso!");
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setUser(null);
-    toast.success("Se cerró la sesión correctamente!");
+    toast.success("Sesión cerrada correctamente");
   };
 
   return (
