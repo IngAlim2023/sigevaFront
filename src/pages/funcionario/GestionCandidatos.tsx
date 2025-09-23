@@ -37,8 +37,6 @@ interface Candidato {
   foto: string;
 }
 
-// const VITE_URL_BACK = import.meta.env.VITE_BASE_URL;
-
 const GestionCandidatos = () => {
   const [aprendices, setAprendices] = useState<Aprendiz[]>([]);
   const [candidatos, setCandidatos] = useState<Candidato[]>([]);
@@ -49,6 +47,7 @@ const GestionCandidatos = () => {
   const [loading, setLoading] = useState(false);
   const [elecciones, setElecciones] = useState<Eleccion[]>([]);
   const { idEleccion } = useParams<{ idEleccion: string }>();
+  const [nombreEleccion, setNombreEleccion] = useState("");
 
   const fetchCandidatos = async () => {
     if (!isAuthenticated || !user) return;
@@ -59,11 +58,14 @@ const GestionCandidatos = () => {
         `/api/candidatos/listar/cformacion/${user?.centroFormacion}`
       );
 
+      const filtrados = res.data.data.filter((candidato: Candidato) => candidato.ideleccion === Number(idEleccion));
+      setCandidatos(filtrados || []);
+
       if (!res.data) {
         throw new Error("Error al traer aprendices");
       }
-      console.log("candidatos: ", res.data);
-      setCandidatos(res.data.data || []);
+      // console.log("candidatos: ", res.data);
+      // console.log("idEleccion param: ", idEleccion);
     } catch (error) {
       console.error(error);
     } finally {
@@ -72,14 +74,13 @@ const GestionCandidatos = () => {
   };
   
   useEffect(() => {
-
     const fetchAprendices = async () => {
       try {
         const res = await api.get(`/api/aprendiz/centros/${user?.centroFormacion}`);
         if (!res.data) {
           throw new Error("Error al traer aprendices");
         }
-        console.log("aprendices: ", res.data);
+        // console.log("aprendices: ", res.data);
         setAprendices(res.data || []);
       } catch (error) {
         console.error(error);
@@ -92,6 +93,7 @@ const GestionCandidatos = () => {
         if (!res.data) {
           throw new Error("Error al traer elecciones");
         }
+        setNombreEleccion(res.data.data.find((e: Eleccion) => e.ideleccion === Number(idEleccion))?.nombre || "");
         console.log("elecciones: ", res.data);
         setElecciones(res.data.data || []);
       } catch (error) {
@@ -156,7 +158,9 @@ const GestionCandidatos = () => {
     <div className="container my-4">
       {/* Header */}
       <div className="d-flex justify-content-between align-items-center mb-5">
-        <h2 className="fw-bold m-0">Gestión de Candidatos</h2>
+        <h2 className="fw-bold m-0">{nombreEleccion}</h2>
+        <br />
+        {/* <h3 className="text-muted">{nombreEleccion}</h3> */}
         <button
           className="btn btn-gradient d-flex align-items-center gap-2"
           onClick={() => setShowModal(true)}
@@ -232,6 +236,16 @@ const GestionCandidatos = () => {
 
               </tbody>
             </table>
+
+            {/* boton de regresar */}
+            <div className="d-flex justify-content-end p-3">
+              <button
+                className="btn btn-secondary"
+                onClick={() => window.history.back()}
+              >
+                Regresar
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -242,7 +256,6 @@ const GestionCandidatos = () => {
           onHide={() => setShowModalModificar(false)}
           candidato={candidatoSeleccionado}
           onSave={(candidatoEditado) => {
-            // actualizar la lista en el front
             setCandidatos(prev =>
               prev.map(c =>
                 c.idcandidatos === candidatoEditado.idcandidatos ? candidatoEditado : c
@@ -250,21 +263,18 @@ const GestionCandidatos = () => {
             );
             fetchCandidatos();
             setShowModalModificar(false);
-            //referescar lista
             fetchCandidatos();
           }}
-          elecciones={elecciones || []}
           aprendices={aprendices || []}
         />
       )}
-
 
       <AgregarCandidatoModal
         show={showModal}
         onHide={() => setShowModal(false)}
         onSave={handleAgregarCandidato}
-        elecciones={elecciones || []}
         aprendices={aprendices || []}
+        idEleccion={idEleccion ? parseInt(idEleccion) : undefined}
       />
 
       <style>{`

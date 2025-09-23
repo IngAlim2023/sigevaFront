@@ -11,19 +11,20 @@ interface Aprendiz {
   email: string;
 }
 
-interface Eleccion {
-  ideleccion: number;
-  nombre: string;
-}
+// interface Eleccion {
+//   ideleccion: number;
+//   nombre: string;
+// }
 interface AgregarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
   onSave: (candidato: any) => void;
-  elecciones: Eleccion[];
+  // elecciones: Eleccion[];
   aprendices: Aprendiz[];
+  idEleccion?: number;
 }
 
-const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }: AgregarCandidatoModalProps) => {
+const AgregarCandidatoModal = ({ show, onHide, onSave, idEleccion, aprendices }: AgregarCandidatoModalProps) => {
   const [formData, setFormData] = useState<{
     nombres: string;
     foto: File | string | null;
@@ -35,7 +36,7 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
     nombres: "",
     foto: null as File | null,
     idaprendiz: null,
-    ideleccion: null,
+    ideleccion: idEleccion || null,
     propuesta: "",
     numero_tarjeton: "",
   });
@@ -50,12 +51,12 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
     : [];
 
 
-  const eleccionOptions = Array.isArray(elecciones)
-    ? elecciones.map((e) => ({
-      value: e.ideleccion,
-      label: e.nombre,
-    }))
-    : [];
+  // const eleccionOptions = Array.isArray(elecciones)
+  //   ? elecciones.map((e) => ({
+  //     value: e.ideleccion,
+  //     label: e.nombre,
+  //   }))
+  //   : [];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -189,7 +190,7 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
                 />
               </Form.Group>
 
-              <Form.Group className="mb-3">
+              {/* <Form.Group className="mb-3">
                 <Form.Label>Elección</Form.Label>
                 <Select
                   options={eleccionOptions}
@@ -207,7 +208,7 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, aprendices, elecciones }:
                   }
                   isClearable
                 />
-              </Form.Group>
+              </Form.Group> */}
 
               <Form.Group className="mb-3">
                 <Form.Label>Propuesta</Form.Label>

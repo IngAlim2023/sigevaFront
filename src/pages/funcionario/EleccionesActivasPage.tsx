@@ -93,14 +93,16 @@ export default function EleccionesActivasPage() {
           <Button
             size="sm"
             variant="outline-primary"
-            onClick={() => setSelectedEleccion(row)}
+            onClick={() => navegar(`/gestion-candidatos/${row.ideleccion}`)}
+
           >
             Candidato
           </Button>
           <Button
             size="sm"
             variant="outline-secondary"
-            onClick={() => navegar(`/editar-eleccion/${row.ideleccion}`)}
+            onClick={() => setSelectedEleccion(row)}
+
           >
             Editar
           </Button>
@@ -114,7 +116,7 @@ export default function EleccionesActivasPage() {
 
   return (
     <Container className="my-4">
-      
+
       <h3 className="fw-bold text-center ">
         {eleccionActiva.length > 0
           ? `Centro de formación ${eleccionActiva[0].centro}`
@@ -132,7 +134,7 @@ export default function EleccionesActivasPage() {
         </Button>
       </div>
 
-      
+
       <div className="mt-4">
         <DataTable
           columns={columns}

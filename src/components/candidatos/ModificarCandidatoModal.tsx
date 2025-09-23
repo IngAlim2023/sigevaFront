@@ -11,25 +11,19 @@ interface Aprendiz {
   email: string;
 }
 
-interface Eleccion {
-  ideleccion: number;
-  nombre: string;
-}
 interface ModificarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
   candidato: any | null;
   onSave: (candidato: any) => void;
-  elecciones: Eleccion[];
   aprendices: Aprendiz[];
 }
 
-const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, elecciones }: ModificarCandidatoModalProps) => {
+const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices }: ModificarCandidatoModalProps) => {
   const [formData, setFormData] = useState({
     nombres: "",
     foto: null as File | null,
     idaprendiz: null as number | null,
-    ideleccion: null as number | null,
     propuesta: "",
     numero_tarjeton: "",
   });
@@ -40,7 +34,6 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
       setFormData({
         nombres: candidato.nombres || "",
         idaprendiz: candidato.idaprendiz || null,
-        ideleccion: candidato.ideleccion || null,
         propuesta: candidato.propuesta || "",
         numero_tarjeton: candidato.numeroTarjeton || "",
         foto: candidato.foto
@@ -58,14 +51,6 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
     }))
     : [];
 
-
-  const eleccionOptions = Array.isArray(elecciones)
-    ? elecciones.map((e) => ({
-      value: e.ideleccion,
-      label: e.nombre,
-    }))
-    : [];
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -80,7 +65,6 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
     try {
       const data = new FormData();
       data.append("nombres", formData.nombres);
-      data.append("ideleccion", String(formData.ideleccion));
       data.append("idaprendiz", String(formData.idaprendiz));
       data.append("propuesta", formData.propuesta);
       data.append("numero_tarjeton", String(formData.numero_tarjeton));
@@ -194,27 +178,6 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
                   isClearable
                 />
               </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Elección</Form.Label>
-                <Select
-                  options={eleccionOptions}
-                  placeholder="Selecciona una opción..."
-                  value={
-                    formData.ideleccion
-                      ? eleccionOptions.find((opt) => opt.value === formData.ideleccion)
-                      : null
-                  }
-                  onChange={(selected) =>
-                    setFormData({
-                      ...formData,
-                      ideleccion: selected ? selected.value : null,
-                    })
-                  }
-                  isClearable
-                />
-              </Form.Group>
-
               <Form.Group className="mb-3">
                 <Form.Label>Propuesta</Form.Label>
                 <Form.Control
