@@ -4,6 +4,7 @@ import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import AgregarCandidatoModal from "../../components/candidatos/AgregarCandidatoModal";
 import ModificarCandidatoModal from '../../components/candidatos/ModificarCandidatoModal';
 import { api } from "../../api";
+import { useParams } from "react-router-dom";
 
 interface Eleccion {
   ideleccion: number;
@@ -26,7 +27,6 @@ interface Aprendiz {
   programa: Programa;
   email: string;
 }
-
 interface Candidato {
   idcandidatos: number;
   ideleccion: number;
@@ -48,6 +48,7 @@ const GestionCandidatos = () => {
   const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [elecciones, setElecciones] = useState<Eleccion[]>([]);
+  const { idEleccion } = useParams<{ idEleccion: string }>();
 
   const fetchCandidatos = async () => {
     if (!isAuthenticated || !user) return;
@@ -115,7 +116,6 @@ const GestionCandidatos = () => {
     try {
       const response = await api.put(`/api/candidatos/actualizar/${id}`);
 
-
       const candidato = response.data.data;
       console.log(candidato);
 
@@ -124,7 +124,7 @@ const GestionCandidatos = () => {
 
     } catch (error: any) {
       console.error("Error al obtener candidato:", error.response?.data || error.message);
-      alert("No se pudo cargar el candidato ❌");
+      alert("No se pudo cargar el candidato");
     }
 
 
