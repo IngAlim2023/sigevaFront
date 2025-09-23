@@ -1,40 +1,33 @@
-import { Row, Col, Container, Button } from "react-bootstrap";
-import EleccionCard from "../../components/EleccionCard";
+import { Container, Button } from "react-bootstrap";
 import { FaPlusCircle } from "react-icons/fa";
 import { useEffect, useState } from "react";
-import EleccionDetalleModal from "../../components/EleccionDetalleModal";
 import { useAuth } from "../../context/auth/auth.context";
 import { api } from "../../api";
 import { useNavigate } from "react-router-dom";
-
-interface Aprendiz {
-  nombres: string;
-  apellidos: string;
-}
-
-interface Candidato {
-  idcandidatos: string;
-  numeroTarjeton: string;
-  foto: string;
-  aprendiz: Aprendiz;
-}
+import DataTable from "react-data-table-component";
+import type { TableColumn } from "react-data-table-component";
+import EleccionDetalleModal from "../../components/EleccionDetalleModal";
 
 interface Eleccion {
   ideleccion: number;
   titulo: string;
+  regional: string,
   centro: string;
   jornada: string | null;
   fechaInicio: string;
   fechaFin: string;
+  horaInicio?: string;
+  horaFin?: string;
+  estado?: string;
 }
+
+
 
 export default function EleccionesActivasPage() {
   const [showModal, setShowModal] = useState(false);
   const [selectedEleccion, setSelectedEleccion] = useState<Eleccion | null>(null);
   const [eleccionActiva, setEleccionActiva] = useState<Eleccion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadingCandidatos, setLoadingCandidatos] = useState(false)
-  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
   const { user } = useAuth();
   const navegar = useNavigate();
 
@@ -42,7 +35,7 @@ export default function EleccionesActivasPage() {
     const loadData = async () => {
       if (!user?.centroFormacion) return;
       try {
-        const res = await api.get(`/api/eleccion/traerTodas/${user?.centroFormacion}`);
+        const res = await api.get(`/api/eleccionPorCentro/${user?.centroFormacion}`);
         setEleccionActiva(res.data.eleccionesActivas);
         setLoading(false);
       } catch (error) {
@@ -52,85 +45,113 @@ export default function EleccionesActivasPage() {
     loadData();
   }, [user?.centroFormacion]);
 
-  const formatDate = (dateStr: string) => {
-    if (!dateStr) return "Fecha no disponible";
-    return new Date(dateStr).toLocaleDateString("es-ES", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+  // 🔹 Formatear fecha + hora en la misma celda
+  const formatDateTime = (fecha: string, hora?: string) => {
+    if (!fecha) return "Fecha no disponible";
+
+    const date = hora ? new Date(hora) : new Date(fecha); // usamos hora si viene, si no la fecha
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const year = date.getUTCFullYear();
+
+    const hours = String(date.getUTCHours()).padStart(2, "0");
+    const minutes = String(date.getUTCMinutes()).padStart(2, "0");
+
+    return `${day}/${month}/${year} - ${hours}:${minutes}`;
   };
 
-  const handleDetalles = async (eleccion: Eleccion) => {
-    if(loadingCandidatos) return
-    setSelectedEleccion({
-      ...eleccion,
-      fechaInicio: formatDate(eleccion.fechaInicio),
-      fechaFin: formatDate(eleccion.fechaFin),
-    });
-    setShowModal(true);
-    setLoadingCandidatos(true)
 
-    try {
-      const res = await api.get(`/api/candidatos/listar/${eleccion.ideleccion}`);
-      setCandidatos(res.data.data);
-    } catch (error) {
-      console.error("Error al cargar candidatos:", error);
-    }
-    finally{
-      setLoadingCandidatos(false)
-    }
-  };
+  // 🔹 Definimos las columnas del DataTable
+  const columns: TableColumn<Eleccion>[] = [
+    {
+      name: "Nombre",
+      selector: (row) => row.titulo,
+      sortable: true,
+    },
+    {
+      name: "Fecha inicio",
+      selector: (row) => formatDateTime(row.fechaInicio, row.horaInicio),
+      sortable: true,
+    },
+    {
+      name: "Fecha fin",
+      selector: (row) => formatDateTime(row.fechaFin, row.horaFin),
+      sortable: true,
+    },
+    {
+      name: "Jornada",
+      selector: (row) => row.jornada ?? "Sin jornada",
+    },
+    {
+      name: "Estado",
+      selector: (row) => row.estado ?? "Activa",
+    },
+    {
+      name: "Acciones",
+      cell: (row) => (
+        <div className="d-flex gap-2">
+          <Button
+            size="sm"
+            variant="outline-primary"
+            onClick={() => setSelectedEleccion(row)}
+          >
+            Candidato
+          </Button>
+          <Button
+            size="sm"
+            variant="outline-secondary"
+            onClick={() => navegar(`/editar-eleccion/${row.ideleccion}`)}
+          >
+            Editar
+          </Button>
+        </div>
+      ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
+    },
+  ];
 
   return (
     <Container className="my-4">
-      {/* Título de bienvenida */}
-      <h3 className="fw-bold">Bienvenido</h3>
-      <p className="text-muted">
-        Aquí tiene un resumen de la actividad reciente en SIGEVA.
-      </p>
+      
+      <h3 className="fw-bold text-center ">
+        {eleccionActiva.length > 0
+          ? `Centro de formación ${eleccionActiva[0].centro}`
+          : "No hay centro asignado"}
+      </h3>
 
-      {/* Subtítulo */}
-      <h5 className="fw-semibold mt-5">Resumen de Elecciones Activas</h5>
-
-       <div className="d-flex justify-content-end gap-3 mt-5">
+      {/* Botones arriba */}
+      <div className="d-flex justify-content-end gap-3 mt-3">
         <Button className="btn-gradient" onClick={() => navegar("/cargar-aprendices")}>
-          <FaPlusCircle /> Agregar votantes
+          <FaPlusCircle /> Agregar Candidatos
         </Button>
 
         <Button className="btn-gradient" onClick={() => navegar("/nueva-eleccion")}>
-          <FaPlusCircle /> Crear elección
+          <FaPlusCircle /> Crear Elección
         </Button>
       </div>
 
-      {/* Cards */}
-      <Row className="g-2 my-2">
-        {loading ? (
-          <p>Cargando elecciones...</p>
-        ) : eleccionActiva.length > 0 ? (
-          eleccionActiva.map((vote) => (
-            <Col key={vote.ideleccion} xs={12} md={6} lg={4}>
-              <EleccionCard
-                titulo={vote.titulo}
-                regional={vote.centro}
-                jornada={vote.jornada ?? "Sin jornada"}
-                fechaInicio={formatDate(vote.fechaInicio)}
-                fechaTerminacion={formatDate(vote.fechaFin)}
-                onDetalles={() => handleDetalles(vote)}
-              />
-            </Col>
-          ))
-        ) : (
-          <p>No hay elecciones activas en este momento.</p>
-        )}
-      </Row>
+      
+      <div className="mt-4">
+        <DataTable
+          columns={columns}
+          data={eleccionActiva}
+          progressPending={loading}
+          pagination
+          highlightOnHover
+          striped
+          responsive
+          noDataComponent="No hay elecciones activas en este momento."
+        />
+      </div>
 
-      {/* Modal de detalles */}
+      {/* Modal Detalle */}
       <EleccionDetalleModal
         show={showModal}
-        onClose={() => {setShowModal(false); setCandidatos([])}}
+        onClose={() => setShowModal(false)}
         eleccion={selectedEleccion}
-        candidatos={candidatos}
+        candidatos={[]} // 🔹 después puedes cargar los candidatos aquí
       />
     </Container>
   );
