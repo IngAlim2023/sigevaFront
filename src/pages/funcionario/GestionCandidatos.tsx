@@ -64,8 +64,6 @@ const GestionCandidatos = () => {
       if (!res.data) {
         throw new Error("Error al traer aprendices");
       }
-      // console.log("candidatos: ", res.data);
-      // console.log("idEleccion param: ", idEleccion);
     } catch (error) {
       console.error(error);
     } finally {
