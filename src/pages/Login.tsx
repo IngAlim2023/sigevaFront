@@ -57,8 +57,7 @@ export default function Login({ perfil }: Props) {
         }
       }
     } catch (error) {
-      toast.error("Correo o contraseña incorrectos")
-      throw new Error("Error en el servidor", error as Error)
+      toast.error("Error en el servidor. Inténtalo de nuevo más tarde.")
     }
   };
   
