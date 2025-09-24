@@ -122,7 +122,7 @@ const Equipo: React.FC = () => {
     <main style={{ padding: "2rem" }}>
       <div className="mb-3">
         <Button 
-          variant="outline-primary" 
+          variant="light" 
           size="sm"
           onClick={() => navigate(-1)}
           className="d-flex align-items-center gap-2"
