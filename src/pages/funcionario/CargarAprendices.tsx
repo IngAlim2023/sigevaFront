@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import Container from "react-bootstrap/Container";
@@ -11,7 +12,7 @@ import Spinner from "react-bootstrap/Spinner";
 import { api } from "../../api";
 import { useAuth } from "../../context/auth/auth.context";
 import type { User, Gestor } from "../../context/auth/types/authTypes";
-
+import Modal from "react-bootstrap/Modal";
 
 import { Toast } from "react-bootstrap";
 import ToastContainer from "react-bootstrap/ToastContainer";
@@ -27,16 +28,13 @@ type FilaExcel = {
   [k: string]: any;
 };
 
-
 const UPLOAD_URL = "/api/aprendices/importarExcel";
-
 
 export default function CargarAprendices() {
   const { user, isAuthenticated } = useAuth();
   const isFuncionario =
     isAuthenticated && (user as User)?.perfil === "Funcionario";
   const userId = isFuncionario ? (user as Gestor).id : null;
-
 
   const [file, setFile] = useState<File | null>(null);
   const [jornada, setJornada] = useState("Diurna");
@@ -50,7 +48,10 @@ export default function CargarAprendices() {
   const [uploadPct, setUploadPct] = useState(0);
   const [subiendo, setSubiendo] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [skippedAprendices, setSkippedAprendices] = useState<FilaExcel[]>([]);
+  const [showSkippedModal, setShowSkippedModal] = useState(false);
 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const leerExcelParaPreview = async (archivo: File) => {
     setMsg(null);
@@ -58,11 +59,9 @@ export default function CargarAprendices() {
     setProgramaDetectado("");
     setFichaDetectada("");
 
-
     const buffer = await archivo.arrayBuffer();
     const wb = XLSX.read(buffer, { type: "array" });
     const sheet = wb.Sheets[wb.SheetNames[0]];
-
 
     const c2 = sheet?.["C2"]?.v?.toString().trim() || "";
     const fichaLimpia = c2.replace(/–/g, "-");
@@ -72,14 +71,12 @@ export default function CargarAprendices() {
     setFichaDetectada(numeroGrupo);
     setProgramaDetectado(nombrePrograma);
 
-
     const data = XLSX.utils.sheet_to_json<FilaExcel>(sheet, {
       range: 4,
       defval: "",
     });
     setPreview(data.slice(0, 20));
   };
-
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] || null;
@@ -105,7 +102,6 @@ export default function CargarAprendices() {
     }
   };
 
-
   const onSubmit = async () => {
     if (!isFuncionario) {
       setMsg({
@@ -125,18 +121,28 @@ export default function CargarAprendices() {
       setShowToast(true);
       return;
     }
+    // Filtramos aprendices inválidos
+    const invalidos = preview.filter((fila) => {
+      const email = (fila["Correo Electrónico"] || "").toString().trim();
+      const estado = (fila["Estado"] || "").toString().trim().toLowerCase();
+      return !email || (estado !== "activo" && estado !== "en formacion");
+    });
 
+    setSkippedAprendices(invalidos);
+
+    if (invalidos.length > 0) {
+      setShowSkippedModal(true);
+      return; // Detiene subida hasta que el usuario confirme
+    }
 
     const fd = new FormData();
     fd.append("excel", file);
     fd.append("userId", String(userId));
     fd.append("jornada", jornada);
 
-
     setSubiendo(true);
     setMsg(null);
     setUploadPct(0);
-
 
     try {
       const res = await api.post(UPLOAD_URL, fd, {
@@ -147,7 +153,6 @@ export default function CargarAprendices() {
           setUploadPct(pct);
         },
       });
-
 
       setMsg({
         type: "success",
@@ -166,22 +171,16 @@ export default function CargarAprendices() {
     }
   };
 
+  const handleConfirmUpload = async () => {
+    setShowConfirmModal(false);
+    await onSubmit();
+  };
 
   return (
     <div>
       <Container className="mb-5">
         <h1>Cargar Archivos De Votantes</h1>
-        <p>
-          Seleccione un archivo Excel (.xlsx / .xls) con los datos de los
-          aprendices. Cabeceras esperadas:
-          <strong>
-            {" "}
-            "Tipo de Documento", "Número de Documento", "Nombre", "Apellidos",
-            "Celular", "Correo Electrónico", "Estado"
-          </strong>
-          . En la celda <strong>C2</strong> debe venir <em>FICHA - PROGRAMA</em>
-          .
-        </p>
+
         {!isFuncionario && (
           <Alert variant="warning" className="mt-3">
             Debes iniciar sesión como <strong>Funcionario</strong> para importar
@@ -195,7 +194,6 @@ export default function CargarAprendices() {
         )}
       </Container>
 
-
       <Container className="mb-4">
         <div className="d-flex gap-3 align-items-end">
           <Form.Group controlId="fileExcel" className="flex-grow-1">
@@ -208,7 +206,6 @@ export default function CargarAprendices() {
             />
           </Form.Group>
 
-
           <Form.Group controlId="jornadaSelect">
             <Form.Label>Jornada</Form.Label>
             <Form.Select
@@ -218,12 +215,10 @@ export default function CargarAprendices() {
             >
               <option value="Diurna">Diurna</option>
 
-
               <option value="Nocturna">Nocturna</option>
             </Form.Select>
           </Form.Group>
         </div>
-
 
         {(fichaDetectada || programaDetectado) && (
           <div className="mt-2">
@@ -234,14 +229,12 @@ export default function CargarAprendices() {
           </div>
         )}
 
-
         {subiendo && (
           <div className="mt-3">
             <ProgressBar now={uploadPct} label={`${uploadPct}%`} animated />
           </div>
         )}
       </Container>
-
 
       <Container>
         <div className="d-flex justify-content-between align-items-center mb-2">
@@ -250,7 +243,6 @@ export default function CargarAprendices() {
             Mostrando {preview.length} filas (solo vista previa)
           </small>
         </div>
-
 
         <div className="border rounded">
           <Table responsive className="align-middle m-0">
@@ -306,11 +298,10 @@ export default function CargarAprendices() {
         </div>
       </Container>
 
-
       <Container className="d-flex justify-content-end mt-3">
         <Button
           variant="primary"
-          onClick={onSubmit}
+          onClick={() => setShowConfirmModal(true)}
           disabled={!isFuncionario || !file || subiendo}
         >
           {subiendo ? (
@@ -349,6 +340,119 @@ export default function CargarAprendices() {
           <Toast.Body className="text-white">{msg?.text}</Toast.Body>
         </Toast>
       </ToastContainer>
+      <Modal
+        show={showConfirmModal}
+        onHide={() => setShowConfirmModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title> ⚠️Atención</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="text-danger">
+            Recuerda que los aprendices que no estén en estado activo y en
+            formación ,no podrán votar a menos de que se modifique su estado
+            manualmente.
+          </p>
+          <p>
+            El archivo debe ser el reporte oficial de aprendices generado desde
+            <p className="text-success ">Sofia plus</p>
+            Asegúrate de no modificar los nombres de columnas ni el formato
+            original del reporte.
+          </p>
+          <ul>
+            <li>
+              Archivo seleccionado: <strong>{file?.name || "—"}</strong>
+            </li>
+
+            <li className="text-danger">
+              Ten en cuenta que los aprendices seran enlazados segun tu centro
+              de Formación
+            </li>
+            <li>
+              Ficha detectada: <strong>{fichaDetectada || "—"}</strong>
+            </li>
+            <li>
+              Programa detectado: <strong>{programaDetectado || "—"}</strong>
+            </li>
+          </ul>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmModal(false)}
+            disabled={subiendo}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="success"
+            onClick={handleConfirmUpload}
+            disabled={subiendo}
+          >
+            {subiendo ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />{" "}
+                Subiendo…
+              </>
+            ) : (
+              "Confirmar y subir"
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal
+        show={showSkippedModal}
+        onHide={() => setShowSkippedModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Aprendices Omitidos</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {skippedAprendices.length === 0 ? (
+            <p>No hay aprendices omitidos.</p>
+          ) : (
+            <Table responsive className="align-middle m-0">
+              <thead className="table-light">
+                <tr>
+                  <th>Documento</th>
+                  <th>Correo</th>
+                  <th>Nombre</th>
+                  <th>Apellidos</th>
+                </tr>
+              </thead>
+              <tbody>
+                {skippedAprendices.map((a, i) => (
+                  <tr key={i}>
+                    <td>{a["Número de Documento"] || "—"}</td>
+                    <td>{a["Correo Electrónico"] || "—"}</td>
+                    <td>{a["Nombre"] || "—"}</td>
+                    <td>{a["Apellidos"] || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowSkippedModal(false)}
+            disabled={subiendo}
+          >
+            Cerrar
+          </Button>
+          <Button
+            variant="success"
+            onClick={handleConfirmUpload}
+            disabled={subiendo}
+          >
+            Confirmar y subir
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
