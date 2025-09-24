@@ -43,7 +43,7 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, idEleccion, aprendices }:
     ? aprendices.map((a, index) => ({
       id: index,
       value: a.idaprendiz,
-      label: `${a.nombres} ${a.apellidos}`.trim(),
+      label: `${a.numeroDocumento} - ${a.nombres} ${a.apellidos}`.trim(),
     }))
     : [];
 
@@ -54,6 +54,8 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, idEleccion, aprendices }:
       [name]: name === "ideleccion" ? Number(value) : value,
     }));
   };
+
+  console.log('aprendices', aprendices)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
