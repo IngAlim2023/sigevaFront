@@ -139,9 +139,17 @@ export async function generarReporte(eleccion: Eleccion) {
       let fmt: "PNG" | "JPEG" | "WEBP" = "PNG";
       if (mime.includes("jpeg") || mime.includes("jpg")) fmt = "JPEG";
       if (mime.includes("webp")) fmt = "WEBP" as any;
-      // Aumentar tamaño del logo y dejar espacio con el título
-      const logoW = 30, logoH = 30;
-      doc.addImage(logoDataUrl, fmt, margin, margin, logoW, logoH);
+      // Logo centrado en el encabezado (más pequeño 28x28) y en marco cuadrado
+      const logoW = 28, logoH = 28;
+      const logoX = (pageWidth - logoW) / 2;
+      const logoY = margin;
+      // Fondo cuadrado blanco para evitar apariencia circular por transparencia
+      doc.setFillColor(255, 255, 255);
+      doc.rect(logoX, logoY, logoW, logoH, 'F');
+      // Borde fino alrededor del logo para definir el cuadrado
+      doc.setDrawColor(200);
+      doc.rect(logoX, logoY, logoW, logoH);
+      doc.addImage(logoDataUrl, fmt, logoX, logoY, logoW, logoH);
       logoDrawnHeight = logoH;
     } catch (e) {
       // Si falla la decodificación (p.ej., firma PNG incorrecta), continuar sin logo
@@ -152,17 +160,27 @@ export async function generarReporte(eleccion: Eleccion) {
   }
 
   // Header
+  // Subtítulo debajo del logo
+  const subtitle = "Sistema de votación SIGEVA";
+  let subtitleY = margin + (logoDrawnHeight > 0 ? logoDrawnHeight + 6 : 12);
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.text(subtitle, pageWidth / 2, subtitleY, { align: "center" });
+
+  // Título: "REPORTE DE LA ELECCIÓN [nombre]" debajo del subtítulo
   doc.setFont("helvetica", "bold");
-  // Revertir tamaño del título al valor previo (18)
   doc.setFontSize(18);
-  // Título: "REPORTE DE LA ELECCIÓN [nombre]"
   const titulo = `REPORTE DE LA ELECCIÓN ${eleccion.nombre}`;
-  // Ubicar el título centrado DEBAJO del logo (si existe) para que no se superponga
-  const titleYOffset = logoDrawnHeight > 0 ? (logoDrawnHeight + 8) : 18;
-  const titleY = margin + titleYOffset;
-  doc.text(titulo, pageWidth / 2, titleY, { align: "center" });
+  let titleY = subtitleY + 16; // +6 de espacio extra entre subtítulo y título
+  // Ajuste: dividir título si es muy largo y centrar cada línea
+  const maxTitleWidth = pageWidth - margin * 2; // ancho disponible
+  const titleLines = doc.splitTextToSize(titulo, maxTitleWidth);
+  titleLines.forEach((line: string) => {
+    doc.text(line, pageWidth / 2, titleY, { align: "center" });
+    titleY += 8; // separación entre líneas del título
+  });
   // Iniciar texto de cabecera más abajo para no chocar con el título
-  currentY = titleY + 16;
+  currentY = titleY + 10;
 
   doc.setFontSize(12);
   doc.setFont("helvetica", "normal");
@@ -287,7 +305,15 @@ export async function generarReporte(eleccion: Eleccion) {
     doc.text(`• Mínimo de votos: ${min}`, margin, currentY); currentY += 6;
     doc.text(`• Diferencia 1° y 2° lugar: ${max - segundoLugar}`, margin, currentY); currentY += 8;
 
-    // Simple bar chart drawn directly on PDF
+    // Título de la gráfica
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    const chartTitle = "CANTIDAD DE VOTOS POR CANDIDATO";
+    ensureSpace(8);
+    doc.text(chartTitle, pageWidth / 2, currentY, { align: "center" });
+    currentY += 6;
+
+    // Gráfica de barras dibujada directamente en el PDF
     const chartHeight = 90;
     const chartWidth = pageWidth - margin * 2;
     ensureSpace(chartHeight + 10);
