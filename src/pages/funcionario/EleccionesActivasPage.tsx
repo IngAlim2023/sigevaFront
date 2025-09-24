@@ -22,7 +22,6 @@ interface Eleccion {
 }
 
 
-
 export default function EleccionesActivasPage() {
   const [showModal, setShowModal] = useState(false);
   const [selectedEleccion, setSelectedEleccion] = useState<Eleccion | null>(null);
@@ -35,7 +34,8 @@ export default function EleccionesActivasPage() {
     const loadData = async () => {
       if (!user?.centroFormacion) return;
       try {
-        const res = await api.get(`/api/eleccionPorCentro/${user?.centroFormacion}`);
+        const res = await api.get(`/api/eleccion/traerTodas/${user.centroFormacion}`);
+        console.log("las elecciones son: ", res.data);
         setEleccionActiva(res.data.eleccionesActivas);
         setLoading(false);
       } catch (error) {
@@ -64,7 +64,7 @@ export default function EleccionesActivasPage() {
   // 🔹 Definimos las columnas del DataTable
   const columns: TableColumn<Eleccion>[] = [
     {
-      name: <b>Nombre</b>,
+      name: <b>Título</b>,
       selector: (row) => row.titulo,
       sortable: true,
     },
@@ -84,7 +84,14 @@ export default function EleccionesActivasPage() {
     },
     {
       name: <b>Estado</b>,
-      selector: (row) => row.estado ?? "Activa",
+      selector: (row) => {
+        if (!row.fechaFin) return "Activa";
+
+        const hoy = new Date();
+        const fechaFin = new Date(row.fechaFin);
+
+        return hoy > fechaFin ? "Cerrada" : "Activa";
+      },
     },
     {
       name: <b>Acciones</b>,
