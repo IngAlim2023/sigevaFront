@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import type { TableColumn } from "react-data-table-component";
 import EleccionDetalleModal from "../../components/EleccionDetalleModal";
-import { FaRegEdit } from "react-icons/fa";
+import { FiUserPlus, FiEdit, FiEye } from "react-icons/fi";
 import { Row, Col, Form } from "react-bootstrap";
 import EleccionEditarModal from "../../components/EleccionEditarModal";
 
@@ -36,8 +36,6 @@ interface Eleccion {
   estado?: string;
 }
 
-
-
 export default function EleccionesActivasPage() {
   const [showDetalleModal, setShowDetalleModal] = useState(false);
   const [showEditarModal, setShowEditarModal] = useState(false);
@@ -50,17 +48,18 @@ export default function EleccionesActivasPage() {
   const { user } = useAuth();
   const navegar = useNavigate();
 
+  const loadData = async () => {
+    if (!user?.centroFormacion) return;
+    try {
+      const res = await api.get(`/api/eleccion/traerTodas/${user.centroFormacion}`);
+      console.log("las elecciones son: ", res.data.eleccionesActivas);
+      setEleccionActiva(res.data.eleccionesActivas);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error al cargar las votaciones:", error);
+    }
+  };
   useEffect(() => {
-    const loadData = async () => {
-      if (!user?.centroFormacion) return;
-      try {
-        const res = await api.get(`/api/eleccionPorCentro/${user?.centroFormacion}`);
-        setEleccionActiva(res.data.eleccionesActivas);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error al cargar las votaciones:", error);
-      }
-    };
     loadData();
   }, [user?.centroFormacion]);
 
@@ -68,7 +67,7 @@ export default function EleccionesActivasPage() {
   const formatDateTime = (fecha: string, hora?: string) => {
     if (!fecha) return "Fecha no disponible";
 
-    const date = hora ? new Date(hora) : new Date(fecha); // usamos hora si viene, si no la fecha
+    const date = hora ? new Date(hora) : new Date(fecha);
     const day = String(date.getUTCDate()).padStart(2, "0");
     const month = String(date.getUTCMonth() + 1).padStart(2, "0");
     const year = date.getUTCFullYear();
@@ -95,11 +94,16 @@ export default function EleccionesActivasPage() {
     }
   };
 
-
-  // 🔹 Definimos las columnas del DataTable
   const columns: TableColumn<Eleccion>[] = [
     {
-      name: <b>Nombre</b>,
+      name: <b>#</b>,
+      selector: (row, index) => index + 1,
+      sortable: true,
+      width: '70px',
+      center: true,
+    },
+    {
+      name: <b>Título</b>,
       selector: (row) => row.titulo,
       sortable: true,
       grow: 2,
@@ -124,7 +128,19 @@ export default function EleccionesActivasPage() {
     },
     {
       name: <b>Estado</b>,
-      selector: (row) => row.estado ?? "Activa",
+      cell: (row) => {
+        const hoy = new Date();
+        const fechaHoraFin = row.horaFin ? new Date(row.horaFin) : null;
+
+        const estado = !fechaHoraFin || hoy <= fechaHoraFin ? "Activa" : "Cerrada";
+
+        const style = {
+          color: estado === "Activa" ? "green" : "orange",
+          fontWeight: "bold",
+        };
+
+        return <span style={style}>{estado}</span>;
+      },
     },
     {
       name: <b>Acciones</b>,
@@ -136,7 +152,7 @@ export default function EleccionesActivasPage() {
             className="text-nowrap"
             onClick={() => navegar(`/gestion-candidatos/${row.ideleccion}`)}
           >
-            Add candidatos
+            <FiUserPlus />
           </Button>
           <Button
             size="sm"
@@ -147,22 +163,30 @@ export default function EleccionesActivasPage() {
               setShowEditarModal(true)
             }}
           >
-            Editar
+            <FiEdit />
+
           </Button>
 
-          <Button onClick={() => handleDetalles(row)}>
-            <FaRegEdit />
-          </Button>
+
         </div>
       ),
       ignoreRowClick: true,
-      /*allowOverflow: true,
-      button: true,*/
+
     },
+    {
+      name: <b>Generar PDF</b>,
+      cell: (row) => (
+        <Button onClick={() => handleDetalles(row)}>
+          <FiEye />
+        </Button>
+      )
+    }
   ];
 
+  const query = (buscador ?? "").toLowerCase();
+
   const eleccionesFiltradas = eleccionActiva.filter((eleccion) =>
-    eleccion.titulo.toLowerCase().includes(buscador.toLowerCase())
+    eleccion?.titulo?.toLowerCase().includes(query)
   );
 
   return (
@@ -172,7 +196,6 @@ export default function EleccionesActivasPage() {
         Aquí tiene un resumen de la actividad reciente en SIGEVA.
       </p>
 
-      {/* Subtítulo */}
       <h5 className="fw-semibold mt-4">Resumen de Elecciones Activas</h5>
 
       <h3 className="fw-bold ">
@@ -181,8 +204,7 @@ export default function EleccionesActivasPage() {
           : "No hay centro asignado"}
       </h3>
 
-      {/* Botones arriba */}
-       <Row className="align-items-center mt-3 mb-4">
+      <Row className="align-items-center mt-3 mb-4">
         <Col md={8} lg={6} className="mb-2 mb-md-0">
           <Form.Control
             type="text"
@@ -221,18 +243,22 @@ export default function EleccionesActivasPage() {
         candidatos={candidatos}
       />
 
-      <EleccionEditarModal 
+      <EleccionEditarModal
         show={showEditarModal}
         onHide={() => setShowEditarModal(false)}
         eleccion={selectedEleccion}
         onUpdated={() => {
           if (user?.centroFormacion) {
             api.get(`/api/eleccionPorCentro/${user?.centroFormacion}`)
-              .then(res => setEleccionActiva(res.data.eleccionesActivas))
+              .then(res => {
+                setEleccionActiva(res.data.eleccionesActivas)
+                setLoading(false);
+                loadData();
+              })
               .catch(err => console.error("Error al recargar elecciones:", err));
           }
         }}
-      
+
       />
     </Container>
   );
