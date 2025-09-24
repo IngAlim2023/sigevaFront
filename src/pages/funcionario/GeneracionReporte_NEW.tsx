@@ -109,8 +109,8 @@ const GeneracionReporte: React.FC<GeneracionReporteProps> = ({ eleccion: eleccio
         <button
           onClick={generarReportePDF}
           disabled={cargando}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold shadow-md transition-all duration-300 disabled:bg-gray-400 
-            ${cargando ? 'bg-gray-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600'}`}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-black font-semibold shadow-md transition-all duration-300 disabled:bg-gray-400 
+            ${cargando ? 'bg-blue-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600'}`}
         >
           <FaFilePdf size={20} />
           {cargando ? (
