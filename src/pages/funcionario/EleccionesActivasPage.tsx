@@ -7,6 +7,21 @@ import { useNavigate } from "react-router-dom";
 import DataTable from "react-data-table-component";
 import type { TableColumn } from "react-data-table-component";
 import EleccionDetalleModal from "../../components/EleccionDetalleModal";
+import { FaRegEdit } from "react-icons/fa";
+import { Row, Col, Form } from "react-bootstrap";
+import EleccionEditarModal from "../../components/EleccionEditarModal";
+
+interface Aprendiz {
+  nombres: string;
+  apellidos: string
+}
+
+interface Candidato {
+  idcandidatos: string;
+  numeroTarjeton: string;
+  foto: string;
+  aprendiz: Aprendiz;
+}
 
 interface Eleccion {
   ideleccion: number;
@@ -24,10 +39,14 @@ interface Eleccion {
 
 
 export default function EleccionesActivasPage() {
-  const [showModal, setShowModal] = useState(false);
+  const [showDetalleModal, setShowDetalleModal] = useState(false);
+  const [showEditarModal, setShowEditarModal] = useState(false);
   const [selectedEleccion, setSelectedEleccion] = useState<Eleccion | null>(null);
   const [eleccionActiva, setEleccionActiva] = useState<Eleccion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingCandidatos, setLoadingCandidatos] = useState(false);
+  const [candidatos, setCandidatos] = useState<Candidato[]>([]);
+  const [buscador, setBuscador] = useState("");
   const { user } = useAuth();
   const navegar = useNavigate();
 
@@ -60,6 +79,22 @@ export default function EleccionesActivasPage() {
     return `${day}/${month}/${year} - ${hours}:${minutes}`;
   };
 
+  const handleDetalles = async (eleccion: Eleccion) => {
+    if (loadingCandidatos) return;
+    setSelectedEleccion(eleccion);
+    setShowDetalleModal(true);
+    setLoadingCandidatos(true);
+    try {
+      const res = await api.get(`/api/candidatos/listar/${eleccion.ideleccion}`);
+      setCandidatos(res.data.data);
+    } catch (error) {
+      console.error("Error al cargar los candidatos:", error);
+      setCandidatos([]);
+    } finally {
+      setLoadingCandidatos(false);
+    }
+  };
+
 
   // 🔹 Definimos las columnas del DataTable
   const columns: TableColumn<Eleccion>[] = [
@@ -67,6 +102,11 @@ export default function EleccionesActivasPage() {
       name: <b>Nombre</b>,
       selector: (row) => row.titulo,
       sortable: true,
+      grow: 2,
+      wrap: true,
+      style: {
+        whiteSpace: 'normal',
+      }
     },
     {
       name: <b>Fecha inicio</b>,
@@ -89,7 +129,7 @@ export default function EleccionesActivasPage() {
     {
       name: <b>Acciones</b>,
       cell: (row) => (
-        <div className=" gap-2 d-flex ">
+        <div className="d-flex gap-1 ">
           <Button
             size="sm"
             variant="outline-primary"
@@ -102,43 +142,66 @@ export default function EleccionesActivasPage() {
             size="sm"
             variant="outline-secondary"
             className="text-nowrap"
-            onClick={() => setSelectedEleccion(row)}
+            onClick={() => {
+              setSelectedEleccion(row)
+              setShowEditarModal(true)
+            }}
           >
             Editar
+          </Button>
+
+          <Button onClick={() => handleDetalles(row)}>
+            <FaRegEdit />
           </Button>
         </div>
       ),
       ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
+      /*allowOverflow: true,
+      button: true,*/
     },
   ];
 
-  return (
-    <Container className="my-4">
+  const eleccionesFiltradas = eleccionActiva.filter((eleccion) =>
+    eleccion.titulo.toLowerCase().includes(buscador.toLowerCase())
+  );
 
-      <h3 className="fw-bold text-center ">
+  return (
+    <Container className="my-4 px-3">
+      <h3 className="fw-bold">Bienvenido</h3>
+      <p className="text-muted">
+        Aquí tiene un resumen de la actividad reciente en SIGEVA.
+      </p>
+
+      {/* Subtítulo */}
+      <h5 className="fw-semibold mt-4">Resumen de Elecciones Activas</h5>
+
+      <h3 className="fw-bold ">
         {eleccionActiva.length > 0
           ? `Centro de formación ${eleccionActiva[0].centro}`
           : "No hay centro asignado"}
       </h3>
 
       {/* Botones arriba */}
-      <div className="d-flex justify-content-end gap-3 mt-3">
-        {/* <Button className="btn-gradient" onClick={() => navegar("/cargar-aprendices")}>
-          <FaPlusCircle /> Agregar Candidatos
-        </Button> */}
-
-        <Button className="btn-gradient" onClick={() => navegar("/nueva-eleccion")}>
-          <FaPlusCircle /> Crear Elección
-        </Button>
-      </div>
-
+       <Row className="align-items-center mt-3 mb-4">
+        <Col md={8} lg={6} className="mb-2 mb-md-0">
+          <Form.Control
+            type="text"
+            placeholder="Buscar elección por nombre..."
+            value={buscador}
+            onChange={(e) => setBuscador(e.target.value)}
+          />
+        </Col>
+        <Col md={4} lg={6} className="d-flex justify-content-md-end">
+          <Button className="btn-gradient" onClick={() => navegar("/nueva-eleccion")}>
+            <FaPlusCircle className="me-2" /> Crear Elección
+          </Button>
+        </Col>
+      </Row>
 
       <div className="mt-4">
         <DataTable
           columns={columns}
-          data={eleccionActiva}
+          data={eleccionesFiltradas}
           progressPending={loading}
           pagination
           highlightOnHover
@@ -148,12 +211,28 @@ export default function EleccionesActivasPage() {
         />
       </div>
 
-      {/* Modal Detalle */}
       <EleccionDetalleModal
-        show={showModal}
-        onClose={() => setShowModal(false)}
+        show={showDetalleModal}
+        onClose={() => {
+          setShowDetalleModal(false);
+          setCandidatos([]);
+        }}
         eleccion={selectedEleccion}
-        candidatos={[]} // 🔹 después puedes cargar los candidatos aquí
+        candidatos={candidatos}
+      />
+
+      <EleccionEditarModal 
+        show={showEditarModal}
+        onHide={() => setShowEditarModal(false)}
+        eleccion={selectedEleccion}
+        onUpdated={() => {
+          if (user?.centroFormacion) {
+            api.get(`/api/eleccionPorCentro/${user?.centroFormacion}`)
+              .then(res => setEleccionActiva(res.data.eleccionesActivas))
+              .catch(err => console.error("Error al recargar elecciones:", err));
+          }
+        }}
+      
       />
     </Container>
   );
