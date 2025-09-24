@@ -13,7 +13,9 @@ import { useAuth } from "../../context/auth/auth.context";
 import type { Gestor } from "../../context/auth/types/authTypes";
 import Toast from "react-bootstrap/Toast";
 import ToastContainer from "react-bootstrap/ToastContainer";
+import Modal from "react-bootstrap/Modal";
 
+import axios from "axios";
 type FilaExcel = {
   ["Tipo de Documento"]?: string;
   ["Número de Documento"]?: string | number;
@@ -22,16 +24,54 @@ type FilaExcel = {
   ["Celular"]?: string | number;
   ["Correo Electrónico"]?: string;
   ["Estado"]?: string;
-  [k: string]: any;
+  [k: string]: unknown;
 };
 
 type CentroFormacion = {
   id: string | number;
   nombre: string;
+  regionalId?: string | number;
+};
+type Regional = {
+  id: string | number;
+  nombre: string;
+};
+
+type CentroRaw = {
+  idcentro_formacion?: number | string | null;
+  idcentroFormacion?: number | string | null; // fallback por si API cambia a camelCase
+  id?: number | string | null; // fallback genérico
+  centro_formacioncol?: string | null;
+  centroFormacioncol?: string | null; // fallback camelCase
+  nombre?: string | null; // a veces API lo puede simplificar
+  centro_formacion?: string | null;
+  direccion?: string | null;
+  telefono?: string | null;
+  correo?: string | null;
+  subdirector?: string | null;
+  correosubdirector?: string | null;
+  idregional?: number | string | null;
+  idRegional?: number | string | null; // fallback camelCase
+  id_regional?: number | string | null; // fallback snake_case
+  idmunicipios?: number | string | null;
+  [k: string]: unknown;
+};
+type RegionalRaw = {
+  idregional?: number | string | null;
+  id?: number | string | null; // fallback por si API devuelve 'id'
+  regional?: string | null; // nombre corto de la regional
+  nombre?: string | null; // a veces API usa 'nombre'
+  telefono?: string | null;
+  direccion?: string | null;
+  numero_centros?: number | null;
+  departamentos_iddepartamentos?: number | string | null;
+  departamentos_iddepartamento?: number | string | null;
+  [k: string]: unknown; // acepta cualquier extra
 };
 
 const UPLOAD_URL = "/api/aprendices/importarExcel";
 const CENTROS_URL = "/api/centrosFormacion/obtiene";
+const REGIONAL_URL = "/api/regionales";
 
 export default function CargarAprendices() {
   const { user, isAuthenticated } = useAuth();
@@ -41,9 +81,18 @@ export default function CargarAprendices() {
 
   const userId = isAdmin ? (user as Gestor).id : null;
 
+  // estados
   const [centros, setCentros] = useState<CentroFormacion[]>([]);
   const [centroId, setCentroId] = useState<string>("");
   const [cargandoCentros, setCargandoCentros] = useState(false);
+
+  const [regionales, setRegionales] = useState<Regional[]>([]);
+  const [regionalId, setRegionalId] = useState<string>("");
+  const [cargandoRegional, setCargandoRegional] = useState(false);
+
+  const [uploaded, setUploaded] = useState(false); // para saber si ya terminó
+  const [controller, setController] = useState<AbortController | null>(null); // para cancelar
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
   const [jornada, setJornada] = useState("Diurna");
@@ -58,36 +107,84 @@ export default function CargarAprendices() {
   const [subiendo, setSubiendo] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
+  const [skippedAprendices, setSkippedAprendices] = useState<FilaExcel[]>([]);
+  const [showSkippedModal, setShowSkippedModal] = useState(false);
 
   useEffect(() => {
-    const fetchCentros = async () => {
+    const fetchInicial = async () => {
       setCargandoCentros(true);
+      setCargandoRegional(true);
       try {
-        const res = await api.get(CENTROS_URL, { params: { activos: true } });
-        console.log("Respuesta centros:", res.data);
+        const [resCentros, resRegionales] = await Promise.all([
+          api.get(CENTROS_URL, { params: { activos: true } }),
+          api.get(REGIONAL_URL, { params: { activos: true } }),
+        ]);
 
-        const lista = res.data?.data ?? [];
-        setCentros(
-          lista.map((c: any) => ({
-            id: c.idcentroFormacion,
-            nombre: c.centroFormacioncol,
-          }))
+        console.log("Respuesta centros:", resCentros.data);
+        console.log("Respuesta regionales:", resRegionales.data);
+
+        const centrosRaw = resCentros.data?.data ?? resCentros.data ?? [];
+
+        const centrosMapped: CentroFormacion[] = centrosRaw.map(
+          (c: CentroRaw) => ({
+            id: c.idcentro_formacion ?? c.idcentroFormacion ?? c.id ?? "",
+            nombre:
+              c.centro_formacioncol ??
+              c.centroFormacioncol ??
+              c.nombre ??
+              c.centro_formacion ??
+              "",
+            regionalId:
+              c.idregional ?? c.idRegional ?? c.idRegional ?? undefined,
+          })
         );
-      } catch (e: any) {
-        setMsg({
-          type: "danger",
-          text:
-            e?.response?.data?.message ||
-            "No se pudieron cargar los centros de formación",
-        });
+
+        const regionalesRaw =
+          resRegionales.data?.data ?? resRegionales.data ?? [];
+        const regionalesMapped: Regional[] = regionalesRaw.map(
+          (r: RegionalRaw) => ({
+            id: r.idregional ?? r.id ?? "",
+            nombre: r.regional ?? r.nombre ?? "",
+          })
+        );
+
+        setCentros(centrosMapped);
+        setRegionales(regionalesMapped);
+      } catch (e: unknown) {
+        console.error("Error al cargar centros/regionales:", e);
+        if (axios.isAxiosError(e)) {
+          setMsg({
+            type: "danger",
+            text:
+              e.response?.data?.message ||
+              "No se pudieron cargar los centros o las regionales.",
+          });
+        } else {
+          setMsg({
+            type: "danger",
+            text: "No se pudieron cargar los centros o las regionales.",
+          });
+        }
       } finally {
         setCargandoCentros(false);
+        setCargandoRegional(false);
       }
     };
 
-    fetchCentros();
+    fetchInicial();
   }, []);
 
+  // Cuando cambia regionalId limpiamos centroId para evitar inconsistencias
+  useEffect(() => {
+    setCentroId("");
+  }, [regionalId]);
+
+  // Filtramos centros por regional seleccionada
+  const centrosFiltrados = regionalId
+    ? centros.filter((c) => String(c.regionalId ?? "") === String(regionalId))
+    : [];
+
+  // Lectura del Excel para preview
   const leerExcelParaPreview = async (archivo: File) => {
     setMsg(null);
     setPreview([]);
@@ -116,6 +213,8 @@ export default function CargarAprendices() {
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] || null;
     setFile(f);
+    setUploaded(false); // resetea estado de subida cuando cambia archivo
+    setController(null);
     setUploadPct(0);
     if (!f) {
       setPreview([]);
@@ -160,12 +259,25 @@ export default function CargarAprendices() {
       });
       return;
     }
+    if (!regionalId) {
+      setMsg({
+        type: "danger",
+        text: "Selecciona una Regional primero.",
+      });
+      return;
+    }
+
+    if (skippedAprendices.length > 0) {
+      setShowSkippedModal(true);
+    }
 
     const fd = new FormData();
     fd.append("excel", file, file.name);
     fd.append("userId", String(userId));
     fd.append("jornada", jornada);
     fd.append("centroFormacionId", String(centroId));
+    fd.append("idregional", String(regionalId));
+
     for (const pair of fd.entries()) {
       console.log(pair[0], pair[1]);
     }
@@ -174,7 +286,11 @@ export default function CargarAprendices() {
     setUploadPct(0);
 
     try {
+      const ctrl = new AbortController();
+      setController(ctrl);
+
       const res = await api.post(UPLOAD_URL, fd, {
+        signal: ctrl.signal,
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (pe) => {
           if (!pe.total) return;
@@ -182,18 +298,46 @@ export default function CargarAprendices() {
           setUploadPct(pct);
         },
       });
+      const skippedAprendices: FilaExcel[] = res?.data?.skippedAprendices ?? [];
+
+      // Guardar en estado
+      setSkippedAprendices(skippedAprendices);
 
       setToastMsg(res?.data?.message || "Aprendices importados con éxito");
       setShowToast(true);
-    } catch (err: any) {
-      const apiMsg =
-        err?.response?.data?.message ||
-        err?.message ||
-        "Error al importar aprendices. Revisa el formato del archivo y los campos requeridos.";
-      setMsg({ type: "danger", text: apiMsg });
+
+      setUploaded(true);
+      setController(null);
+    } catch (err: unknown) {
+      if (
+        axios.isAxiosError(err) &&
+        (err.code === "ERR_CANCELED" || err.message.includes("canceled"))
+      ) {
+        setMsg({ type: "warning", text: "Subida cancelada por el usuario." });
+      } else if (err instanceof DOMException && err.name === "AbortError") {
+        setMsg({ type: "warning", text: "Subida cancelada por el usuario." });
+      } else if (axios.isAxiosError(err)) {
+        const apiMsg =
+          err.response?.data?.message ||
+          err.message ||
+          "Error al importar aprendices. Revisa el formato del archivo y los campos requeridos.";
+        setMsg({ type: "danger", text: apiMsg });
+      } else if (err instanceof Error) {
+        setMsg({ type: "danger", text: err.message || "Error desconocido." });
+      } else {
+        setMsg({
+          type: "danger",
+          text: "Error al importar aprendices. Revisa el formato del archivo y los campos requeridos.",
+        });
+      }
     } finally {
       setSubiendo(false);
+      setController(null); // limpieza por si quedó algo
     }
+  };
+  const handleConfirmUpload = async () => {
+    setShowConfirmModal(false);
+    await onSubmit();
   };
 
   const centroSeleccionado = centros.find(
@@ -204,17 +348,7 @@ export default function CargarAprendices() {
     <div>
       <Container className="mb-5">
         <h1>Cargar Archivos de Aprendices Admin</h1>
-        <p>
-          Seleccione un archivo Excel (.xlsx / .xls) con los datos de los
-          aprendices. Cabeceras esperadas:
-          <strong>
-            {" "}
-            "Tipo de Documento", "Número de Documento", "Nombre", "Apellidos",
-            "Celular", "Correo Electrónico", "Estado"
-          </strong>
-          . En la celda <strong>C2</strong> debe venir <em>FICHA - PROGRAMA</em>
-          .
-        </p>
+
         {!isAdmin && (
           <Alert variant="warning" className="mt-3">
             Debes iniciar sesión como <strong>Admin</strong> para importar
@@ -224,6 +358,11 @@ export default function CargarAprendices() {
         {msg && (
           <Alert variant={msg.type} className="mt-3">
             {msg.text}
+          </Alert>
+        )}
+        {uploaded && (
+          <Alert variant="success" className="mt-3">
+            El archivo se subió correctamente.
           </Alert>
         )}
       </Container>
@@ -240,19 +379,48 @@ export default function CargarAprendices() {
             />
           </Form.Group>
 
+          <Form.Group controlId="regionalSelect">
+            <Form.Label>Regionales</Form.Label>
+            <Form.Select
+              value={regionalId}
+              onChange={(e) => setRegionalId(e.target.value)}
+              disabled={!isAdmin || subiendo || cargandoRegional}
+            >
+              <option value="">
+                {cargandoRegional
+                  ? "Cargando Regionales..."
+                  : "Seleccione un regional"}
+              </option>
+              {regionales.map((r, i) => (
+                <option key={`${String(r.id)}-${i}`} value={String(r.id)}>
+                  {r.nombre}
+                </option>
+              ))}
+            </Form.Select>
+            {cargandoRegional && (
+              <div className="mt-2">
+                <Spinner animation="border" size="sm" /> Cargando…
+              </div>
+            )}
+          </Form.Group>
+
           <Form.Group controlId="centroSelect">
             <Form.Label>Centro de Formación</Form.Label>
             <Form.Select
               value={centroId}
               onChange={(e) => setCentroId(e.target.value)}
-              disabled={!isAdmin || subiendo || cargandoCentros}
+              disabled={!isAdmin || subiendo || cargandoCentros || !regionalId}
             >
               <option value="">
-                {cargandoCentros
+                {!regionalId
+                  ? "Seleccione una regional primero"
+                  : cargandoCentros
                   ? "Cargando centros..."
+                  : centrosFiltrados.length === 0
+                  ? "No hay centros para la regional seleccionada"
                   : "Seleccione un centro"}
               </option>
-              {centros.map((c, i) => (
+              {centrosFiltrados.map((c, i) => (
                 <option key={`${String(c.id)}-${i}`} value={String(c.id)}>
                   {c.nombre}
                 </option>
@@ -309,6 +477,120 @@ export default function CargarAprendices() {
           <Toast.Body className="text-white">{toastMsg}</Toast.Body>
         </Toast>
       </ToastContainer>
+      <Modal
+        show={showConfirmModal}
+        onHide={() => setShowConfirmModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>⚠️ Atención</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="text-danger">
+            Recuerda que los aprendices que no estén en estado activo y en
+            formación ,no podrán votar a menos de que se modifique su estado
+            manualmente.
+          </p>
+          <p>
+            El archivo debe ser el reporte oficial de aprendices generado desde{" "}
+            <span className="text-success">Sofia plus</span>. Asegúrate de no
+            modificar los nombres de columnas ni el formato original del
+            reporte.
+          </p>
+
+          <ul>
+            <li>
+              Archivo seleccionado: <strong>{file?.name || "—"}</strong>
+            </li>
+            <li>
+              Regional:{" "}
+              <strong>
+                {regionales.find((r) => String(r.id) === regionalId)?.nombre ||
+                  "—"}
+              </strong>
+            </li>
+            <li>
+              Centro:{" "}
+              <strong>
+                {centros.find((c) => String(c.id) === centroId)?.nombre || "—"}
+              </strong>
+            </li>
+            <li>
+              Ficha detectada: <strong>{fichaDetectada || "—"}</strong>
+            </li>
+            <li>
+              Programa detectado: <strong>{programaDetectado || "—"}</strong>
+            </li>
+          </ul>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmModal(false)}
+            disabled={subiendo}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="success"
+            onClick={handleConfirmUpload}
+            disabled={subiendo}
+          >
+            {subiendo ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />{" "}
+                Subiendo…
+              </>
+            ) : (
+              "Confirmar y subir"
+            )}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal
+        show={showSkippedModal}
+        onHide={() => setShowSkippedModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Aprendices Omitidos</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {skippedAprendices.length === 0 ? (
+            <p>No hay aprendices omitidos.</p>
+          ) : (
+            <Table responsive className="align-middle m-0">
+              <thead className="table-light">
+                <tr>
+                  <th>Documento</th>
+                  <th>Correo</th>
+                  <th>Nombre</th>
+                  <th>Apellidos</th>
+                </tr>
+              </thead>
+              <tbody>
+                {skippedAprendices.map((a, i) => (
+                  <tr key={i}>
+                    <td>{a["Número de Documento"] || "—"}</td>
+                    <td>{a["Correo Electrónico"] || "—"}</td>
+                    <td>{a["Nombre"] || "—"}</td>
+                    <td>{a["Apellidos"] || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={() => setShowSkippedModal(false)}
+          >
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
       <Container>
         <div className="d-flex justify-content-between align-items-center mb-2">
@@ -373,12 +655,17 @@ export default function CargarAprendices() {
           </Table>
         </div>
       </Container>
+      <Container className="d-flex justify-content-end gap-2 mt-3">
+        {subiendo && controller && (
+          <Button variant="danger" onClick={() => controller.abort()}>
+            Cancelar subida
+          </Button>
+        )}
 
-      <Container className="d-flex justify-content-end mt-3">
         <Button
           variant="primary"
-          onClick={onSubmit}
-          disabled={!isAdmin || !file || subiendo || !centroId}
+          onClick={() => setShowConfirmModal(true)}
+          disabled={!isAdmin || !file || subiendo || !centroId || !regionalId}
         >
           {subiendo ? (
             <>
