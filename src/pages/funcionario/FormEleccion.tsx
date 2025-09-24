@@ -140,6 +140,12 @@ function FormEleccion() {
                     Crear elección
                   </Button>
                 </div>
+                {/* boton regresar */}
+                <div className="d-grid gap-2 mt-3">
+                  <Button variant="outline-secondary" onClick={() => window.history.back()}>
+                    Regresar
+                  </Button>
+                </div>
               </Form>
             </div>
           </Col>

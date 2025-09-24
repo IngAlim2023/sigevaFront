@@ -8,6 +8,7 @@ interface EleccionCardProps {
   jornada: string;
   regional: string;
   onDetalles?: () => void;
+  onCandidatos?: () => void;
 }
 
 export default function EleccionCard({
@@ -17,6 +18,7 @@ export default function EleccionCard({
   jornada,
   regional,
   onDetalles,
+  onCandidatos,
 }: EleccionCardProps) {
   return (
     <Card className="h-100 border-success border-1">
@@ -35,6 +37,9 @@ export default function EleccionCard({
         </Card.Text>
         <Button className="btn-gradient" onClick={onDetalles}>
           Detalles
+        </Button>
+        <Button className="btn-gradient" onClick={onCandidatos}>
+          Gestionar candidatos
         </Button>
       </Card.Body>
     </Card>
