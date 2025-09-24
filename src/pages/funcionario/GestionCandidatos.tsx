@@ -5,6 +5,7 @@ import AgregarCandidatoModal from "../../components/candidatos/AgregarCandidatoM
 import ModificarCandidatoModal from '../../components/candidatos/ModificarCandidatoModal';
 import { api } from "../../api";
 import { useParams } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 
 interface Eleccion {
   ideleccion: number;
@@ -70,7 +71,7 @@ const GestionCandidatos = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     const fetchAprendices = async () => {
       try {
@@ -193,7 +194,8 @@ const GestionCandidatos = () => {
                     <tr key={c.idcandidatos}>
                       <td className="ps-4">
                         <img
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(c.nombres)}&background=random&size=128&rounded=true&bold=true&format=png`}
+                          src={c.foto && c.foto.trim() !== ""
+                            ? c.foto : `https://ui-avatars.com/api/?name=${encodeURIComponent(c.nombres)}&background=random&size=128&rounded=true&bold=true&format=png`}
                           alt={`${c.nombres} `}
                           className="rounded-circle"
                           style={{ width: 48, height: 48, objectFit: "cover" }}
@@ -246,6 +248,8 @@ const GestionCandidatos = () => {
             </div>
           </div>
         </div>
+      <Toaster />
+
       </div>
 
       {candidatoSeleccionado && (

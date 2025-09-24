@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import Select from "react-select"
 import { api } from "../../api";
+import toast from "react-hot-toast";
 
 interface Aprendiz {
   idaprendiz: number;
@@ -44,7 +45,8 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices }
 
 
   const aprendizOptions = Array.isArray(aprendices)
-    ? aprendices.map((a) => ({
+    ? aprendices.map((a, index) => ({
+      id: index,
       value: a.idaprendiz,
       label: `${a.nombres} ${a.apellidos}`.trim(),
 
@@ -86,7 +88,8 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices }
       );
 
       console.log("Candidato actualizado:", response.data);
-      alert("Candidato actualizado satisfactoriamente");
+      toast.success(response.data.message, { id: "toast" });
+
       if (onSave) {
         onSave({
           ...response.data,
@@ -97,7 +100,8 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices }
       onHide();
     } catch (error: any) {
       console.error("Error al crear candidato:", error.response?.data || error.message);
-      alert("Error al guardar candidato");
+
+      toast.error("Error al guardar candidato");
     }
   };
 
@@ -211,7 +215,9 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices }
           </div>
         </Form>
       </Modal.Body>
+
     </Modal>
+
   );
 };
 

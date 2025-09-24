@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import Select from "react-select"
 import { api } from "../../api";
+import toast from "react-hot-toast";
 
 interface Aprendiz {
   idaprendiz: number;
@@ -11,10 +12,6 @@ interface Aprendiz {
   email: string;
 }
 
-// interface Eleccion {
-//   ideleccion: number;
-//   nombre: string;
-// }
 interface AgregarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
@@ -40,23 +37,15 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, idEleccion, aprendices }:
     propuesta: "",
     numero_tarjeton: "",
   });
-  const [previewUrl, setPreviewUrl] = useState<string>(""); // para previsualizar
-
+  const [previewUrl, setPreviewUrl] = useState<string>("");
 
   const aprendizOptions = Array.isArray(aprendices)
-    ? aprendices.map((a) => ({
+    ? aprendices.map((a, index) => ({
+      id: index,
       value: a.idaprendiz,
       label: `${a.nombres} ${a.apellidos}`.trim(),
     }))
     : [];
-
-
-  // const eleccionOptions = Array.isArray(elecciones)
-  //   ? elecciones.map((e) => ({
-  //     value: e.ideleccion,
-  //     label: e.nombre,
-  //   }))
-  //   : [];
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -94,7 +83,8 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, idEleccion, aprendices }:
       );
 
       console.log("Candidato creado:", response.data);
-      alert("Candidato guardado satisfactoriamente");
+      toast.success(response.data.message, { id: "toast" });
+
       if (onSave) {
         onSave({
           ...response.data,
@@ -105,7 +95,7 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, idEleccion, aprendices }:
       onHide();
     } catch (error: any) {
       console.error("Error al crear candidato:", error.response?.data || error.message);
-      alert("Error al guardar candidato");
+      toast.error("Error al guardar candidato");
     }
   };
 
