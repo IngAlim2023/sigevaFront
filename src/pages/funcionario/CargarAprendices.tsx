@@ -13,18 +13,11 @@ import { api } from "../../api";
 import { useAuth } from "../../context/auth/auth.context";
 import type { User, Gestor } from "../../context/auth/types/authTypes";
 import Modal from "react-bootstrap/Modal";
-
 import { Toast } from "react-bootstrap";
 import ToastContainer from "react-bootstrap/ToastContainer";
+
 // listo para explicar el codigoooooo
 type FilaExcel = {
-  ["Tipo de Documento"]?: string;
-  ["Número de Documento"]?: string | number;
-  ["Nombre"]?: string;
-  ["Apellidos"]?: string;
-  ["Celular"]?: string | number;
-  ["Correo Electrónico"]?: string;
-  ["Estado"]?: string;
   [k: string]: any;
 };
 
@@ -39,6 +32,7 @@ export default function CargarAprendices() {
   const [file, setFile] = useState<File | null>(null);
   const [jornada, setJornada] = useState("Diurna");
   const [preview, setPreview] = useState<FilaExcel[]>([]);
+  const [allData, setAllData] = useState<FilaExcel[] | null>(null);
   const [programaDetectado, setProgramaDetectado] = useState("");
   const [fichaDetectada, setFichaDetectada] = useState("");
   const [msg, setMsg] = useState<{
@@ -52,6 +46,25 @@ export default function CargarAprendices() {
   const [showSkippedModal, setShowSkippedModal] = useState(false);
 
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // helper: quita tildes, pone en minúscula y limpia espacios
+  const normalize = (s: any) =>
+    String(s || "")
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "") // quita acentos
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase();
+
+  // normaliza keys de un objeto (ej: "Correo Electrónico" -> "correo electronico")
+  const normalizeKeys = (row: Record<string, any>) => {
+    const out: Record<string, any> = {};
+    Object.keys(row).forEach((k) => {
+      const nk = normalize(k);
+      out[nk] = row[k];
+    });
+    return out;
+  };
 
   const leerExcelParaPreview = async (archivo: File) => {
     setMsg(null);
@@ -71,17 +84,29 @@ export default function CargarAprendices() {
     setFichaDetectada(numeroGrupo);
     setProgramaDetectado(nombrePrograma);
 
-    const data = XLSX.utils.sheet_to_json<FilaExcel>(sheet, {
+    const data = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, {
       range: 4,
       defval: "",
     });
-    setPreview(data.slice(0, 20));
+
+    // Guarda toda la data para validaciones posteriores
+    setAllData(data);
+
+    if (data.length > 0) {
+      console.log("Encabezados detectados (primer row):", Object.keys(data[0]));
+      setPreview(data.slice(0, 20));
+    } else {
+      setPreview([]);
+    }
+
+    return data;
   };
 
   const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] || null;
     setFile(f);
     setUploadPct(0);
+    setAllData(null);
     if (!f) {
       setPreview([]);
       return;
@@ -94,7 +119,8 @@ export default function CargarAprendices() {
     }
     try {
       await leerExcelParaPreview(f);
-    } catch {
+    } catch (err) {
+      console.error(err);
       setMsg({
         type: "danger",
         text: "No se pudo leer el Excel para la vista previa.",
@@ -102,7 +128,8 @@ export default function CargarAprendices() {
     }
   };
 
-  const onSubmit = async () => {
+  // onSubmit ahora acepta `force` para obligar la subida incluso si hay omitidos
+  const onSubmit = async (force = false) => {
     if (!isFuncionario) {
       setMsg({
         type: "warning",
@@ -121,16 +148,50 @@ export default function CargarAprendices() {
       setShowToast(true);
       return;
     }
-    // Filtramos aprendices inválidos
-    const invalidos = preview.filter((fila) => {
-      const email = (fila["Correo Electrónico"] || "").toString().trim();
-      const estado = (fila["Estado"] || "").toString().trim().toLowerCase();
-      return !email || (estado !== "activo" && estado !== "en formacion");
+
+    // usa allData si está disponible (guardada en la lectura para preview), sino lee el archivo ahora
+    let dataToValidate: Record<string, any>[] = [];
+    if (allData && allData.length > 0) {
+      dataToValidate = allData;
+    } else {
+      // leer todo desde el archivo (fallback)
+      try {
+        const buffer = await file.arrayBuffer();
+        const wb = XLSX.read(buffer, { type: "array" });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        dataToValidate = XLSX.utils.sheet_to_json<Record<string, any>>(sheet, {
+          range: 4,
+          defval: "",
+        });
+      } catch (err) {
+        console.error(err);
+        setMsg({ type: "danger", text: "No se pudo leer el archivo para validar." });
+        setShowToast(true);
+        return;
+      }
+    }
+
+    // normalizamos keys y valores para validar correctamente sin depender de acentos o mayúsculas
+    const normalizedRows = dataToValidate.map((r) => normalizeKeys(r));
+
+    const invalidos = normalizedRows.filter((fila) => {
+      const email = normalize(fila["correo electronico"] || fila["correo"] || fila["email"] || "");
+      const estado = normalize(fila["estado"] || "");
+      const estadoValido = estado === "activo" || estado === "en formacion";
+      return !email || !estadoValido;
     });
 
-    setSkippedAprendices(invalidos);
+    // Mapea a un formato legible para mostrar en el modal (si quieres mantener claves originales, ajusta aquí)
+    setSkippedAprendices(
+      invalidos.map((r) => ({
+        documento: r["numero de documento"] || r["documento"] || "—",
+        correo: r["correo electronico"] || r["correo"] || r["email"] || "—",
+        nombre: r["nombre"] || "—",
+        apellidos: r["apellidos"] || "—",
+      }))
+    );
 
-    if (invalidos.length > 0) {
+    if (invalidos.length > 0 && !force) {
       setShowSkippedModal(true);
       return; // Detiene subida hasta que el usuario confirme
     }
@@ -168,12 +229,21 @@ export default function CargarAprendices() {
       setShowToast(true);
     } finally {
       setSubiendo(false);
+      setShowSkippedModal(false);
     }
   };
 
+  // Confirmación desde el modal principal (antes de subir) -> no fuerza
   const handleConfirmUpload = async () => {
     setShowConfirmModal(false);
-    await onSubmit();
+    await onSubmit(false);
+  };
+
+  // Confirmación desde el modal de omitidos -> fuerza la subida
+  const handleConfirmSkipped = async () => {
+    setShowSkippedModal(false);
+    setShowConfirmModal(false);
+    await onSubmit(true);
   };
 
   return (
@@ -223,7 +293,7 @@ export default function CargarAprendices() {
         {(fichaDetectada || programaDetectado) && (
           <div className="mt-2">
             <small className="text-muted">
-              <strong>Ficha detectada:</strong> {fichaDetectada || "—"} |{" "}
+              <strong>Ficha detectada:</strong> {fichaDetectada || "—"} | {" "}
               <strong>Programa:</strong> {programaDetectado || "—"}
             </small>
           </div>
@@ -239,9 +309,7 @@ export default function CargarAprendices() {
       <Container>
         <div className="d-flex justify-content-between align-items-center mb-2">
           <h2 className="m-0">Vista Previa De los Datos</h2>
-          <small className="text-muted">
-            Mostrando {preview.length} filas (solo vista previa)
-          </small>
+          <small className="text-muted">Mostrando {preview.length} filas (solo vista previa)</small>
         </div>
 
         <div className="border rounded">
@@ -265,13 +333,10 @@ export default function CargarAprendices() {
                 </tr>
               ) : (
                 preview.map((fila, i) => {
-                  const nombre =
-                    `${fila["Nombre"] || ""} ${
-                      fila["Apellidos"] || ""
-                    }`.trim() || "—";
-                  const doc = fila["Número de Documento"]?.toString() || "—";
-                  const correo = fila["Correo Electrónico"] || "—";
-                  const estado = (fila["Estado"] || "").toString().trim();
+                  const nombre = `${fila["Nombre"] || fila["nombre"] || ""} ${fila["Apellidos"] || fila["apellidos"] || ""}`.trim() || "—";
+                  const doc = (fila["Número de Documento"] || fila["numero de documento"] || fila["documento"] || "—").toString();
+                  const correo = fila["Correo Electrónico"] || fila["correo electronico"] || fila["correo"] || fila["email"] || "—";
+                  const estado = (fila["Estado"] || fila["estado"] || "").toString().trim();
                   const activo = estado.toLowerCase() === "activo";
                   return (
                     <tr key={i}>
@@ -306,8 +371,7 @@ export default function CargarAprendices() {
         >
           {subiendo ? (
             <>
-              <Spinner animation="border" size="sm" className="me-2" />{" "}
-              Subiendo…
+              <Spinner animation="border" size="sm" className="me-2" /> Subiendo…
             </>
           ) : (
             "Subir Archivos y Procesar"
@@ -330,16 +394,13 @@ export default function CargarAprendices() {
         >
           <Toast.Header>
             <strong className="me-auto">
-              {msg?.type === "success"
-                ? "Éxito"
-                : msg?.type === "danger"
-                ? "Error"
-                : "Aviso"}
+              {msg?.type === "success" ? "Éxito" : msg?.type === "danger" ? "Error" : "Aviso"}
             </strong>
           </Toast.Header>
           <Toast.Body className="text-white">{msg?.text}</Toast.Body>
         </Toast>
       </ToastContainer>
+
       <Modal
         show={showConfirmModal}
         onHide={() => setShowConfirmModal(false)}
@@ -392,8 +453,7 @@ export default function CargarAprendices() {
           >
             {subiendo ? (
               <>
-                <Spinner animation="border" size="sm" className="me-2" />{" "}
-                Subiendo…
+                <Spinner animation="border" size="sm" className="me-2" /> Subiendo…
               </>
             ) : (
               "Confirmar y subir"
@@ -401,6 +461,7 @@ export default function CargarAprendices() {
           </Button>
         </Modal.Footer>
       </Modal>
+
       <Modal
         show={showSkippedModal}
         onHide={() => setShowSkippedModal(false)}
@@ -426,10 +487,10 @@ export default function CargarAprendices() {
               <tbody>
                 {skippedAprendices.map((a, i) => (
                   <tr key={i}>
-                    <td>{a["Número de Documento"] || "—"}</td>
-                    <td>{a["Correo Electrónico"] || "—"}</td>
-                    <td>{a["Nombre"] || "—"}</td>
-                    <td>{a["Apellidos"] || "—"}</td>
+                    <td>{a.documento || "—"}</td>
+                    <td>{a.correo || "—"}</td>
+                    <td>{a.nombre || "—"}</td>
+                    <td>{a.apellidos || "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -446,7 +507,7 @@ export default function CargarAprendices() {
           </Button>
           <Button
             variant="success"
-            onClick={handleConfirmUpload}
+            onClick={handleConfirmSkipped}
             disabled={subiendo}
           >
             Confirmar y subir

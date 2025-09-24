@@ -24,6 +24,7 @@ type FilaExcel = {
   ["Celular"]?: string | number;
   ["Correo Electrónico"]?: string;
   ["Estado"]?: string;
+  motivo?: string; // <-- el backend ahora puede devolver motivo
   [k: string]: unknown;
 };
 
@@ -39,11 +40,11 @@ type Regional = {
 
 type CentroRaw = {
   idcentro_formacion?: number | string | null;
-  idcentroFormacion?: number | string | null; // fallback por si API cambia a camelCase
-  id?: number | string | null; // fallback genérico
+  idcentroFormacion?: number | string | null;
+  id?: number | string | null;
   centro_formacioncol?: string | null;
-  centroFormacioncol?: string | null; // fallback camelCase
-  nombre?: string | null; // a veces API lo puede simplificar
+  centroFormacioncol?: string | null;
+  nombre?: string | null;
   centro_formacion?: string | null;
   direccion?: string | null;
   telefono?: string | null;
@@ -51,22 +52,22 @@ type CentroRaw = {
   subdirector?: string | null;
   correosubdirector?: string | null;
   idregional?: number | string | null;
-  idRegional?: number | string | null; // fallback camelCase
-  id_regional?: number | string | null; // fallback snake_case
+  idRegional?: number | string | null;
+  id_regional?: number | string | null;
   idmunicipios?: number | string | null;
   [k: string]: unknown;
 };
 type RegionalRaw = {
   idregional?: number | string | null;
-  id?: number | string | null; // fallback por si API devuelve 'id'
-  regional?: string | null; // nombre corto de la regional
-  nombre?: string | null; // a veces API usa 'nombre'
+  id?: number | string | null;
+  regional?: string | null;
+  nombre?: string | null;
   telefono?: string | null;
   direccion?: string | null;
   numero_centros?: number | null;
   departamentos_iddepartamentos?: number | string | null;
   departamentos_iddepartamento?: number | string | null;
-  [k: string]: unknown; // acepta cualquier extra
+  [k: string]: unknown;
 };
 
 const UPLOAD_URL = "/api/aprendices/importarExcel";
@@ -109,6 +110,11 @@ export default function CargarAprendices() {
   const [toastMsg, setToastMsg] = useState("");
   const [skippedAprendices, setSkippedAprendices] = useState<FilaExcel[]>([]);
   const [showSkippedModal, setShowSkippedModal] = useState(false);
+
+  // Nuevos estados para processed + opción de actualizar si existe
+  const [updateIfExists, setUpdateIfExists] = useState(true);
+  const [processed, setProcessed] = useState<any[]>([]);
+  const [showProcessedModal, setShowProcessedModal] = useState(false);
 
   useEffect(() => {
     const fetchInicial = async () => {
@@ -267,23 +273,22 @@ export default function CargarAprendices() {
       return;
     }
 
-    if (skippedAprendices.length > 0) {
-      setShowSkippedModal(true);
-    }
-
+    // Construimos FormData
     const fd = new FormData();
     fd.append("excel", file, file.name);
     fd.append("userId", String(userId));
     fd.append("jornada", jornada);
     fd.append("centroFormacionId", String(centroId));
     fd.append("idregional", String(regionalId));
+    // nuevo: enviar flag updateIfExists
+    fd.append("updateIfExists", updateIfExists ? "1" : "0");
 
-    for (const pair of fd.entries()) {
-      console.log(pair[0], pair[1]);
-    }
     setSubiendo(true);
     setMsg(null);
     setUploadPct(0);
+    setSkippedAprendices([]); // limpiar previos
+    setProcessed([]);
+    setShowProcessedModal(false);
 
     try {
       const ctrl = new AbortController();
@@ -298,13 +303,52 @@ export default function CargarAprendices() {
           setUploadPct(pct);
         },
       });
-      const skippedAprendices: FilaExcel[] = res?.data?.skippedAprendices ?? [];
+
+      const resp = res?.data ?? {};
+      const skipped: FilaExcel[] = resp?.skippedAprendices ?? [];
+      const inserted: number = resp?.inserted ?? 0;
+      const updated: number = resp?.updated ?? 0;
+      const skippedCount: number = resp?.skipped ?? skipped.length ?? 0;
+      const processedResp: any[] = resp?.processed ?? [];
 
       // Guardar en estado
-      setSkippedAprendices(skippedAprendices);
+      // Preferimos poblar skippedAprendices desde processed (más confiable)
+      const skippedFromProcessed: FilaExcel[] = processedResp
+        .filter((p) => p.status === "skipped")
+        .map((p) => ({
+          ["Número de Documento"]: p["Número de Documento"] || "",
+          ["Correo Electrónico"]: p["Correo Electrónico"] || "",
+          ["Nombre"]: p.Nombre || "",
+          ["Apellidos"]: p.Apellidos || "",
+          motivo: p.motivo || "Omitido",
+        }));
 
-      setToastMsg(res?.data?.message || "Aprendices importados con éxito");
+      // fallback al campo skipped si backend no devuelve processed (compatibilidad)
+      setSkippedAprendices(
+        skippedFromProcessed.length > 0 ? skippedFromProcessed : skipped
+      );
+
+      setProcessed(processedResp);
+
+      // Mensaje resumido en toast
+      const resumen = `Insertados: ${inserted} • Actualizados: ${updated} • Omitidos: ${skippedCount}`;
+      setToastMsg(resp?.message ? `${resp.message} — ${resumen}` : resumen);
       setShowToast(true);
+
+      // Abrir modal si hay omitidos
+      if (
+        (Array.isArray(skippedFromProcessed) && skippedFromProcessed.length > 0) ||
+        (Array.isArray(skipped) && skipped.length > 0)
+      ) {
+        setShowSkippedModal(true);
+      } else {
+        setShowSkippedModal(false);
+      }
+
+      // Mostrar modal con processed si hay datos
+      if (Array.isArray(processedResp) && processedResp.length > 0) {
+        setShowProcessedModal(true);
+      }
 
       setUploaded(true);
       setController(null);
@@ -444,6 +488,19 @@ export default function CargarAprendices() {
               <option value="Nocturna">Nocturna</option>
             </Form.Select>
           </Form.Group>
+
+          {/* Checkbox para updateIfExists */}
+          <Form.Group controlId="updateIfExists" className="d-flex align-items-center">
+            <Form.Check
+              type="checkbox"
+              id="updateIfExistsCheckbox"
+              label="Actualizar si ya existe"
+              checked={updateIfExists}
+              onChange={(e) => setUpdateIfExists(e.target.checked)}
+              disabled={!isAdmin || subiendo}
+            />
+            <small className="text-muted ms-2">Si está activado actualizará registros existentes.</small>
+          </Form.Group>
         </div>
 
         {(fichaDetectada || programaDetectado || centroSeleccionado) && (
@@ -472,7 +529,7 @@ export default function CargarAprendices() {
           bg="success"
         >
           <Toast.Header>
-            <strong className="me-auto">Importación exitosa</strong>
+            <strong className="me-auto">Importación</strong>
           </Toast.Header>
           <Toast.Body className="text-white">{toastMsg}</Toast.Body>
         </Toast>
@@ -538,8 +595,7 @@ export default function CargarAprendices() {
           >
             {subiendo ? (
               <>
-                <Spinner animation="border" size="sm" className="me-2" />{" "}
-                Subiendo…
+                <Spinner animation="border" size="sm" className="me-2" /> Subiendo…
               </>
             ) : (
               "Confirmar y subir"
@@ -547,6 +603,7 @@ export default function CargarAprendices() {
           </Button>
         </Modal.Footer>
       </Modal>
+
       <Modal
         show={showSkippedModal}
         onHide={() => setShowSkippedModal(false)}
@@ -554,7 +611,9 @@ export default function CargarAprendices() {
         centered
       >
         <Modal.Header closeButton>
-          <Modal.Title>Aprendices Omitidos</Modal.Title>
+          <Modal.Title>
+            Aprendices Omitidos {skippedAprendices.length > 0 ? `(${skippedAprendices.length})` : ""}
+          </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           {skippedAprendices.length === 0 ? (
@@ -567,6 +626,7 @@ export default function CargarAprendices() {
                   <th>Correo</th>
                   <th>Nombre</th>
                   <th>Apellidos</th>
+                  <th>Motivo</th> {/* nueva columna */}
                 </tr>
               </thead>
               <tbody>
@@ -576,6 +636,7 @@ export default function CargarAprendices() {
                     <td>{a["Correo Electrónico"] || "—"}</td>
                     <td>{a["Nombre"] || "—"}</td>
                     <td>{a["Apellidos"] || "—"}</td>
+                    <td>{(a.motivo as string) || "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -587,6 +648,66 @@ export default function CargarAprendices() {
             variant="secondary"
             onClick={() => setShowSkippedModal(false)}
           >
+            Cerrar
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Modal con processed (resultado por fila) */}
+      <Modal
+        show={showProcessedModal}
+        onHide={() => setShowProcessedModal(false)}
+        size="lg"
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Resultados por fila ({processed.length})</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {processed.length === 0 ? (
+            <p>No hay resultados procesados.</p>
+          ) : (
+            <Table responsive className="align-middle m-0">
+              <thead className="table-light">
+                <tr>
+                  <th>Documento</th>
+                  <th>Correo</th>
+                  <th>Nombre</th>
+                  <th>Apellidos</th>
+                  <th>Estado</th>
+                  <th>Motivo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {processed.map((p, i) => (
+                  <tr key={i}>
+                    <td>{p["Número de Documento"] || "—"}</td>
+                    <td>{p["Correo Electrónico"] || "—"}</td>
+                    <td>{p.Nombre || "—"}</td>
+                    <td>{p.Apellidos || "—"}</td>
+                    <td>
+                      <Badge
+                        bg={
+                          p.status === "inserted"
+                            ? "success"
+                            : p.status === "updated"
+                            ? "primary"
+                            : "secondary"
+                        }
+                        pill
+                      >
+                        {p.status}
+                      </Badge>
+                    </td>
+                    <td>{p.motivo || "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowProcessedModal(false)}>
             Cerrar
           </Button>
         </Modal.Footer>
@@ -662,6 +783,13 @@ export default function CargarAprendices() {
           </Button>
         )}
 
+        {/* Botón para abrir processed si quieres verlo manualmente */}
+        {processed.length > 0 && (
+          <Button variant="outline-secondary" onClick={() => setShowProcessedModal(true)}>
+            Ver resultados por fila
+          </Button>
+        )}
+
         <Button
           variant="primary"
           onClick={() => setShowConfirmModal(true)}
@@ -669,8 +797,7 @@ export default function CargarAprendices() {
         >
           {subiendo ? (
             <>
-              <Spinner animation="border" size="sm" className="me-2" />{" "}
-              Subiendo…
+              <Spinner animation="border" size="sm" className="me-2" /> Subiendo…
             </>
           ) : (
             "Subir Archivos y Procesar"
