@@ -55,7 +55,6 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, idEleccion, aprendices }:
     }));
   };
 
-  console.log('aprendices', aprendices)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +70,6 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, idEleccion, aprendices }:
       if (formData.foto instanceof File) {
         data.append("foto", formData.foto);
       }
-      console.log("Datos a enviar:", formData);
 
       const response = await api.post(
         `/api/candidatos/crear`,
@@ -84,7 +82,6 @@ const AgregarCandidatoModal = ({ show, onHide, onSave, idEleccion, aprendices }:
         }
       );
 
-      console.log("Candidato creado:", response.data);
       toast.success(response.data.message, { id: "toast" });
 
       if (onSave) {
