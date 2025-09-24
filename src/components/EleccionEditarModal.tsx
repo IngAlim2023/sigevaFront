@@ -11,6 +11,7 @@ interface Eleccion {
   horaInicio?: string;
   horaFin?: string;
   jornada?: string;
+
 }
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
   onHide: () => void;
   eleccion: Eleccion | null;
   onUpdated: () => void;
+
 }
 
 export default function EleccionEditarModal({
@@ -96,6 +98,7 @@ export default function EleccionEditarModal({
       );
       alert('Elección actualizada exitosamente');
       console.log("Elección actualizada:", res.data);
+      
       onUpdated();
       onHide();
     } catch (error) {
