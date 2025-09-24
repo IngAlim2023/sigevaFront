@@ -75,12 +75,13 @@ const GestionCandidatos = () => {
   useEffect(() => {
     const fetchAprendices = async () => {
       try {
-        const res = await api.get(`/api/aprendiz/centros/${user?.centroFormacion}`);
+        const res = await api.get(`/api/aprendiz/inscritos/centro/${user?.centroFormacion}`);
+        console.log(res)
         if (!res.data) {
           throw new Error("Error al traer aprendices");
         }
         // console.log("aprendices: ", res.data);
-        setAprendices(res.data || []);
+        setAprendices(res.data.data || []);
       } catch (error) {
         console.error(error);
       }
