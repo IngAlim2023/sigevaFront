@@ -23,129 +23,165 @@ interface Props {
     } | null;
 }
 
-
 export default function SelecionarCandidato({ show, onHide, candidato }: Props) {
     const { id } = useParams();
+    const navigate = useNavigate();
 
-    const navigate=useNavigate();
-    
     const [shotModal, setShowModal] = useState(false);
     const [otp, setOtp] = useState("");
     const { user } = useAuth();
 
     if (!candidato) return null;
 
+    /**
+     * generar OTP en servidor
+     * devuelve true si se generó correctamente, false en caso contrario
+     */
     const enviarOTP = async () => {
-
+        console.log("[enviarOTP] iniciando. user:", user, "eleccionId(param):", id);
         try {
-            await api.post('/api/validaciones/generarOtp', {
-                aprendiz_idaprendiz: user.id,
+            const payload = {
+                aprendiz_idaprendiz: user?.id,
                 elecciones_ideleccion: id
-            }
-            )
-        } catch (error) {
+            };
+            console.log("[enviarOTP] payload:", payload);
 
+            const response = await api.post('/api/validaciones/generarOtp', payload);
+            console.log("[enviarOTP] respuesta del servidor:", response);
+            // si tu backend devuelve algo útil, lo verás en response.data
+            console.log("[enviarOTP] response.data:", response.data);
 
+            // devuelve true para indicar éxito (ajusta según tu API)
+            return true;
+        } catch (error: any) {
+            // intentamos extraer info útil del error
+            console.error("[enviarOTP] error al generar OTP:", error);
+            console.error("[enviarOTP] error.message:", error?.message);
+            console.error("[enviarOTP] error.response?.status:", error?.response?.status);
+            console.error("[enviarOTP] error.response?.data:", error?.response?.data);
+
+            // muestra Swal con más detalles si están disponibles
+            const serverMsg = error?.response?.data?.message || error?.response?.data || error?.message;
+            Swal.fire({
+                title: "No se pudo enviar OTP",
+                text: String(serverMsg),
+                icon: "error",
+                confirmButtonText: "Ok"
+            });
+
+            return false;
+        }
+    }
+
+    /**
+     * manejador que espera a que enviarOTP termine antes de abrir modal
+     */
+    const handleVoteClick = async () => {
+        // cerramos modal candidato primero (como tenías)
+        onHide();
+        // llamamos y esperamos
+        const ok = await enviarOTP();
+        console.log("[handleVoteClick] enviarOTP ok?:", ok);
+        if (ok) {
+            setShowModal(true);
+        } else {
+            // si falló, opcionalmente podrías reabrir el modal o navegar
+            // navigate("/votaciones");
         }
     }
 
     const submit = async (e: React.FormEvent) => {
         e.preventDefault();
-        try {
-            if (otp.length === 0 || otp.length > 6) 
-                return Swal.fire({
-                            title:"Tu código OTP debe tener los 6 dígitos!",
-                            icon: "error",
-                            draggable: true,
-                            showConfirmButton:true,
-                            confirmButtonText:"Intenta votar de nuevo"
-                        }).then((result)=>{
-                            if(result.isConfirmed){
-                                navigate("/votaciones")
-                            }
-                        }) ;
+        console.log("[submit] OTP ingresado:", otp);
 
+        if (!/^\d{6}$/.test(otp)) {
+            console.log("[submit] OTP inválido, no es 6 dígitos numéricos");
+            return Swal.fire({
+                title: "Tu código OTP debe tener 6 dígitos numéricos",
+                icon: "error",
+                confirmButtonText: "Intentar de nuevo"
+            });
+        }
+
+        try {
+            console.log("[submit] validando OTP en backend...");
             const { data } = await api.post('api/validaciones/validarOtp', {
                 codigo_otp: otp
-            })
+            });
+            console.log("[submit] respuesta validarOtp:", data);
+
             if (data.success === true) {
                 try {
-                    
-                    const {data}=await api.post('/api/votoXCandidato/crear/', {
+                    console.log("[submit] registrando voto. candidatoId:", candidato.idCandidato, "aprendiz:", user.id, "eleccionId:", id);
+                    const { data: votoResp } = await api.post('/api/votoXCandidato/crear/', {
                         idcandidatos: Number(candidato.idCandidato),
                         idaprendiz: Number(user.id),
                         contador: 1,
                         ideleccion: Number(id)
                     });
-                    
-                    if(data.mensaje==="Éxito"){
+
+                    console.log("[submit] respuesta crear voto:", votoResp);
+
+                    if (votoResp.mensaje === "Éxito") {
                         Swal.fire({
-                            title:"Tu voto fue registrado con éxito",
+                            title: "Tu voto fue registrado con éxito",
                             icon: "success",
-                            draggable: true,
-                            showConfirmButton:true,
-                            confirmButtonText:"Volver"
-                        }).then((result)=>{
-                            if(result.isConfirmed){
+                            confirmButtonText: "Volver"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
                                 navigate("/votaciones")
                             }
                         })
-                    }else{
+                    } else {
                         Swal.fire({
-                            title:"Error. Ya votaste, no puedes volver a votar.",
+                            title: "Error. Ya votaste, no puedes volver a votar.",
                             icon: "error",
-                            draggable: true,
-                            showConfirmButton:true,
-                            confirmButtonText:"Intenta votar de nuevo"
-                        }).then((result)=>{
-                            if(result.isConfirmed){
+                            confirmButtonText: "Intentar de nuevo"
+                        }).then((result) => {
+                            if (result.isConfirmed) {
                                 navigate("/votaciones")
                             }
                         })
                     }
-
-                    
-                    
-                } catch (error) {
+                } catch (error: any) {
+                    console.error("[submit] error al crear voto:", error);
+                    console.error("[submit] error.response?.data:", error?.response?.data);
                     Swal.fire({
-                        title:"Tu Voto No Fue Registrado, Intenta nuevamente",
+                        title: "Tu Voto No Fue Registrado, Intenta nuevamente",
+                        text: String(error?.response?.data || error?.message),
                         icon: "error",
-                        draggable: true,
-                        showConfirmButton:true,
-                        confirmButtonText:"Intenta votar de nuevo"
-                    }).then((result)=>{
-                        if(result.isConfirmed){
+                        confirmButtonText: "Intentar de nuevo"
+                    }).then((result) => {
+                        if (result.isConfirmed) {
                             navigate("/votaciones")
                         }
-                        })
-
+                    })
                 }
             } else {
+                console.warn("[submit] validarOtp devolvió success !== true:", data);
                 Swal.fire({
-                        title:"Código OTP Incorrecto, Intenta nuevamente",
-                        icon: "error",
-                        draggable: true,
-                        showConfirmButton:true,
-                        confirmButtonText:"Intenta votar de nuevo"
-                    }).then((result)=>{
-                        if(result.isConfirmed){
-                            navigate("/votaciones")
-                        }
-                        })
+                    title: "Código OTP Incorrecto, Intenta nuevamente",
+                    icon: "error",
+                    confirmButtonText: "Intentar de nuevo"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        navigate("/votaciones")
+                    }
+                })
             }
-
-        } catch (error) {
-                    Swal.fire({
-                        title:"Código OTP Incorrecto, Intenta nuevamente",
-                        icon: "error",
-                        draggable: true,
-                        showConfirmButton:true,
-                        confirmButtonText:"Intenta votar de nuevo"
-                    }).then((result)=>{
-                        if(result.isConfirmed){
-                            navigate("/votaciones")
-                        }
-                        })
+        } catch (error: any) {
+            console.error("[submit] error al validar OTP:", error);
+            console.error("[submit] error.response?.data:", error?.response?.data);
+            Swal.fire({
+                title: "Código OTP Incorrecto, Intenta nuevamente",
+                text: String(error?.response?.data || error?.message),
+                icon: "error",
+                confirmButtonText: "Intentar de nuevo"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    navigate("/votaciones")
+                }
+            })
         }
     }
 
@@ -175,7 +211,6 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                                 </Col>
                             </Row>
 
-                            {/* <h6 className="text-muted">{candidato.programa}</h6> */}
                             <p style={{ textAlign: "justify" }}>
                                 {candidato.propuesta}
                             </p>
@@ -183,13 +218,14 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                     </Row>
                     <Container className="d-flex justify-content-between gap-3 mt-4">
                         <Button variant="danger" onClick={onHide}>Cancelar</Button>
-                        <Button variant="success" onClick={() => { onHide(); enviarOTP(); setShowModal(true) }}>Votar por este candidato</Button>
+                        {/* ahora usamos handleVoteClick que espera a enviarOTP */}
+                        <Button variant="success" onClick={handleVoteClick}>Votar por este candidato</Button>
                     </Container>
                 </Modal.Body>
             </Modal>
 
-            <Modal show={shotModal}  centered dialogClassName="modal-compact">
-                <Modal.Header closeButton onClick={() => setShowModal(false)}>
+            <Modal show={shotModal} centered dialogClassName="modal-compact">
+                <Modal.Header closeButton onClick={() => { setShowModal(false); setOtp(""); }}>
                 </Modal.Header>
                 <Modal.Body className="bg-white p-5 rounded" style={{ maxWidth: "450px", margin: "0 auto" }}>
                     <h1 className="fw-bold text-center">Confirmar Voto</h1>
@@ -199,6 +235,9 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                         <Form.Group className="mb-4">
                             <Form.Control
                                 type="text"
+                                inputMode="numeric"
+                                pattern="\d*"
+                                maxLength={6}
                                 placeholder=" - - - - - - "
                                 className="text-center border-success"
                                 onChange={(e) => setOtp(e.target.value)}
@@ -213,8 +252,6 @@ export default function SelecionarCandidato({ show, onHide, candidato }: Props) 
                     </Form>
                 </Modal.Body>
             </Modal>
-
-
 
         </Container>
     )
