@@ -81,7 +81,7 @@ function App() {
           {/* Rutas de Funcionario */}
           <Route element={<FuncionarioLayout />}>
             <Route path="/dashboard" element={<DashboardAdmin />} />
-            <Route path="/gestion-candidatos" element={<GestionCandidatos />} />
+            <Route path="/gestion-candidatos/:idEleccion" element={<GestionCandidatos />} />
             <Route path="/cargar-aprendices" element={<CargarAprendices />} />
             <Route path="/panel-metricas" element={<PanelMetricas />} />
             <Route path="/elecciones" element={<EleccionesActivasPage />} />

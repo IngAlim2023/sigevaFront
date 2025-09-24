@@ -64,43 +64,45 @@ export default function EleccionesActivasPage() {
   // 🔹 Definimos las columnas del DataTable
   const columns: TableColumn<Eleccion>[] = [
     {
-      name: "Nombre",
+      name: <b>Nombre</b>,
       selector: (row) => row.titulo,
       sortable: true,
     },
     {
-      name: "Fecha inicio",
+      name: <b>Fecha inicio</b>,
       selector: (row) => formatDateTime(row.fechaInicio, row.horaInicio),
       sortable: true,
     },
     {
-      name: "Fecha fin",
+      name: <b>Fecha fin</b>,
       selector: (row) => formatDateTime(row.fechaFin, row.horaFin),
       sortable: true,
     },
     {
-      name: "Jornada",
+      name: <b>Jornada</b>,
       selector: (row) => row.jornada ?? "Sin jornada",
     },
     {
-      name: "Estado",
+      name: <b>Estado</b>,
       selector: (row) => row.estado ?? "Activa",
     },
     {
-      name: "Acciones",
+      name: <b>Acciones</b>,
       cell: (row) => (
-        <div className="d-flex gap-2">
+        <div className=" gap-2 d-flex ">
           <Button
             size="sm"
             variant="outline-primary"
-            onClick={() => setSelectedEleccion(row)}
+            className="text-nowrap"
+            onClick={() => navegar(`/gestion-candidatos/${row.ideleccion}`)}
           >
-            Candidato
+            Add candidatos
           </Button>
           <Button
             size="sm"
             variant="outline-secondary"
-            onClick={() => navegar(`/editar-eleccion/${row.ideleccion}`)}
+            className="text-nowrap"
+            onClick={() => setSelectedEleccion(row)}
           >
             Editar
           </Button>
@@ -114,7 +116,7 @@ export default function EleccionesActivasPage() {
 
   return (
     <Container className="my-4">
-      
+
       <h3 className="fw-bold text-center ">
         {eleccionActiva.length > 0
           ? `Centro de formación ${eleccionActiva[0].centro}`
@@ -123,16 +125,16 @@ export default function EleccionesActivasPage() {
 
       {/* Botones arriba */}
       <div className="d-flex justify-content-end gap-3 mt-3">
-        <Button className="btn-gradient" onClick={() => navegar("/cargar-aprendices")}>
+        {/* <Button className="btn-gradient" onClick={() => navegar("/cargar-aprendices")}>
           <FaPlusCircle /> Agregar Candidatos
-        </Button>
+        </Button> */}
 
         <Button className="btn-gradient" onClick={() => navegar("/nueva-eleccion")}>
           <FaPlusCircle /> Crear Elección
         </Button>
       </div>
 
-      
+
       <div className="mt-4">
         <DataTable
           columns={columns}
