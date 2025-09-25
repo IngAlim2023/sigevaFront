@@ -1,35 +1,42 @@
 import { Col, Container, Row } from "react-bootstrap";
-import { VotacionCard } from "../../components/VotacionCard";
-const votaciones = [
-  {
-    regional: "Regional Bogotá D.C.",
-    titulo: "Representante de Aprendices 2024",
-    centro: "Centro de Servicios Empresariales y Turísticos",
-    jornada: "Mañana",
-  },
-  {
-    regional: "Regional Antioquia",
-    titulo: "Elección Delegados Curriculares",
-    centro: "Centro de Tecnología de la Manufactura Avanzada",
-    jornada: "Tarde",
-  },
-  {
-    regional: "Regional Valle del Cauca",
-    titulo: "Representante Bienestar al Aprendiz",
-    centro: "Centro de Electricidad y Automatización Industrial",
-    jornada: "Noche",
-  },
-];
+import { VotacionCard } from "../../components/aprendiz/VotacionCard";
+import { useEffect, useState } from "react";
+import { api } from "../../api";
+import { useAuth } from "../../context/auth/auth.context";
+import Navbar from "../../components/aprendiz/Navbar";
 
 const VotacionesActivasPage = () => {
+  const [votaciones, setVotaciones] = useState<any[]>([]);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user?.CentroFormacion) {
+        console.log("Usuario o CentroFormacion no disponible");
+        return;
+      }
+      try {
+        const response = await api.get(
+          `/api/eleccionPorCentro/${user.CentroFormacion}`
+        );
+        setVotaciones(response.data.eleccionesActivas);
+      } catch (error) {
+        console.error("Error al cargar las votaciones:", error);
+      }
+    };
+    loadData();
+  }, [user?.CentroFormacion]);
+
+
   return (
     <>
+      <Navbar />
       <Container className="my-4">
         <h3 className="fw-bold">Votaciones Activas</h3>
-        <p className="text-muted mb-5">
+        <p className="text-muted">
           Participe en los procesos de elección de aprendices.
         </p>
-        <Row className="g-4">
+        <Row className="g-4 my-4">
           {votaciones.map((vote, index) => (
             <Col key={index} xs={12} md={6} lg={4}>
               <VotacionCard {...vote} />

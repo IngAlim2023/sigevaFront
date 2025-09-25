@@ -1,0 +1,93 @@
+/* Variables globales */
+:root {
+  --primary: #5027BC;
+  --primary-light: rgba(80, 39, 188, 0.1);
+  --primary-dark: #3e1f94;
+  --success: #28a745;
+  --light: #f8f9fa;
+  --gray-100: #f8f9fa;
+  --gray-200: #e9ecef;
+  --dark: #343a40;
+  --border-radius: 0.5rem;
+  --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
+  --transition: all 0.3s ease;
+}
+
+/* Estilos base del dashboard */
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #f5f7fb;
+  padding-bottom: 60px; /* Espacio para el footer */
+}
+
+/* Tarjetas */
+.card {
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  margin-bottom: 1.5rem;
+  background: white;
+}
+
+/* Lista de elecciones */
+.election-list .list-group-item {
+  padding: 1rem 0;
+  border: none;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.election-list .list-group-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+/* Botones */
+.btn {
+  font-weight: 500;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.btn-outline-primary {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-light);
+  color: var(--primary-dark);
+  border-color: var(--primary);
+}
+
+/* Progress bar */
+.progress {
+  height: 6px;
+  border-radius: 3px;
+  background-color: var(--gray-200);
+}
+
+.progress-bar {
+  background-color: var(--success);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem 0;
+  }
+  
+  .election-list .list-group-item {
+    padding: 0.75rem 0;
+  }
+}
