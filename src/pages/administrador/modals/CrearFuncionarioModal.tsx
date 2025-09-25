@@ -197,9 +197,7 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
     };
     
     try {
-      console.log("🔄 Creando funcionario (datos filtrados):", submissionData);
-      const response = await api.post("api/usuarios/crear", submissionData);
-      console.log("✅ Funcionario creado exitosamente:", response.data);
+      await api.post("api/usuarios/crear", submissionData);
 
       const nombreCompleto = `${data.nombres} ${data.apellidos}`;
       setCreatedFuncionario(nombreCompleto);
@@ -216,10 +214,6 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
         onSuccess();
       }
     } catch (err: any) {
-      console.error("❌ Error completo:", err);
-      console.error("❌ Response data:", err.response?.data);
-      console.error("❌ Response status:", err.response?.status);
-      
       const message = err.response?.data?.message || err.message || "Error al crear el funcionario";
       alert(`Error: ${message}`);
     }
