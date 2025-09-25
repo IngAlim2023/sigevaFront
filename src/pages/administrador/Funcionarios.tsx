@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, InputGroup } from "react-bootstrap";
 import Swal from "sweetalert2";
-import { FaEdit, FaPlus, FaSearch } from "react-icons/fa";
+import { FaEdit, FaPlus, FaSearch, FaEye, FaToggleOn, FaToggleOff } from "react-icons/fa";
+
 import DataTable from 'react-data-table-component';
 import type { TableColumn } from 'react-data-table-component';
 import { EditarFuncionarioModal } from "./modals/EditarFuncionarioModal";
@@ -34,6 +35,7 @@ interface Funcionario {
   apellidos?: string;
   celular?: string;
   numero_documento?: string;
+  numeroDocumento?: string; // Agregado para manejar ambos formatos de la API
   email: string;
   estado: string;
   centroFormacion?: CentroFormacion;
@@ -61,6 +63,7 @@ interface ApiResponse<T> {
 interface FuncionarioDetalle extends Funcionario {
   idregional?: number;
   idperfil?: number;
+  numeroDocumento?: string; // Asegurar compatibilidad con ambos formatos
 }
 
 // ----------------- Componente -----------------
@@ -91,10 +94,10 @@ const Funcionarios: React.FC = () => {
     const searchTerm = busqueda.toLowerCase();
     return (
       func.email.toLowerCase().includes(searchTerm) ||
-      (func.nombres && func.nombres.toLowerCase().includes(searchTerm)) ||
-      (func.apellidos && func.apellidos.toLowerCase().includes(searchTerm)) ||
-      (func.centroFormacion?.centroFormacioncol && func.centroFormacion.centroFormacioncol.toLowerCase().includes(searchTerm)) ||
-      (func.centroFormacion?.regional?.regional && func.centroFormacion.regional.regional.toLowerCase().includes(searchTerm))
+      (func.nombres?.toLowerCase().includes(searchTerm) ?? false) ||
+      (func.apellidos?.toLowerCase().includes(searchTerm) ?? false) ||
+      (func.centroFormacion?.centroFormacioncol?.toLowerCase().includes(searchTerm) ?? false) ||
+      (func.centroFormacion?.regional?.regional?.toLowerCase().includes(searchTerm) ?? false)
     );
   });
 
@@ -127,7 +130,7 @@ const Funcionarios: React.FC = () => {
     try {
       const isEditing = Boolean(editingId);
       const url = isEditing ? `api/usuarios/${editingId}` : "api/usuarios/crear";
-      const requestData: Record<string, any> = {
+      const requestData: Record<string, string | number> = {
         nombres: formData.nombres,
         apellidos: formData.apellidos,
         celular: formData.celular,
@@ -136,8 +139,22 @@ const Funcionarios: React.FC = () => {
         estado: formData.estado,
         idcentro_formacion: formData.idcentro_formacion.toString(),
         idperfil: formData.idperfil || 2,
-        ...(!isEditing && { password: formData.password }),
       };
+
+      // Solo incluir contraseña si se proporciona una nueva (crear) o si hay contenido (editar)
+      if (!isEditing || (isEditing && formData.password.trim() !== "")) {
+        requestData.password = formData.password;
+      }
+
+      // Debug temporal para verificar qué se envía al backend
+      console.log("🔐 Datos enviados al backend:", {
+        url,
+        isEditing,
+        passwordIncluded: 'password' in requestData,
+        passwordLength: requestData.password ? String(requestData.password).length : 0,
+        requestData: { ...requestData, password: requestData.password ? '[HIDDEN]' : undefined }
+      });
+
       isEditing 
         ? await api.put<ApiResponse<Funcionario>>(url, requestData) 
         : await api.post<ApiResponse<Funcionario>>(url, requestData);
@@ -178,8 +195,9 @@ const Funcionarios: React.FC = () => {
       cancelButtonText: "Cancelar",
     });
     if (!result.isConfirmed) return;
+    
     try {
-      await api.put<ApiResponse<Funcionario>>(`/api/usuarios/${id}`, { estado: nuevoEstado });
+      await api.put<ApiResponse<Funcionario>>(`api/usuarios/${id}`, { estado: nuevoEstado });
       setFuncionarios(
         funcionarios.map((func: Funcionario) => 
           func.id === id ? { ...func, estado: nuevoEstado } : func
@@ -211,13 +229,12 @@ const Funcionarios: React.FC = () => {
   };
 
   const handleEditar = async (funcionario: Funcionario) => {
-    // Si ya tenemos los datos completos, los usamos directamente
     if (funcionario.nombres && funcionario.apellidos) {
       setFormData({
         nombres: funcionario.nombres || "",
         apellidos: funcionario.apellidos || "",
         celular: funcionario.celular || "",
-        numero_documento: funcionario.numero_documento || "",
+        numero_documento: funcionario.numero_documento || funcionario.numeroDocumento || "",
         email: funcionario.email,
         estado: funcionario.estado,
         idcentro_formacion: funcionario.centroFormacion?.idcentroFormacion || 1,
@@ -226,16 +243,15 @@ const Funcionarios: React.FC = () => {
       setEditingId(funcionario.id);
       setShowModal(true);
     } else {
-      // Si no tenemos los datos completos, intentamos cargarlos
       try {
-        const response = await api.get<FuncionarioDetalle>(`/api/usuarios/${funcionario.id}`);
+        const response = await api.get<FuncionarioDetalle>(`api/usuarios/${funcionario.id}`);
         const detalles = response.data;
         
         setFormData({
           nombres: detalles.nombres || "",
           apellidos: detalles.apellidos || "",
           celular: detalles.celular || "",
-          numero_documento: detalles.numero_documento || "",
+          numero_documento: detalles.numero_documento || detalles.numeroDocumento || "",
           email: detalles.email || funcionario.email,
           estado: detalles.estado || funcionario.estado,
           idcentro_formacion: detalles.centroFormacion?.idcentroFormacion || funcionario.centroFormacion?.idcentroFormacion || 1,
@@ -246,8 +262,7 @@ const Funcionarios: React.FC = () => {
         setEditingId(funcionario.id);
         setShowModal(true);
       } catch (error: unknown) {
-        console.error('Error loading funcionario details:', error);
-        // Si falla la carga de detalles, usamos solo los datos básicos disponibles
+        // Error al cargar detalles del funcionario, usar datos básicos
         setFormData({
           nombres: "",
           apellidos: "",
@@ -303,7 +318,7 @@ const Funcionarios: React.FC = () => {
     },
     {
       name: 'Nombre Completo',
-      selector: (row: Funcionario) => {
+      selector: (row: Funcionario): string => {
         if (row.nombres && row.apellidos) {
           return `${row.nombres} ${row.apellidos}`;
         }
@@ -324,14 +339,14 @@ const Funcionarios: React.FC = () => {
     },
     {
       name: 'Centro de Formación',
-      selector: (row: Funcionario) => row.centroFormacion?.centroFormacioncol || "Sin centro",
+      selector: (row: Funcionario): string => row.centroFormacion?.centroFormacioncol ?? "Sin centro",
       sortable: true,
       width: '250px',
       wrap: true,
     },
     {
       name: 'Regional',
-      selector: (row: Funcionario) => row.centroFormacion?.regional?.regional || "Sin regional",
+      selector: (row: Funcionario): string => row.centroFormacion?.regional?.regional ?? "Sin regional",
       sortable: true,
       width: '150px',
     },
@@ -340,22 +355,22 @@ const Funcionarios: React.FC = () => {
       cell: (row: Funcionario) => (
         <div className="d-flex gap-1">
           <Button variant="outline-info" size="sm" onClick={() => handleVerDetalle(row)} title="Ver detalles">
-            Ver
+            <FaEye />
           </Button>
           <Button variant="outline-primary" size="sm" onClick={() => handleEditar(row)} title="Editar funcionario">
             <FaEdit />
           </Button>
           <Button
-            variant="outline-danger"
+            variant={row.estado === "activo" ? "outline-danger" : "outline-success"}
             size="sm"
             onClick={() => handleToggleStatus(row.id, row.estado === "activo" ? "inactivo" : "activo")}
             title={row.estado === "activo" ? "Desactivar" : "Activar"}
           >
-            {row.estado === "activo" ? "Desactivar" : "Activar"}
+            {row.estado === "activo" ? <FaToggleOff /> : <FaToggleOn />}
           </Button>
         </div>
       ),
-      width: '280px',
+      width: '180px',
       ignoreRowClick: true,
       allowOverflow: true,
       button: true,
