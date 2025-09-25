@@ -26,6 +26,7 @@ interface Funcionario {
   apellidos?: string;
   celular?: string;
   numero_documento?: string;
+  numeroDocumento?: string; // Agregado para manejar ambos formatos
   email: string;
   estado: string;
   centroFormacion?: CentroFormacion;
@@ -43,7 +44,6 @@ export const FuncionarioDetalleModal: React.FC<FuncionarioDetalleModalProps> = (
   funcionario,
 }) => {
   if (!funcionario) return null;
-  // console.log("Funcionario en modal:", funcionario); // Comentado para producción
 
   return (
     <Modal show={showModal} onHide={handleClose} size="lg" centered>
@@ -59,7 +59,7 @@ export const FuncionarioDetalleModal: React.FC<FuncionarioDetalleModalProps> = (
               <p><strong>Nombres:</strong> {funcionario.nombres || 'No disponible'}</p>
               <p><strong>Apellidos:</strong> {funcionario.apellidos || 'No disponible'}</p>
               <p><strong>Teléfono:</strong> {funcionario.celular || 'No disponible'}</p>
-              <p><strong>Documento:</strong> {funcionario.numero_documento || 'No disponible'}</p>
+              <p><strong>Documento:</strong> {funcionario.numero_documento || funcionario.numeroDocumento || 'No disponible'}</p>
             </div>
             <div className="col-md-6">
               <h6 className="text-primary mb-3">Estado</h6>
