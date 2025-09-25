@@ -432,6 +432,7 @@ const Funcionarios: React.FC = () => {
         onHide={resetForm}
         error={formError || undefined}
         loading={formLoading}
+        onSuccess={cargarFuncionarios}
       />
       <EditarFuncionarioModal
         show={showModal && !!editingId}

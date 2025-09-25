@@ -32,6 +32,7 @@ interface CrearFuncionarioModalProps {
   onHide: () => void;
   error?: string;
   loading?: boolean;
+  onSuccess?: () => void; // Callback para recargar datos
 }
 
 export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
@@ -39,6 +40,7 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
   onHide,
   error,
   loading = false,
+  onSuccess,
 }) => {
   const [regionales, setRegionales] = useState<Regional[]>([]);
   const [centros, setCentros] = useState<CentroFormacion[]>([]);
@@ -154,7 +156,7 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
 
   useEffect(() => {
     if (show) {
-      api.get<Regional[]>("/api/regionales").then((res) => setRegionales(res.data));
+      api.get<Regional[]>("api/regionales").then((res) => setRegionales(res.data));
       reset({});
     }
   }, [show, reset]);
@@ -162,7 +164,7 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
   useEffect(() => {
     if (!idRegional) return;
     api
-      .get<{ data: CentroFormacion[] }>(`/api/centrosFormacion/obtiene/porRegional/${idRegional}`)
+      .get<{ data: CentroFormacion[] }>(`api/centrosFormacion/obtiene/porRegional/${idRegional}`)
       .then((res) => setCentros(res.data.data));
   }, [idRegional]);
 
@@ -180,9 +182,24 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
     if (!idCentroFormacion) {
       return alert("Selecciona un centro de formación");
     }
-    const submissionData = { ...data, idcentro_formacion: idCentroFormacion };
+    
+    // Filtrar solo los campos que el backend espera
+    const submissionData = {
+      nombres: data.nombres,
+      apellidos: data.apellidos,
+      celular: data.celular,
+      numero_documento: data.numero_documento,
+      email: data.email,
+      password: data.password,
+      idcentro_formacion: idCentroFormacion,
+      idperfil: 2, // Valor por defecto para funcionarios
+      estado: "activo" // Valor por defecto
+    };
+    
     try {
-      await api.post("/api/usuarios/crear", submissionData);
+      console.log("🔄 Creando funcionario (datos filtrados):", submissionData);
+      const response = await api.post("api/usuarios/crear", submissionData);
+      console.log("✅ Funcionario creado exitosamente:", response.data);
 
       const nombreCompleto = `${data.nombres} ${data.apellidos}`;
       setCreatedFuncionario(nombreCompleto);
@@ -193,10 +210,18 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
 
       onHide();
       setShowSuccessModal(true);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error al crear el funcionario";
-      console.error("Error creating funcionario:", err);
-      alert(message);
+      
+      // Recargar la lista de funcionarios
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (err: any) {
+      console.error("❌ Error completo:", err);
+      console.error("❌ Response data:", err.response?.data);
+      console.error("❌ Response status:", err.response?.status);
+      
+      const message = err.response?.data?.message || err.message || "Error al crear el funcionario";
+      alert(`Error: ${message}`);
     }
   };
 
