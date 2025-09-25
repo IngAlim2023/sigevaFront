@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal, Button, Form, Row, Col } from "react-bootstrap";
 import Select from "react-select"
 import { api } from "../../api";
+import toast from "react-hot-toast";
 
 interface Aprendiz {
   idaprendiz: number;
@@ -11,25 +12,19 @@ interface Aprendiz {
   email: string;
 }
 
-interface Eleccion {
-  ideleccion: number;
-  nombre: string;
-}
 interface ModificarCandidatoModalProps {
   show: boolean;
   onHide: () => void;
   candidato: any | null;
   onSave: (candidato: any) => void;
-  elecciones: Eleccion[];
   aprendices: Aprendiz[];
 }
 
-const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, elecciones }: ModificarCandidatoModalProps) => {
+const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices }: ModificarCandidatoModalProps) => {
   const [formData, setFormData] = useState({
     nombres: "",
     foto: null as File | null,
     idaprendiz: null as number | null,
-    ideleccion: null as number | null,
     propuesta: "",
     numero_tarjeton: "",
   });
@@ -40,7 +35,6 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
       setFormData({
         nombres: candidato.nombres || "",
         idaprendiz: candidato.idaprendiz || null,
-        ideleccion: candidato.ideleccion || null,
         propuesta: candidato.propuesta || "",
         numero_tarjeton: candidato.numeroTarjeton || "",
         foto: candidato.foto
@@ -51,20 +45,11 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
 
 
   const aprendizOptions = Array.isArray(aprendices)
-    ? aprendices.map((a) => ({
+    ? aprendices.map((a, index) => ({
+      id: index,
       value: a.idaprendiz,
       label: `${a.nombres} ${a.apellidos}`.trim(),
 
-      // numeroDocumento: a.numeroDocumento,
-      // email: a.email,
-    }))
-    : [];
-
-
-  const eleccionOptions = Array.isArray(elecciones)
-    ? elecciones.map((e) => ({
-      value: e.ideleccion,
-      label: e.nombre,
     }))
     : [];
 
@@ -82,7 +67,6 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
     try {
       const data = new FormData();
       data.append("nombres", formData.nombres);
-      data.append("ideleccion", String(formData.ideleccion));
       data.append("idaprendiz", String(formData.idaprendiz));
       data.append("propuesta", formData.propuesta);
       data.append("numero_tarjeton", String(formData.numero_tarjeton));
@@ -103,8 +87,9 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
         }
       );
 
-      console.log("Candidato creado:", response.data);
-      alert("Candidato guardado satisfactoriamente");
+      console.log("Candidato actualizado:", response.data);
+      toast.success(response.data.message, { id: "toast" });
+
       if (onSave) {
         onSave({
           ...response.data,
@@ -115,7 +100,8 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
       onHide();
     } catch (error: any) {
       console.error("Error al crear candidato:", error.response?.data || error.message);
-      alert("Error al guardar candidato");
+
+      toast.error("Error al guardar candidato");
     }
   };
 
@@ -196,27 +182,6 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
                   isClearable
                 />
               </Form.Group>
-
-              <Form.Group className="mb-3">
-                <Form.Label>Elección</Form.Label>
-                <Select
-                  options={eleccionOptions}
-                  placeholder="Selecciona una opción..."
-                  value={
-                    formData.ideleccion
-                      ? eleccionOptions.find((opt) => opt.value === formData.ideleccion)
-                      : null
-                  }
-                  onChange={(selected) =>
-                    setFormData({
-                      ...formData,
-                      ideleccion: selected ? selected.value : null,
-                    })
-                  }
-                  isClearable
-                />
-              </Form.Group>
-
               <Form.Group className="mb-3">
                 <Form.Label>Propuesta</Form.Label>
                 <Form.Control
@@ -250,7 +215,9 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices, 
           </div>
         </Form>
       </Modal.Body>
+
     </Modal>
+
   );
 };
 

@@ -54,7 +54,7 @@ const Aprendices: React.FC = () => {
       try {
         const path = user.perfil == 'Administrador'? 'api/aprendiz/listar' : `api/aprendiz/inscritos/centro/${user?.centroFormacion}`;
         const res = await api.get(path);
-        setAprendices(res.data.data)
+        user?.perfil == 'Administrador'? setAprendices(res.data) : setAprendices(res.data.data);
       } catch (error) {
         console.error("Error al cargar las votaciones:", error);
       }
