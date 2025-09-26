@@ -97,7 +97,7 @@ export default function EleccionesActivasPage() {
   const columns: TableColumn<Eleccion>[] = [
     {
       name: <b>#</b>,
-      selector: (row, index) => index + 1,
+      selector: (_row, index) => (index ?? 0) + 1,
       sortable: true,
       width: '70px',
       center: true,
@@ -246,7 +246,7 @@ export default function EleccionesActivasPage() {
       <EleccionEditarModal
         show={showEditarModal}
         onHide={() => setShowEditarModal(false)}
-        eleccion={selectedEleccion}
+        eleccion={selectedEleccion as any}
         onUpdated={() => {
           if (user?.centroFormacion) {
             api.get(`/api/eleccionPorCentro/${user?.centroFormacion}`)

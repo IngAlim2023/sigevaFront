@@ -11,13 +11,13 @@ const VotacionesActivasPage = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!user?.CentroFormacion) {
+      if (!user?.centroFormacion) {
         console.log("Usuario o CentroFormacion no disponible");
         return;
       }
       try {
         const response = await api.get(
-          `/api/eleccionPorCentro/${user.CentroFormacion}`
+          `/api/eleccionPorCentro/${user.centroFormacion}`
         );
         setVotaciones(response.data.eleccionesActivas);
       } catch (error) {
@@ -25,7 +25,7 @@ const VotacionesActivasPage = () => {
       }
     };
     loadData();
-  }, [user?.CentroFormacion]);
+  }, [user?.centroFormacion]);
 
   const filtraJornada = votaciones.filter(
     (val) => val.jornada == user?.jornada

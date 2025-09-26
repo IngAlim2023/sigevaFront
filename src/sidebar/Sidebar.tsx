@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaHome, FaUserTie, FaUsers, FaChartBar, FaSignOutAlt, FaClipboardList, FaUserGraduate, FaUserPlus, FaChevronDown } from 'react-icons/fa';
+import { FaHome, FaUserTie, FaUsers, FaSignOutAlt, FaClipboardList, FaUserGraduate, FaUserPlus, FaChevronDown } from 'react-icons/fa';
 import { Button, Dropdown } from 'react-bootstrap';
 import { BsList } from 'react-icons/bs';
 import "./sidebar.css";
@@ -9,6 +9,11 @@ import { useAuth } from '../context/auth/auth.context';
 interface SidebarProps {
   onNavigate?: () => void;
 }
+
+type LinkItem = { to: string; icon: React.ReactNode; text: string; type: 'link' };
+type DropdownChild = { to: string; icon: React.ReactNode; text: string };
+type DropdownItem = { type: 'dropdown'; text: string; icon: React.ReactNode; items: DropdownChild[] };
+type NavItem = LinkItem | DropdownItem;
 
 const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 992);
@@ -20,14 +25,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   const isAdmin = user?.perfil?.toLowerCase() === 'administrador';
   const sidebarClass = isAdmin ? 'admin-sidebar' : '';
 
-  const handleClose = useCallback(() => {
-    setShowSidebar(false);
-    onNavigate?.();
-  }, [onNavigate]);
-
-  const handleShow = useCallback(() => {
-    setShowSidebar(true);
-  }, []);
+  // No se usan directamente, se controla con setShowSidebar en eventos
 
   // Manejar redimensionamiento de pantalla
   useEffect(() => {
@@ -44,10 +42,10 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
   }, []);
 
   // Obtener los enlaces según el rol del usuario
-  const getNavItems = useCallback(() => {
-    if (!user) return [];
+  const getNavItems = useCallback((): NavItem[] => {
+    if (!user) return [] as NavItem[];
 
-    const commonItems = [];
+    const commonItems: NavItem[] = [];
 
     if (user.perfil?.toLowerCase() === 'funcionario') {
       return [
@@ -131,17 +129,17 @@ const Sidebar: React.FC<SidebarProps> = ({ onNavigate }) => {
         </div>
         
         <nav className="sidebar-nav">
-          {navItems.map((item, index) => {
+          {navItems.map((item: NavItem, index: number) => {
             if (item.type === 'dropdown') {
               return (
                 <Dropdown key={index} className="sidebar-dropdown">
-                  <Dropdown.Toggle as="div" className={`sidebar-link ${item.items.some(i => isActive(i.to)) ? 'active' : ''}`}>
+                  <Dropdown.Toggle as="div" className={`sidebar-link ${item.items.some((i: DropdownChild) => isActive(i.to)) ? 'active' : ''}`}>
                     <span className="sidebar-icon">{item.icon}</span>
                     <span className="sidebar-text">{item.text}</span>
                     <FaChevronDown className="ms-auto" />
                   </Dropdown.Toggle>
                   <Dropdown.Menu className="sidebar-submenu">
-                    {item.items.map((subItem, subIndex) => (
+                    {item.items.map((subItem: DropdownChild, subIndex: number) => (
                       <Dropdown.Item 
                         key={subIndex}
                         as={Link}
