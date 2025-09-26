@@ -30,7 +30,7 @@ export default function CargarAprendices() {
   const userId = isFuncionario ? (user as Gestor).id : null;
 
   const [file, setFile] = useState<File | null>(null);
-  const [jornada, setJornada] = useState("Diurna");
+  const [jornada, setJornada] = useState("Mañana");
   const [preview, setPreview] = useState<FilaExcel[]>([]);
   const [allData, setAllData] = useState<FilaExcel[] | null>(null);
   const [programaDetectado, setProgramaDetectado] = useState("");
@@ -165,7 +165,10 @@ export default function CargarAprendices() {
         });
       } catch (err) {
         console.error(err);
-        setMsg({ type: "danger", text: "No se pudo leer el archivo para validar." });
+        setMsg({
+          type: "danger",
+          text: "No se pudo leer el archivo para validar.",
+        });
         setShowToast(true);
         return;
       }
@@ -175,9 +178,14 @@ export default function CargarAprendices() {
     const normalizedRows = dataToValidate.map((r) => normalizeKeys(r));
 
     const invalidos = normalizedRows.filter((fila) => {
-      const email = normalize(fila["correo electronico"] || fila["correo"] || fila["email"] || "");
+      const email = normalize(
+        fila["correo electronico"] || fila["correo"] || fila["email"] || ""
+      );
       const estado = normalize(fila["estado"] || "");
-      const estadoValido = estado === "activo" || estado === "en formacion";
+      const estadoValido =
+        estado === "activo" ||
+        estado === "en formacion" ||
+        estado === "condicionado";
       return !email || !estadoValido;
     });
 
@@ -283,8 +291,8 @@ export default function CargarAprendices() {
               onChange={(e) => setJornada(e.target.value)}
               disabled={!isFuncionario || subiendo}
             >
-              <option value="Diurna">Diurna</option>
-
+              <option value="Mañana">Mañana</option>
+              <option value="Tarde">Tarde</option>
               <option value="Nocturna">Nocturna</option>
             </Form.Select>
           </Form.Group>
@@ -293,7 +301,7 @@ export default function CargarAprendices() {
         {(fichaDetectada || programaDetectado) && (
           <div className="mt-2">
             <small className="text-muted">
-              <strong>Ficha detectada:</strong> {fichaDetectada || "—"} | {" "}
+              <strong>Ficha detectada:</strong> {fichaDetectada || "—"} |{" "}
               <strong>Programa:</strong> {programaDetectado || "—"}
             </small>
           </div>
@@ -309,7 +317,9 @@ export default function CargarAprendices() {
       <Container>
         <div className="d-flex justify-content-between align-items-center mb-2">
           <h2 className="m-0">Vista Previa De los Datos</h2>
-          <small className="text-muted">Mostrando {preview.length} filas (solo vista previa)</small>
+          <small className="text-muted">
+            Mostrando {preview.length} filas (solo vista previa)
+          </small>
         </div>
 
         <div className="border rounded">
@@ -333,10 +343,25 @@ export default function CargarAprendices() {
                 </tr>
               ) : (
                 preview.map((fila, i) => {
-                  const nombre = `${fila["Nombre"] || fila["nombre"] || ""} ${fila["Apellidos"] || fila["apellidos"] || ""}`.trim() || "—";
-                  const doc = (fila["Número de Documento"] || fila["numero de documento"] || fila["documento"] || "—").toString();
-                  const correo = fila["Correo Electrónico"] || fila["correo electronico"] || fila["correo"] || fila["email"] || "—";
-                  const estado = (fila["Estado"] || fila["estado"] || "").toString().trim();
+                  const nombre =
+                    `${fila["Nombre"] || fila["nombre"] || ""} ${
+                      fila["Apellidos"] || fila["apellidos"] || ""
+                    }`.trim() || "—";
+                  const doc = (
+                    fila["Número de Documento"] ||
+                    fila["numero de documento"] ||
+                    fila["documento"] ||
+                    "—"
+                  ).toString();
+                  const correo =
+                    fila["Correo Electrónico"] ||
+                    fila["correo electronico"] ||
+                    fila["correo"] ||
+                    fila["email"] ||
+                    "—";
+                  const estado = (fila["Estado"] || fila["estado"] || "")
+                    .toString()
+                    .trim();
                   const activo = estado.toLowerCase() === "activo";
                   return (
                     <tr key={i}>
@@ -371,7 +396,8 @@ export default function CargarAprendices() {
         >
           {subiendo ? (
             <>
-              <Spinner animation="border" size="sm" className="me-2" /> Subiendo…
+              <Spinner animation="border" size="sm" className="me-2" />{" "}
+              Subiendo…
             </>
           ) : (
             "Subir Archivos y Procesar"
@@ -394,7 +420,11 @@ export default function CargarAprendices() {
         >
           <Toast.Header>
             <strong className="me-auto">
-              {msg?.type === "success" ? "Éxito" : msg?.type === "danger" ? "Error" : "Aviso"}
+              {msg?.type === "success"
+                ? "Éxito"
+                : msg?.type === "danger"
+                ? "Error"
+                : "Aviso"}
             </strong>
           </Toast.Header>
           <Toast.Body className="text-white">{msg?.text}</Toast.Body>
@@ -453,7 +483,8 @@ export default function CargarAprendices() {
           >
             {subiendo ? (
               <>
-                <Spinner animation="border" size="sm" className="me-2" /> Subiendo…
+                <Spinner animation="border" size="sm" className="me-2" />{" "}
+                Subiendo…
               </>
             ) : (
               "Confirmar y subir"
