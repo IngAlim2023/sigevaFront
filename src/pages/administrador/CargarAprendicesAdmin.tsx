@@ -96,7 +96,7 @@ export default function CargarAprendices() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
-  const [jornada, setJornada] = useState("Diurna");
+  const [jornada, setJornada] = useState("Mañana");
   const [preview, setPreview] = useState<FilaExcel[]>([]);
   const [programaDetectado, setProgramaDetectado] = useState("");
   const [fichaDetectada, setFichaDetectada] = useState("");
@@ -484,8 +484,10 @@ export default function CargarAprendices() {
               onChange={(e) => setJornada(e.target.value)}
               disabled={!isAdmin || subiendo}
             >
-              <option value="Diurna">Diurna</option>
-              <option value="Nocturna">Nocturna</option>
+           
+              <option value="Mañana">Mañana</option>
+                <option value="Tarde">Tarde</option>
+              <option value="Noche">Noche</option>
             </Form.Select>
           </Form.Group>
 

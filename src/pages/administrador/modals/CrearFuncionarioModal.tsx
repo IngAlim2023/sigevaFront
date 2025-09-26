@@ -185,16 +185,20 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
     
     // Filtrar solo los campos que el backend espera
     const submissionData = {
-      nombres: data.nombres,
-      apellidos: data.apellidos,
-      celular: data.celular,
-      numero_documento: data.numero_documento,
-      email: data.email,
-      password: data.password,
-      idcentro_formacion: idCentroFormacion,
-      idperfil: 2, // Valor por defecto para funcionarios
-      estado: "activo" // Valor por defecto
-    };
+    nombres: data.nombres,
+    apellidos: data.apellidos,
+    celular: data.celular,
+    tipo_documento: data.tipo_documento || "CC", 
+    numero_documento: data.numero_documento,
+    email: data.email,
+    password: data.password,
+    idcentro_formacion: idCentroFormacion,
+   idperfil: Number(data.rol),
+
+    estado: data.estado ? String(data.estado) : "Activo",
+  };
+
+  console.log("Payload ->", submissionData);
     
     try {
       await api.post("api/usuarios/crear", submissionData);
@@ -214,10 +218,19 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
         onSuccess();
       }
     } catch (err: any) {
-      const message = err.response?.data?.message || err.message || "Error al crear el funcionario";
-      alert(`Error: ${message}`);
-    }
-  };
+  console.error("ERROR axios ->", err);
+  console.error("err.message ->", err?.message);
+  console.error("err.config ->", err?.config);
+  console.error("err.request ->", err?.request);
+  console.error("err.response ->", err?.response);
+  console.error("err.response?.status ->", err?.response?.status);
+  console.error("err.response?.headers ->", err?.response?.headers);
+  console.error("err.response?.data ->", err?.response?.data);
+  // mostrar algo al usuario
+  const serverMsg = err?.response?.data?.message || JSON.stringify(err?.response?.data) || err?.message;
+  alert(`Error al crear: ${serverMsg}`);
+}
+  }
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
@@ -513,15 +526,18 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
                 <Form.Label>
                   Rol <span className="text-danger">*</span>
                 </Form.Label>
-                <Form.Select
-                  {...register("rol", {
-                    required: "Seleccione un rol",
-                  })}
-                  isInvalid={!!errors.rol}
-                >
-                  <option value="">Seleccione un rol</option>
-                  <option value="Funcionario">Funcionario</option>
-                </Form.Select>
+               <Form.Select
+  {...register("rol", {
+    required: "Seleccione un rol",
+  })}
+  isInvalid={!!errors.rol}
+>
+  <option value="">Seleccione un rol</option>
+  {/* usar ids que espera tu backend */}
+  <option value="2">Funcionario</option>
+  <option value="1">Administrador</option> {/* si aplica */}
+</Form.Select>
+
                 <Form.Control.Feedback type="invalid">
                   {errors.rol?.message as string}
                 </Form.Control.Feedback>

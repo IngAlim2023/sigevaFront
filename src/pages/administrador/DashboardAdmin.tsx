@@ -31,7 +31,12 @@ export const DashboardAdmin = () => {
 
         // Votos totales hoy
         const resVotos = await api.get("/api/votoXCandidato/traer");
-        setVotosHoy(resVotos.data?.length || resVotos.data.totalVotosHoy || 0);
+        const votos =resVotos.data?.data || []
+        const hoy = new Date().toISOString().split("T")[0];
+        const votosDeHoy = votos.filter((v: any) => 
+  v.createdAt.startsWith(hoy)
+);
+        setVotosHoy(votosDeHoy.length);
       } catch (error) {
         console.error("Error al traer datos del dashboard:", error);
       }

@@ -103,7 +103,7 @@ export default function SelecionarCandidato({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("[submit] OTP ingresado:", otp);
-    if (!/^[A-Za-z0-9]{6}$/.test(otp)) {
+    if (!/^[A-Za-z0-9_-]{6}$/.test(otp)) {
       return Swal.fire({
         title: "Tu código OTP debe tener 6 caracteres alfanuméricos",
         icon: "error",
