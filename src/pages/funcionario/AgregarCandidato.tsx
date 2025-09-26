@@ -1,4 +1,4 @@
-import { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import { useState, useEffect } from "react";
 import type { DragEvent } from "react";
 import { FiUploadCloud } from "react-icons/fi";
 
@@ -34,7 +34,7 @@ const AgregarCandidato = () => {
     const [preview, setPreview] = useState<string | null>(null);
     const [dragOver, setDragOver] = useState(false);
     const [saving, setSaving] = useState(false);
-    const [elecciones, setElecciones] = useState(null)
+    const [_elecciones, setElecciones] = useState<any>(null)
 
     const getElecciones = async () => {
         try {

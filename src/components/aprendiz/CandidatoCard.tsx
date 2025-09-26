@@ -38,7 +38,7 @@ export default function CandidateCard({
   aprendiz,
   numeroTarjeton,
   setIdCandidato,
-  idCandidato,
+  idCandidato: _idCandidato,
   idcandidatos
 }: Props) {
   return (

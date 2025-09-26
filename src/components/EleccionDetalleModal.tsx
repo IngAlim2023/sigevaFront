@@ -16,11 +16,6 @@ interface Candidato {
   aprendiz: Aprendiz;
 }
 
-interface VotoPorCandidato {
-  idcandidatos: number;
-  totalVotos: number;
-}
-
 interface Eleccion {
   ideleccion: number;
   titulo: string;

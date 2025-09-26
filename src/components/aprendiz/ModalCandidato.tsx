@@ -124,7 +124,7 @@ export default function SelecionarCandidato({
             "[submit] registrando voto. candidatoId:",
             candidato.idCandidato,
             "aprendiz:",
-            user.id,
+            user?.id,
             "eleccionId:",
             id
           );
@@ -132,7 +132,7 @@ export default function SelecionarCandidato({
             "/api/votoXCandidato/crear/",
             {
               idcandidatos: Number(candidato.idCandidato),
-              idaprendiz: Number(user.id),
+              idaprendiz: Number(user?.id),
               contador: 1,
               ideleccion: Number(id),
             }

@@ -10,7 +10,7 @@ interface Eleccion {
   fechaFin: string;
   horaInicio?: string;
   horaFin?: string;
-  jornada?: string;
+  jornada?: string | null;
 
 }
 
