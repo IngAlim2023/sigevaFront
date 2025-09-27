@@ -61,7 +61,7 @@ export default function EleccionDetalleModal({
           throw err;
         }
       }
-      console.log("Reporte de elección (real):", dataResp);
+     
 
       const rep = dataResp;
       const candidatosResp: any[] = Array.isArray(rep.candidatos) ? rep.candidatos : [];

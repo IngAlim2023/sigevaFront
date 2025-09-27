@@ -52,7 +52,7 @@ export default function EleccionesActivasPage() {
     if (!user?.centroFormacion) return;
     try {
       const res = await api.get(`/api/eleccion/traerTodas/${user.centroFormacion}`);
-      console.log("las elecciones son: ", res.data.eleccionesActivas);
+  
       setEleccionActiva(res.data.eleccionesActivas);
       setLoading(false);
     } catch (error) {

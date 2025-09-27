@@ -59,7 +59,7 @@ const getProgramas = async () => {
 
   useEffect(() => {
     if (!user?.centroFormacion) {
-      console.log("Usuario o CentroFormacion no disponible");
+   
       return;
     }
     getCentros();
@@ -157,7 +157,7 @@ const getProgramas = async () => {
     } else {
       agregarAprendiz(data);
     }
-    console.log("FORM DATA:", data);
+   
   };
 
 

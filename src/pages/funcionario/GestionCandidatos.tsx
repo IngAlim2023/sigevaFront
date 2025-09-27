@@ -76,11 +76,11 @@ const GestionCandidatos = () => {
     const fetchAprendices = async () => {
       try {
         const res = await api.get(`/api/aprendiz/inscritos/centro/${user?.centroFormacion}`);
-        console.log(res)
+        
         if (!res.data) {
           throw new Error("Error al traer aprendices");
         }
-        // console.log("aprendices: ", res.data);
+       
         setAprendices(res.data.data || []);
       } catch (error) {
         console.error(error);
@@ -94,7 +94,7 @@ const GestionCandidatos = () => {
           throw new Error("Error al traer elecciones");
         }
         setNombreEleccion(res.data.data.find((e: Eleccion) => e.ideleccion === Number(idEleccion))?.nombre || "");
-        console.log("elecciones: ", res.data);
+       
         setElecciones(res.data.data || []);
       } catch (error) {
         console.error(error);
@@ -119,7 +119,7 @@ const GestionCandidatos = () => {
       const response = await api.put(`/api/candidatos/actualizar/${id}`);
 
       const candidato = response.data.data;
-      console.log(candidato);
+      
 
       setCandidatoSeleccionado(candidato);
       setShowModalModificar(true);
