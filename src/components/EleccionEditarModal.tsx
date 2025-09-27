@@ -92,7 +92,7 @@ export default function EleccionEditarModal({
     
 
     try {
-      const res = await api.put(
+      await api.put(
         `/api/eleccionActualizar/${eleccion.ideleccion}`,
         payload
       );

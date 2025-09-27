@@ -50,7 +50,7 @@ export default function SelecionarCandidato({
       };
      
 
-      const response = await api.post("/api/validaciones/generarOtp", payload);
+      await api.post("/api/validaciones/generarOtp", payload);
   
       // si tu backend devuelve algo útil, lo verás en response.data
       

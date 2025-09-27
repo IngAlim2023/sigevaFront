@@ -24,7 +24,7 @@ function FormEleccion() {
     e.preventDefault()
       if(!user?.centroFormacion)return
       try {
-        const response = await api.post(`/api/eleccion/crear`, 
+        await api.post(`/api/eleccion/crear`, 
           {
             idcentro_formacion: user?.centroFormacion,
             nombre,
