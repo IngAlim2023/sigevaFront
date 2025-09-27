@@ -126,8 +126,7 @@ export default function CargarAprendices() {
           api.get(REGIONAL_URL, { params: { activos: true } }),
         ]);
 
-        console.log("Respuesta centros:", resCentros.data);
-        console.log("Respuesta regionales:", resRegionales.data);
+       
 
         const centrosRaw = resCentros.data?.data ?? resCentros.data ?? [];
 
