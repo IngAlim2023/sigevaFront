@@ -31,5 +31,6 @@ export interface UserNormalizado {
   estado: string;
   perfil: "Funcionario" | "Administrador" | "Aprendiz";
   jornada?: string;    
-  CentroFormacion: number; 
+  CentroFormacion?: number; 
+  centroFormacion?: number; 
 }
