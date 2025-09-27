@@ -30,7 +30,7 @@ const Inicio: React.FC = () => {
 
             <div className="mb-4">
               <Button
-                as={Link}
+                as={Link as any}
                 to="/login-aprendiz"
                 className="px-5 py-2 fw-semibold"
                 style={{

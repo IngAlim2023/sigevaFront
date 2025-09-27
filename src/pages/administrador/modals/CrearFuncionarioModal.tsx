@@ -32,6 +32,7 @@ interface CrearFuncionarioModalProps {
   onHide: () => void;
   error?: string;
   loading?: boolean;
+  onSuccess?: () => void; // Callback para recargar datos
 }
 
 export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
@@ -39,6 +40,7 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
   onHide,
   error,
   loading = false,
+  onSuccess,
 }) => {
   const [regionales, setRegionales] = useState<Regional[]>([]);
   const [centros, setCentros] = useState<CentroFormacion[]>([]);
@@ -154,7 +156,7 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
 
   useEffect(() => {
     if (show) {
-      api.get<Regional[]>("/api/regionales").then((res) => setRegionales(res.data));
+      api.get<Regional[]>("api/regionales").then((res) => setRegionales(res.data));
       reset({});
     }
   }, [show, reset]);
@@ -162,7 +164,7 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
   useEffect(() => {
     if (!idRegional) return;
     api
-      .get<{ data: CentroFormacion[] }>(`/api/centrosFormacion/obtiene/porRegional/${idRegional}`)
+      .get<{ data: CentroFormacion[] }>(`api/centrosFormacion/obtiene/porRegional/${idRegional}`)
       .then((res) => setCentros(res.data.data));
   }, [idRegional]);
 
@@ -180,9 +182,26 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
     if (!idCentroFormacion) {
       return alert("Selecciona un centro de formación");
     }
-    const submissionData = { ...data, idcentro_formacion: idCentroFormacion };
+    
+    // Filtrar solo los campos que el backend espera
+    const submissionData = {
+    nombres: data.nombres,
+    apellidos: data.apellidos,
+    celular: data.celular,
+    tipo_documento: data.tipo_documento || "CC", 
+    numero_documento: data.numero_documento,
+    email: data.email,
+    password: data.password,
+    idcentro_formacion: idCentroFormacion,
+   idperfil: Number(data.rol),
+
+    estado: data.estado ? String(data.estado) : "Activo",
+  };
+
+  console.log("Payload ->", submissionData);
+    
     try {
-      await api.post("/api/usuarios/crear", submissionData);
+      await api.post("api/usuarios/crear", submissionData);
 
       const nombreCompleto = `${data.nombres} ${data.apellidos}`;
       setCreatedFuncionario(nombreCompleto);
@@ -193,12 +212,25 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
 
       onHide();
       setShowSuccessModal(true);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Error al crear el funcionario";
-      console.error("Error creating funcionario:", err);
-      alert(message);
-    }
-  };
+      
+      // Recargar la lista de funcionarios
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (err: any) {
+  console.error("ERROR axios ->", err);
+  console.error("err.message ->", err?.message);
+  console.error("err.config ->", err?.config);
+  console.error("err.request ->", err?.request);
+  console.error("err.response ->", err?.response);
+  console.error("err.response?.status ->", err?.response?.status);
+  console.error("err.response?.headers ->", err?.response?.headers);
+  console.error("err.response?.data ->", err?.response?.data);
+  // mostrar algo al usuario
+  const serverMsg = err?.response?.data?.message || JSON.stringify(err?.response?.data) || err?.message;
+  alert(`Error al crear: ${serverMsg}`);
+}
+  }
 
   const handleSuccessModalClose = () => {
     setShowSuccessModal(false);
@@ -494,15 +526,18 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
                 <Form.Label>
                   Rol <span className="text-danger">*</span>
                 </Form.Label>
-                <Form.Select
-                  {...register("rol", {
-                    required: "Seleccione un rol",
-                  })}
-                  isInvalid={!!errors.rol}
-                >
-                  <option value="">Seleccione un rol</option>
-                  <option value="Funcionario">Funcionario</option>
-                </Form.Select>
+               <Form.Select
+  {...register("rol", {
+    required: "Seleccione un rol",
+  })}
+  isInvalid={!!errors.rol}
+>
+  <option value="">Seleccione un rol</option>
+  {/* usar ids que espera tu backend */}
+  <option value="2">Funcionario</option>
+  <option value="1">Administrador</option> {/* si aplica */}
+</Form.Select>
+
                 <Form.Control.Feedback type="invalid">
                   {errors.rol?.message as string}
                 </Form.Control.Feedback>

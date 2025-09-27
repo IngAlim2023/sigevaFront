@@ -157,7 +157,9 @@ const getProgramas = async () => {
     } else {
       agregarAprendiz(data);
     }
+    console.log("FORM DATA:", data);
   };
+
 
   return (
     <>
@@ -191,7 +193,8 @@ const getProgramas = async () => {
                     <Form.Label>Jornada</Form.Label>
                     <Form.Select {...register("jornada")} required>
                       <option value="">Seleccione...</option>
-                      <option value="Diurna">Diurna</option>
+                      <option value="Mañana">Mañana</option>
+                           <option value="Tarde">Tarde</option>
                       <option value="Noche">Noche</option>
                     </Form.Select>
                   </Form.Group>

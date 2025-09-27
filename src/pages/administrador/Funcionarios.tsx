@@ -146,15 +146,6 @@ const Funcionarios: React.FC = () => {
         requestData.password = formData.password;
       }
 
-      // Debug temporal para verificar qué se envía al backend
-      console.log("🔐 Datos enviados al backend:", {
-        url,
-        isEditing,
-        passwordIncluded: 'password' in requestData,
-        passwordLength: requestData.password ? String(requestData.password).length : 0,
-        requestData: { ...requestData, password: requestData.password ? '[HIDDEN]' : undefined }
-      });
-
       isEditing 
         ? await api.put<ApiResponse<Funcionario>>(url, requestData) 
         : await api.post<ApiResponse<Funcionario>>(url, requestData);
@@ -432,6 +423,7 @@ const Funcionarios: React.FC = () => {
         onHide={resetForm}
         error={formError || undefined}
         loading={formLoading}
+        onSuccess={cargarFuncionarios}
       />
       <EditarFuncionarioModal
         show={showModal && !!editingId}

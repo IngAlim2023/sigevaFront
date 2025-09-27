@@ -17,7 +17,7 @@ const VotacionesActivasPage = () => {
       }
       try {
         const response = await api.get(
-          `/api/eleccionPorCentro/${user.CentroFormacion}`
+          `/api/eleccionPorCentro/${user?.CentroFormacion}`
         );
         setVotaciones(response.data.eleccionesActivas);
       } catch (error) {
@@ -27,6 +27,12 @@ const VotacionesActivasPage = () => {
     loadData();
   }, [user?.CentroFormacion]);
 
+  const filtraJornada = votaciones.filter(
+    (val) => val.jornada == user?.jornada
+  );
+
+  console.log(user);
+  console.log(votaciones);
 
   return (
     <>
@@ -37,7 +43,7 @@ const VotacionesActivasPage = () => {
           Participe en los procesos de elección de aprendices.
         </p>
         <Row className="g-4 my-4">
-          {votaciones.map((vote, index) => (
+          {filtraJornada.map((vote, index) => (
             <Col key={index} xs={12} md={6} lg={4}>
               <VotacionCard {...vote} />
             </Col>
