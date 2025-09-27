@@ -57,7 +57,7 @@ export default function Login({ perfil }: Props) {
         }
       }
     } catch (error) {
-      toast.error("Error en el servidor. Inténtalo de nuevo más tarde.")
+      toast.error("Credenciales inválidas. Verifica tu correo y contraseña.")
     }
   };
   
