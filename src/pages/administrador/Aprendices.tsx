@@ -48,7 +48,7 @@ const Aprendices: React.FC = () => {
   useEffect(() => {
       const loadData = async () => {
       if (!user?.centroFormacion) {
-        console.log("Usuario o CentroFormacion no disponible");
+       
         return;
       }
       try {

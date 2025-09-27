@@ -42,18 +42,18 @@ export default function SelecionarCandidato({
    * devuelve true si se generó correctamente, false en caso contrario
    */
   const enviarOTP = async () => {
-    console.log("[enviarOTP] iniciando. user:", user, "eleccionId(param):", id);
+    
     try {
       const payload = {
         aprendiz_idaprendiz: user?.id,
         elecciones_ideleccion: id,
       };
-      console.log("[enviarOTP] payload:", payload);
+     
 
       const response = await api.post("/api/validaciones/generarOtp", payload);
-      console.log("[enviarOTP] respuesta del servidor:", response);
+  
       // si tu backend devuelve algo útil, lo verás en response.data
-      console.log("[enviarOTP] response.data:", response.data);
+      
 
       // devuelve true para indicar éxito (ajusta según tu API)
       return true;
@@ -91,7 +91,7 @@ export default function SelecionarCandidato({
     onHide();
     // llamamos y esperamos
     const ok = await enviarOTP();
-    console.log("[handleVoteClick] enviarOTP ok?:", ok);
+    
     if (ok) {
       setShowModal(true);
     } else {
@@ -102,7 +102,7 @@ export default function SelecionarCandidato({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("[submit] OTP ingresado:", otp);
+   
     if (!/^[A-Za-z0-9_-]{6}$/.test(otp)) {
       return Swal.fire({
         title: "Tu código OTP debe tener 6 caracteres alfanuméricos",
@@ -112,12 +112,11 @@ export default function SelecionarCandidato({
     }
 
     try {
-      console.log("[submit] validando OTP en backend...");
+      
       const { data } = await api.post("api/validaciones/validarOtp", {
         codigo_otp: otp,
       });
-      console.log("[submit] respuesta validarOtp:", data);
-
+      
       if (data.success === true) {
         try {
           console.log(
@@ -138,8 +137,7 @@ export default function SelecionarCandidato({
             }
           );
 
-          console.log("[submit] respuesta crear voto:", votoResp);
-
+         
           if (votoResp.mensaje === "Éxito") {
             Swal.fire({
               title: "Tu voto fue registrado con éxito",

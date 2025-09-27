@@ -74,7 +74,7 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices }
       if (formData.foto instanceof File) {
         data.append("foto", formData.foto);
       }
-      console.log("Datos a enviar:", formData);
+    
 
       const response = await api.put(
         `/api/candidatos/actualizar/${candidato?.idcandidatos}`,
@@ -87,7 +87,7 @@ const ModificarCandidatoModal = ({ show, onHide, candidato, onSave, aprendices }
         }
       );
 
-      console.log("Candidato actualizado:", response.data);
+      
       toast.success(response.data.message, { id: "toast" });
 
       if (onSave) {

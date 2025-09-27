@@ -12,7 +12,7 @@ const VotacionesActivasPage = () => {
   useEffect(() => {
     const loadData = async () => {
       if (!user?.CentroFormacion) {
-        console.log("Usuario o CentroFormacion no disponible");
+        
         return;
       }
       try {
@@ -31,8 +31,7 @@ const VotacionesActivasPage = () => {
     (val) => val.jornada == user?.jornada
   );
 
-  console.log(user);
-  console.log(votaciones);
+ 
 
   return (
     <>

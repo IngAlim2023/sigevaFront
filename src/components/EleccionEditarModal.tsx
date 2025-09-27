@@ -89,7 +89,7 @@ export default function EleccionEditarModal({
     if (formData.hora_fin && formData.fecha_fin)
       payload.hora_fin = `${formData.fecha_fin}T${formData.hora_fin}:00`;
 
-    console.log("📤 Payload final para backend:", payload);
+    
 
     try {
       const res = await api.put(
@@ -97,7 +97,8 @@ export default function EleccionEditarModal({
         payload
       );
       alert('Elección actualizada exitosamente');
-      console.log("Elección actualizada:", res.data);
+   
+      
       
       onUpdated();
       onHide();

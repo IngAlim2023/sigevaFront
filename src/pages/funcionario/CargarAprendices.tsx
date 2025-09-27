@@ -93,7 +93,7 @@ export default function CargarAprendices() {
     setAllData(data);
 
     if (data.length > 0) {
-      console.log("Encabezados detectados (primer row):", Object.keys(data[0]));
+    
       setPreview(data.slice(0, 20));
     } else {
       setPreview([]);
