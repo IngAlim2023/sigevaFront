@@ -10,7 +10,7 @@ interface Eleccion {
   fechaFin: string;
   horaInicio?: string;
   horaFin?: string;
-  jornada?: string;
+  jornada?: string | null;
 
 }
 
@@ -89,15 +89,16 @@ export default function EleccionEditarModal({
     if (formData.hora_fin && formData.fecha_fin)
       payload.hora_fin = `${formData.fecha_fin}T${formData.hora_fin}:00`;
 
-    console.log("📤 Payload final para backend:", payload);
+    
 
     try {
-      const res = await api.put(
+      await api.put(
         `/api/eleccionActualizar/${eleccion.ideleccion}`,
         payload
       );
       alert('Elección actualizada exitosamente');
-      console.log("Elección actualizada:", res.data);
+   
+      
       
       onUpdated();
       onHide();

@@ -147,7 +147,7 @@ export const DashboardAdmin = () => {
                 </Card.Body>
               </Card>
             </Col>
-
+          {user?.perfil =="Administrador" &&  
             <Col md="auto">
               <Card className="shadow-sm text-center p-3">
                 <Card.Body>
@@ -161,6 +161,7 @@ export const DashboardAdmin = () => {
                 </Card.Body>
               </Card>
             </Col>
+          } 
           </Row>
         </Row>
       </Container>

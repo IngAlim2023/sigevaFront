@@ -198,7 +198,7 @@ export const CrearFuncionarioModal: React.FC<CrearFuncionarioModalProps> = ({
     estado: data.estado ? String(data.estado) : "Activo",
   };
 
-  console.log("Payload ->", submissionData);
+  
     
     try {
       await api.post("api/usuarios/crear", submissionData);

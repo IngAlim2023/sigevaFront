@@ -12,12 +12,12 @@ const VotacionesActivasPage = () => {
   useEffect(() => {
     const loadData = async () => {
       if (!user?.CentroFormacion) {
-        console.log("Usuario o CentroFormacion no disponible");
+        
         return;
       }
       try {
         const response = await api.get(
-          `/api/eleccionPorCentro/${user.CentroFormacion}`
+          `/api/eleccionPorCentro/${user?.CentroFormacion}`
         );
         setVotaciones(response.data.eleccionesActivas);
       } catch (error) {
@@ -31,7 +31,7 @@ const VotacionesActivasPage = () => {
     (val) => val.jornada == user?.jornada
   );
 
-  console.log(filtraJornada);
+ 
 
   return (
     <>
