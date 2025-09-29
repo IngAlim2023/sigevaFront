@@ -2,7 +2,7 @@ import Container from "react-bootstrap/Container";
 import toast from "react-hot-toast";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api } from "../api";
 import Logo from "../assets/Sigeva white.svg";
 import { useAuth } from "../context/auth/auth.context";
@@ -96,8 +96,8 @@ export default function Login({ perfil }: Props) {
                 gap: "2px",
               }}
             >
-              <a
-                href="/login-aprendiz"
+              <Link
+                to="/login-aprendiz"
                 className={`text-decoration-none text-center px-4 py-2 rounded-pill ${
                   perfil === "aprendiz"
                     ? "text-white fw-bold"
@@ -111,9 +111,9 @@ export default function Login({ perfil }: Props) {
                 }}
               >
                 Aprendiz
-              </a>
-              <a
-                href="/login"
+              </Link>
+              <Link
+                to="/login"
                 className={`text-decoration-none text-center px-4 py-2 rounded-pill ${
                   perfil === "gestor"
                     ? "text-white fw-bold"
@@ -127,7 +127,7 @@ export default function Login({ perfil }: Props) {
                 }}
               >
                 Funcionario
-              </a>
+              </Link>
             </div>
           </div>
 
